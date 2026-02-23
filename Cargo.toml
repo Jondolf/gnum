@@ -4,4 +4,26 @@ version = "0.1.0"
 edition = "2024"
 readme = "README.md"
 
+[features]
+# Experimental APIs
+more_float_constants = []
+float_gamma = []
+float_erf = []
+float_minimum_maximum = []
+clamp_magnitude = []
+float_algebraic = []
+portable_simd = []
+
 [dependencies]
+
+[dev-dependencies]
+# For benchmarking and testing
+gnum = { path = "./", features = [
+    "more_float_constants",
+    "float_gamma",
+    "float_erf",
+    "float_minimum_maximum",
+    "clamp_magnitude",
+    "float_algebraic",
+    "portable_simd",
+] }
