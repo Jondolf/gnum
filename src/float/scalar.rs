@@ -3,7 +3,6 @@ use core::num::FpCategory;
 
 impl Float for f32 {
     type Bits = u32;
-    type Bool = bool;
     type Int = i32;
     type Sign = i32;
 
@@ -228,7 +227,6 @@ impl Float for f32 {
 
 impl Float for f64 {
     type Bits = u64;
-    type Bool = bool;
     type Int = i32;
     type Sign = i32;
 

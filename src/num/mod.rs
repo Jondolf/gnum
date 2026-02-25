@@ -2,9 +2,10 @@
 mod portable_simd;
 mod scalar;
 
+use crate::simd::SimdValue;
 use core::ops::{Add, Div, Mul, Rem, Sub};
 
-pub trait Num: PartialEq + Zero + One + NumOps {}
+pub trait Num: PartialEq + Zero + One + NumOps + SimdValue {}
 
 pub trait Zero: Sized {
     const ZERO: Self;
@@ -12,10 +13,6 @@ pub trait Zero: Sized {
 
 pub trait One: Sized {
     const ONE: Self;
-}
-
-pub trait NegOne: Sized {
-    const NEG_ONE: Self;
 }
 
 pub trait NumOps<Rhs = Self, Output = Self>:

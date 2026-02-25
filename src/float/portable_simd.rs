@@ -1,4 +1,4 @@
-use core::simd::{LaneCount, Mask, Simd, SupportedLaneCount, cmp::SimdPartialOrd, num::SimdFloat};
+use core::simd::{LaneCount, Simd, SupportedLaneCount, cmp::SimdPartialOrd, num::SimdFloat};
 use std::simd::StdFloat;
 
 use crate::{
@@ -87,7 +87,6 @@ macro_rules! impl_float_simd {
             LaneCount<N>: SupportedLaneCount,
         {
             type Sign = Simd<i32, N>;
-            type Bool = Mask<$int, N>;
             type Int = Simd<i32, N>;
             type Bits = <Self as SimdFloat>::Bits;
 
@@ -107,7 +106,7 @@ macro_rules! impl_float_simd {
             const NEG_INFINITY: Self = Self::splat($float::NEG_INFINITY);
 
             fn floor(self) -> Self {
-                SimdFloat::signum(self)
+                StdFloat::floor(self)
             }
             fn ceil(self) -> Self {
                 StdFloat::ceil(self)

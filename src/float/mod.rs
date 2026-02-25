@@ -10,7 +10,8 @@ pub use classify::FloatClassify;
 pub use constants::FloatConst;
 pub use total_cmp::TotalCmp;
 
-use crate::num::NumOps;
+use crate::{cmp::SimdPartialOrd, num::Num, simd::SimdValue};
+use core::ops::Neg;
 
 #[cfg(feature = "portable_simd")]
 mod portable_simd;
@@ -18,9 +19,8 @@ mod scalar;
 
 // TODO: Implement for core::simd, wide, and fixed
 // TODO: cross_platform_determinism and libm features
-pub trait Float: Sized + FloatConst + NumOps {
+pub trait Float: Num + Copy + SimdValue + SimdPartialOrd + FloatConst + Neg<Output = Self> {
     type Sign;
-    type Bool;
     type Int;
     type Bits;
 

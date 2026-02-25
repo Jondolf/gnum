@@ -8,9 +8,9 @@
 #![cfg_attr(feature = "clamp_magnitude", feature(clamp_magnitude))]
 #![cfg_attr(feature = "float_algebraic", feature(float_algebraic))]
 #![cfg_attr(feature = "portable_simd", feature(portable_simd))]
-// Linting
-#![expect(clippy::wrong_self_convention)]
 
 pub mod bytes;
+pub mod cmp;
 pub mod float;
 pub mod num;
+pub mod simd;
