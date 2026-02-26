@@ -10,7 +10,7 @@ pub use classify::FloatClassify;
 pub use constants::FloatConst;
 pub use total_cmp::TotalCmp;
 
-use crate::{cmp::SimdPartialOrd, num::Num, simd::SimdValue};
+use crate::{cmp::SimdPartialOrd, simd::SimdValue, traits::Num};
 use core::ops::Neg;
 
 #[cfg(feature = "portable_simd")]
@@ -42,7 +42,6 @@ pub trait Float: Num + Copy + SimdValue + SimdPartialOrd + FloatConst + Neg<Outp
     fn floor(self) -> Self;
     fn ceil(self) -> Self;
     fn round(self) -> Self;
-    fn round_ties_even(self) -> Self;
     fn trunc(self) -> Self;
     fn fract(self) -> Self;
     fn mul_add(self, a: Self, b: Self) -> Self;
@@ -75,14 +74,6 @@ pub trait Float: Num + Copy + SimdValue + SimdPartialOrd + FloatConst + Neg<Outp
     fn asinh(self) -> Self;
     fn acosh(self) -> Self;
     fn atanh(self) -> Self;
-    #[cfg(feature = "float_gamma")]
-    fn gamma(self) -> Self;
-    #[cfg(feature = "float_gamma")]
-    fn ln_gamma(self) -> (Self, Self::Sign);
-    #[cfg(feature = "float_erf")]
-    fn erf(self) -> Self;
-    #[cfg(feature = "float_erf")]
-    fn erfc(self) -> Self;
     fn is_nan(self) -> Self::Bool;
     fn is_infinite(self) -> Self::Bool;
     fn is_finite(self) -> Self::Bool;
@@ -97,17 +88,10 @@ pub trait Float: Num + Copy + SimdValue + SimdPartialOrd + FloatConst + Neg<Outp
     fn to_radians(self) -> Self;
     fn max(self, other: Self) -> Self;
     fn min(self, other: Self) -> Self;
-    #[cfg(feature = "float_minimum_maximum")]
-    fn maximum(self, other: Self) -> Self;
-    #[cfg(feature = "float_minimum_maximum")]
-    fn minimum(self, other: Self) -> Self;
     fn midpoint(self, other: Self) -> Self;
-    unsafe fn to_int_unchecked(self) -> Self::Int;
     fn to_bits(self) -> Self::Bits;
     fn from_bits(bits: Self::Bits) -> Self;
     fn clamp(self, min: Self, max: Self) -> Self;
-    #[cfg(feature = "clamp_magnitude")]
-    fn clamp_magnitude(self, limit: Self) -> Self;
     fn abs(self) -> Self;
     fn signum(self) -> Self;
     fn copysign(self, sign: Self) -> Self;

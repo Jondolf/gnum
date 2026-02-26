@@ -1,4 +1,4 @@
-use super::{Num, One, Zero};
+use crate::traits::{Num, One, Zero};
 
 macro_rules! impl_num_scalar {
     ($($t:ty),*) => {

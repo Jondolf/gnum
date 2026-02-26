@@ -7,10 +7,6 @@ readme = "README.md"
 [features]
 # Experimental APIs
 more_float_constants = []
-float_gamma = []
-float_erf = []
-float_minimum_maximum = []
-clamp_magnitude = []
 float_algebraic = []
 portable_simd = []
 
@@ -20,10 +16,6 @@ portable_simd = []
 # For benchmarking and testing
 gnum = { path = "./", features = [
     "more_float_constants",
-    "float_gamma",
-    "float_erf",
-    "float_minimum_maximum",
-    "clamp_magnitude",
     "float_algebraic",
     "portable_simd",
 ] }

@@ -3,7 +3,7 @@ use std::simd::StdFloat;
 
 use crate::{
     float::{Float, FloatConst},
-    num::Zero,
+    traits::Zero,
 };
 
 impl<const N: usize> FloatConst for Simd<f32, N>
@@ -113,9 +113,6 @@ macro_rules! impl_float_simd {
             }
             fn round(self) -> Self {
                 StdFloat::round(self)
-            }
-            fn round_ties_even(self) -> Self {
-                self.as_array().map(|x| x.round_ties_even()).into()
             }
             fn trunc(self) -> Self {
                 StdFloat::trunc(self)
@@ -244,29 +241,6 @@ macro_rules! impl_float_simd {
             fn atanh(self) -> Self {
                 self.as_array().map(|x| x.atanh()).into()
             }
-            #[cfg(feature = "float_gamma")]
-            fn gamma(self) -> Self {
-                self.as_array().map(|x| x.gamma()).into()
-            }
-            #[cfg(feature = "float_gamma")]
-            fn ln_gamma(self) -> (Self, Self::Sign) {
-                let mut ln_gamma = self;
-                let mut sign = Simd::splat(0);
-                for i in 0..Self::LEN {
-                    let (lg, s) = ln_gamma[i].ln_gamma();
-                    ln_gamma[i] = lg;
-                    sign[i] = s;
-                }
-                (ln_gamma, sign)
-            }
-            #[cfg(feature = "float_erf")]
-            fn erf(self) -> Self {
-                self.as_array().map(|x| x.erf()).into()
-            }
-            #[cfg(feature = "float_erf")]
-            fn erfc(self) -> Self {
-                self.as_array().map(|x| x.erfc()).into()
-            }
             fn is_nan(self) -> Self::Bool {
                 SimdFloat::is_nan(self)
             }
@@ -309,33 +283,10 @@ macro_rules! impl_float_simd {
             fn min(self, other: Self) -> Self {
                 SimdFloat::simd_min(self, other)
             }
-            #[cfg(feature = "float_minimum_maximum")]
-            fn maximum(self, other: Self) -> Self {
-                let mut result = self;
-                for i in 0..Self::LEN {
-                    result[i] = result[i].maximum(other[i]);
-                }
-                result
-            }
-            #[cfg(feature = "float_minimum_maximum")]
-            fn minimum(self, other: Self) -> Self {
-                let mut result = self;
-                for i in 0..Self::LEN {
-                    result[i] = result[i].minimum(other[i]);
-                }
-                result
-            }
             fn midpoint(self, other: Self) -> Self {
                 let mut result = self;
                 for i in 0..Self::LEN {
                     result[i] = result[i].midpoint(other[i]);
-                }
-                result
-            }
-            unsafe fn to_int_unchecked(self) -> Self::Int {
-                let mut result = Self::Int::splat(0);
-                for i in 0..Self::LEN {
-                    result[i] = unsafe { self[i].to_int_unchecked() };
                 }
                 result
             }
@@ -347,14 +298,6 @@ macro_rules! impl_float_simd {
             }
             fn clamp(self, min: Self, max: Self) -> Self {
                 SimdFloat::simd_clamp(self, min, max)
-            }
-            #[cfg(feature = "clamp_magnitude")]
-            fn clamp_magnitude(self, limit: Self) -> Self {
-                // TODO: Is this bit-for-bit equivalent?
-                let abs = Float::abs(self);
-                let mask = abs.simd_gt(limit);
-                let clamped = self * (limit / abs);
-                mask.select(clamped, self)
             }
             fn abs(self) -> Self {
                 SimdFloat::abs(self)

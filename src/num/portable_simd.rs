@@ -1,4 +1,4 @@
-use super::{Num, One, Zero};
+use crate::traits::{Num, One, Zero};
 use core::simd::{LaneCount, Simd, SupportedLaneCount};
 
 macro_rules! impl_num_simd {

@@ -30,9 +30,6 @@ impl Float for f32 {
     fn round(self) -> Self {
         self.round()
     }
-    fn round_ties_even(self) -> Self {
-        self.round_ties_even()
-    }
     fn trunc(self) -> Self {
         self.trunc()
     }
@@ -129,22 +126,6 @@ impl Float for f32 {
     fn atanh(self) -> Self {
         self.atanh()
     }
-    #[cfg(feature = "float_gamma")]
-    fn gamma(self) -> Self {
-        self.gamma()
-    }
-    #[cfg(feature = "float_gamma")]
-    fn ln_gamma(self) -> (Self, i32) {
-        self.ln_gamma()
-    }
-    #[cfg(feature = "float_erf")]
-    fn erf(self) -> Self {
-        self.erf()
-    }
-    #[cfg(feature = "float_erf")]
-    fn erfc(self) -> Self {
-        self.erfc()
-    }
     fn is_nan(self) -> bool {
         self.is_nan()
     }
@@ -187,19 +168,8 @@ impl Float for f32 {
     fn min(self, other: Self) -> Self {
         self.min(other)
     }
-    #[cfg(feature = "float_minimum_maximum")]
-    fn maximum(self, other: Self) -> Self {
-        self.maximum(other)
-    }
-    #[cfg(feature = "float_minimum_maximum")]
-    fn minimum(self, other: Self) -> Self {
-        self.minimum(other)
-    }
     fn midpoint(self, other: Self) -> Self {
         self.midpoint(other)
-    }
-    unsafe fn to_int_unchecked(self) -> i32 {
-        unsafe { self.to_int_unchecked() }
     }
     fn to_bits(self) -> u32 {
         self.to_bits()
@@ -209,10 +179,6 @@ impl Float for f32 {
     }
     fn clamp(self, min: Self, max: Self) -> Self {
         self.clamp(min, max)
-    }
-    #[cfg(feature = "clamp_magnitude")]
-    fn clamp_magnitude(self, limit: Self) -> Self {
-        self.clamp_magnitude(limit)
     }
     fn abs(self) -> Self {
         self.abs()
@@ -254,9 +220,6 @@ impl Float for f64 {
     fn round(self) -> Self {
         self.round()
     }
-    fn round_ties_even(self) -> Self {
-        self.round_ties_even()
-    }
     fn trunc(self) -> Self {
         self.trunc()
     }
@@ -353,22 +316,6 @@ impl Float for f64 {
     fn atanh(self) -> Self {
         self.atanh()
     }
-    #[cfg(feature = "float_gamma")]
-    fn gamma(self) -> Self {
-        f64::gamma(self)
-    }
-    #[cfg(feature = "float_gamma")]
-    fn ln_gamma(self) -> (Self, i32) {
-        self.ln_gamma()
-    }
-    #[cfg(feature = "float_erf")]
-    fn erf(self) -> Self {
-        self.erf()
-    }
-    #[cfg(feature = "float_erf")]
-    fn erfc(self) -> Self {
-        self.erfc()
-    }
     fn is_nan(self) -> bool {
         self.is_nan()
     }
@@ -411,19 +358,8 @@ impl Float for f64 {
     fn min(self, other: Self) -> Self {
         self.min(other)
     }
-    #[cfg(feature = "float_minimum_maximum")]
-    fn maximum(self, other: Self) -> Self {
-        self.maximum(other)
-    }
-    #[cfg(feature = "float_minimum_maximum")]
-    fn minimum(self, other: Self) -> Self {
-        self.minimum(other)
-    }
     fn midpoint(self, other: Self) -> Self {
         self.midpoint(other)
-    }
-    unsafe fn to_int_unchecked(self) -> i32 {
-        unsafe { self.to_int_unchecked() }
     }
     fn to_bits(self) -> Self::Bits {
         self.to_bits()
@@ -433,10 +369,6 @@ impl Float for f64 {
     }
     fn clamp(self, min: Self, max: Self) -> Self {
         self.clamp(min, max)
-    }
-    #[cfg(feature = "clamp_magnitude")]
-    fn clamp_magnitude(self, limit: Self) -> Self {
-        self.clamp_magnitude(limit)
     }
     fn abs(self) -> Self {
         self.abs()

@@ -1,0 +1,351 @@
+use crate::traits::{Int, Real};
+
+/// A trait for floating-point types representing [`Real`] numbers such as [`f32`] and [`f64`].
+///
+/// Floating-point types are expected to conform to the IEEE 754-2008 standard.
+pub trait Float: Real {
+    /// The integer type associated with this floating-point type.
+    ///
+    /// Used for methods that require an integer argument such as [`powi`](Self::powi).
+    type Int: Int;
+
+    /// The radix or base of the internal representation of the floating-point type.
+    const RADIX: u32;
+
+    /// Number of significant digits in base 2.
+    ///
+    /// Note that the size of the mantissa in the bitwise representation is one
+    /// smaller than this since the leading 1 is not stored explicitly.
+    const MANTISSA_DIGITS: u32;
+
+    /// Approximate number of significant digits in base 10.
+    ///
+    /// This is the maximum <i>x</i> such that any decimal number with <i>x</i> significant digits
+    /// can be converted to the floating-point type and back without loss.
+    ///
+    /// Equal to floor(log<sub>10</sub>&nbsp;2<sup>[`MANTISSA_DIGITS`]&nbsp;&minus;&nbsp;1</sup>).
+    ///
+    /// [`MANTISSA_DIGITS`]: Self::MANTISSA_DIGITS
+    const DIGITS: u32;
+
+    /// [Machine epsilon] value for the floating-point type.
+    ///
+    /// This is the difference between `1.0` and the next larger representable number.
+    ///
+    /// Equal to 2<sup>1&nbsp;&minus;&nbsp;[`MANTISSA_DIGITS`]</sup>.
+    ///
+    /// [Machine epsilon]: https://en.wikipedia.org/wiki/Machine_epsilon
+    /// [`MANTISSA_DIGITS`]: Self::MANTISSA_DIGITS
+    const EPSILON: Self;
+
+    /// Smallest positive normal value for the floating-point type.
+    ///
+    /// Equal to 2<sup>[`MIN_EXP`]&nbsp;&minus;&nbsp;1</sup>.
+    ///
+    /// [`MIN_EXP`]: Self::MIN_EXP
+    const MIN_POSITIVE: Self;
+
+    /// One greater than the minimum possible *normal* power of 2 exponent
+    /// for a significand bounded by 1 ≤ x < 2 (i.e. the IEEE definition).
+    ///
+    /// This corresponds to the exact minimum possible *normal* power of 2 exponent
+    /// for a significand bounded by 0.5 ≤ x < 1 (i.e. the C definition).
+    /// In other words, all normal numbers representable by this type are
+    /// greater than or equal to 0.5&nbsp;×&nbsp;2<sup><i>MIN_EXP</i></sup>.
+    const MIN_EXP: i32;
+
+    /// One greater than the maximum possible power of 2 exponent
+    /// for a significand bounded by 1 ≤ x < 2 (i.e. the IEEE definition).
+    ///
+    /// This corresponds to the exact maximum possible power of 2 exponent
+    /// for a significand bounded by 0.5 ≤ x < 1 (i.e. the C definition).
+    /// In other words, all numbers representable by this type are
+    /// strictly less than 2<sup><i>MAX_EXP</i></sup>.
+    const MAX_EXP: i32;
+
+    /// Minimum <i>x</i> for which 10<sup><i>x</i></sup> is normal.
+    ///
+    /// Equal to ceil(log<sub>10</sub>&nbsp;[`MIN_POSITIVE`]).
+    ///
+    /// [`MIN_POSITIVE`]: Self::MIN_POSITIVE
+    const MIN_10_EXP: i32;
+
+    /// Maximum <i>x</i> for which 10<sup><i>x</i></sup> is normal.
+    ///
+    /// Equal to floor(log<sub>10</sub>&nbsp;[`MAX`]).
+    ///
+    /// [`MAX`]: Self::MAX
+    const MAX_10_EXP: i32;
+
+    /// Not a Number (NaN).
+    ///
+    /// Note that IEEE 754 doesn't define just a single NaN value; a plethora of bit patterns are
+    /// considered to be NaN. Furthermore, the standard makes a difference between a "signaling" and
+    /// a "quiet" NaN, and allows inspecting its "payload" (the unspecified bits in the bit pattern)
+    /// and its sign. See the [specification of NaN bit patterns](f32#nan-bit-patterns) for more
+    /// info.
+    ///
+    /// This constant is guaranteed to be a quiet NaN (on targets that follow the Rust assumptions
+    /// that the quiet/signaling bit being set to 1 indicates a quiet NaN). Beyond that, nothing is
+    /// guaranteed about the specific bit pattern chosen here: both payload and sign are arbitrary.
+    /// The concrete bit pattern may change across Rust versions and target platforms.
+    const NAN: Self;
+
+    /// Infinity (∞).
+    const INFINITY: Self;
+
+    /// Negative infinity (−∞).
+    const NEG_INFINITY: Self;
+
+    /// Returns the result of a fused multiply-add `(self * a) + b` with only one rounding error,
+    /// yielding a more accurate result than an unfused multiply-add.
+    ///
+    /// Using `mul_add` may be more performant than an unfused multiply-add if the target architecture
+    /// has a dedicated `fma` CPU instruction. However, this is not always true, and will be heavily dependant
+    /// on designing algorithms with specific target hardware in mind.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f64 = 10.0;
+    /// let a: f64 = 4.0;
+    /// let b: f64 = 60.0;
+    ///
+    /// assert_eq!(x.mul_add(a, b), 100.0);
+    /// assert_eq!(x * a + b, 100.0);
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    #[doc(alias = "fmaf", alias = "fusedMultiplyAdd")]
+    fn mul_add(self, a: Self, b: Self) -> Self;
+
+    /// Returns `self` raised to the integer power of `n`.
+    ///
+    /// Using this function is generally faster than using [`powf`](Self::powf).
+    /// It might have a different sequence of rounding operations than [`powf`](Self::powf),
+    /// so the results are not guaranteed to agree.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: f32 = 2.0;
+    /// let abs_difference = (x.powi(2) - (x * x)).abs();
+    /// assert!(abs_difference <= 1e-5);
+    ///
+    /// assert_eq!(f32::powi(f32::NAN, 0), 1.0);
+    /// assert_eq!(f32::powi(0.0, 0), 1.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn powi(self, n: Self::Int) -> Self;
+
+    /// Returns `self` raised to the power of `n`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let x: f32 = 2.0;
+    /// let abs_difference = (x.powf(2.0) - (x * x)).abs();
+    /// assert!(abs_difference <= 1e-5);
+    ///
+    /// assert_eq!(f32::powf(1.0, f32::NAN), 1.0);
+    /// assert_eq!(f32::powf(f32::NAN, 0.0), 1.0);
+    /// assert_eq!(f32::powf(0.0, 0.0), 1.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn powf(self, n: Self) -> Self;
+
+    /// Returns `true` if `self` is NaN, and `false` otherwise.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let nan: f32 = f32::NAN;
+    /// let x: f32 = 1.0;
+    ///
+    /// assert!(nan.is_nan());
+    /// assert!(!x.is_nan());
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn is_nan(self) -> Self::Bool;
+
+    /// Returns `true` if `self` is positive or negative infinity, and `false` otherwise.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let inf: f32 = f32::INFINITY;
+    /// let neg_inf: f32 = f32::NEG_INFINITY;
+    /// let x: f32 = 1.0;
+    ///
+    /// assert!(inf.is_infinite());
+    /// assert!(neg_inf.is_infinite());
+    /// assert!(!x.is_infinite());
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn is_infinite(self) -> Self::Bool;
+
+    /// Returns `true` if `self` is neither infinite nor NaN, and `false` otherwise.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f32 = 1.0;
+    /// let inf: f32 = f32::INFINITY;
+    /// let neg_inf: f32 = f32::NEG_INFINITY;
+    /// let nan: f32 = f32::NAN;
+    ///
+    /// assert!(x.is_finite());
+    /// assert!(!inf.is_finite());
+    /// assert!(!neg_inf.is_finite());
+    /// assert!(!nan.is_finite());
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn is_finite(self) -> Self::Bool;
+
+    /// Returns `true` if `self` is a [subnormal] number, and `false` otherwise.
+    ///
+    /// [subnormal]: https://en.wikipedia.org/wiki/Denormal_number
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let min: f32 = f32::MIN_POSITIVE;
+    /// let max: f32 = f32::MAX;
+    /// let lower_than_min: f32 = 1e-40;
+    /// let zero: f32 = 0.0;
+    ///
+    /// assert!(!min.is_subnormal());
+    /// assert!(!max.is_subnormal());
+    ///
+    /// assert!(!zero.is_subnormal());
+    /// assert!(!f32::NAN.is_subnormal());
+    /// assert!(!f32::INFINITY.is_subnormal());
+    /// assert!(lower_than_min.is_subnormal());
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn is_subnormal(self) -> Self::Bool;
+
+    /// Returns `true` if `self` is neither zero, infinite, [subnormal], nor NaN, and `false` otherwise.
+    ///
+    /// [subnormal]: https://en.wikipedia.org/wiki/Denormal_number
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let min: f32 = f32::MIN_POSITIVE;
+    /// let max: f32 = f32::MAX;
+    /// let lower_than_min: f32 = 1e-40;
+    /// let zero: f32 = 0.0;
+    ///
+    /// assert!(min.is_normal());
+    /// assert!(max.is_normal());
+    ///
+    /// assert!(!zero.is_normal());
+    /// assert!(!f32::NAN.is_normal());
+    /// assert!(!f32::INFINITY.is_normal());
+    /// assert!(!lower_than_min.is_normal());
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn is_normal(self) -> Self::Bool;
+
+    /// Returns `true` if `self` has a positive sign, including `+0.0`, NaNs with
+    /// a positive sign bit, and positive infinity.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f32 = 7.0;
+    /// let y: f32 = -7.0;
+    ///
+    /// assert!(x.is_sign_positive());
+    /// assert!(!y.is_sign_positive());
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn is_sign_positive(self) -> Self::Bool;
+
+    /// Returns `true` if `self` has a negative sign, including `-0.0`, NaNs with
+    /// a negative sign bit, and negative infinity.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f32 = 7.0;
+    /// let y: f32 = -7.0;
+    ///
+    /// assert!(!x.is_sign_negative());
+    /// assert!(y.is_sign_negative());
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn is_sign_negative(self) -> Self::Bool;
+
+    /// Returns the least number greater than `self`.
+    ///
+    /// This corresponds to the IEEE 754 `nextUp` operation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// // f32::EPSILON is the difference between 1.0 and the next number up.
+    /// assert_eq!(1.0.next_up(), 1.0 + f32::EPSILON);
+    /// // But not for most numbers.
+    /// assert!(0.1.next_up() < 0.1 + f32::EPSILON);
+    /// assert_eq!(16777216.0.next_up(), 16777218.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn next_up(self) -> Self;
+
+    /// Returns the greatest number less than `self`.
+    ///
+    /// This corresponds to the IEEE 754 `nextDown` operation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f32 = 1.0;
+    /// // Clamp value into range [0, 1).
+    /// let clamped = x.clamp(0.0, 1.0.next_down());
+    /// assert!(clamped < 1.0);
+    /// assert_eq!(clamped.next_up(), 1.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn next_down(self) -> Self;
+
+    /// Returns the minimum of `self` and `other`, ignoring NaN.
+    ///
+    /// This corresponds to the IEEE 754 `minNum` operation,
+    /// except that it handles all NaNs the same way and avoids
+    /// `minNum`'s problems with associativity. This also matches
+    /// the behavior of libm's `fmin`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f32 = 1.0;
+    /// let y: f32 = 2.0;
+    /// let nan: f32 = f32::NAN;
+    ///
+    /// assert_eq!(x.min(y), 1.0);
+    /// assert_eq!(x.min(nan), 1.0);
+    /// assert_eq!(nan.min(x), 1.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn min(self, other: Self) -> Self;
+
+    /// Returns the maximum of `self` and `other`, ignoring NaN.
+    ///
+    /// This corresponds to the IEEE 754 `maxNum` operation,
+    /// except that it handles all NaNs the same way and avoids
+    /// `maxNum`'s problems with associativity. This also matches
+    /// the behavior of libm's `fmax`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f32 = 1.0;
+    /// let y: f32 = 2.0;
+    /// let nan: f32 = f32::NAN;
+    ///
+    /// assert_eq!(x.max(y), 2.0);
+    /// assert_eq!(x.max(nan), 1.0);
+    /// assert_eq!(nan.max(x), 1.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn max(self, other: Self) -> Self;
+}
