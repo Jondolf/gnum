@@ -301,49 +301,6 @@ pub trait CheckedRemEuclid<Rhs = Self>: Rem<Rhs> + Sized {
     fn strict_rem_euclid(self, rhs: Rhs) -> Self::Output;
 }
 
-/// Performs exact division that returns `None` instead of wrapping around on overflow, division by zero, or if the division is not exact.
-pub trait CheckedDivExact<Rhs = Self>: Div<Rhs> + Sized {
-    /// Performs the `div_exact` operation, returning `None` if overflow, division by zero, or inexact division occurred.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// assert_eq!(12.checked_div_exact(3), Some(4));
-    /// assert_eq!(12.checked_div_exact(5), None);
-    /// assert_eq!(12.checked_div_exact(0), None);
-    /// assert_eq!(i32::MIN.checked_div_exact(-1), None);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn checked_div_exact(self, rhs: Rhs) -> Option<Self::Output>;
-
-    /// Performs the `div_exact` operation, panicking if overflow, division by zero, or inexact division occurred.
-    ///
-    /// # Panics
-    ///
-    /// Panics if overflow, division by zero, or inexact division occurs when performing the exact division.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// assert_eq!(12.strict_div_exact(3), Some(4));
-    /// assert_eq!(12.strict_div_exact(5), None);
-    /// ```
-    ///
-    /// The following panics because of division by zero:
-    ///
-    /// ```should_panic
-    /// let _ = 12.strict_div_exact(0);
-    /// ```
-    ///
-    /// The following panics because of overflow:
-    ///
-    /// ```should_panic
-    /// let _ = i32::MIN.strict_div_exact(-1);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn strict_div_exact(self, rhs: Rhs) -> Self::Output;
-}
-
 /// Performs negation that returns `None` instead of wrapping around on overflow.
 ///
 /// This is a checked version of the [`Neg`] trait.
@@ -442,50 +399,6 @@ pub trait CheckedShl<Rhs = Self>: Shl<Rhs> + Sized {
     unsafe fn unchecked_shl(self, rhs: Rhs) -> Self::Output;
 }
 
-/// Performs exact left bitwise shift that returns `None` if the shift amount is greater than
-/// or equal to the number of bits in the type, or if any of the bits shifted out are not zero.
-pub trait CheckedShlExact<Rhs = Self>: Shl<Rhs> + Sized {
-    /// Performs the `<<` operation, returning `None` if the shift amount is greater than
-    /// or equal to the number of bits in the type, or if any of the bits shifted out are not zero.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// assert_eq!(1u32.checked_shl_exact(2), Some(4));
-    /// assert_eq!(1u32.checked_shl_exact(32), None);
-    /// assert_eq!(3u32.checked_shl_exact(2), None);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn shl_exact(self, rhs: Rhs) -> Option<Self::Output>;
-
-    /// Performs the `<<` operation, panicking if the shift amount is greater than
-    /// or equal to the number of bits in the type, or if any of the bits shifted out are not zero.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the shift amount is greater than or equal to the number of bits in the type, or if any of the bits shifted out are not zero.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// assert_eq!(1u32.strict_shl_exact(2), 4);
-    /// ```
-    ///
-    /// The following panics because the shift amount is greater than or equal to the number of bits in the type:
-    ///
-    /// ```should_panic
-    /// let _ = 1u32.strict_shl_exact(32);
-    /// ```
-    ///
-    /// The following panics because some of the bits shifted out are not zero:
-    ///
-    /// ```should_panic
-    /// let _ = 3u32.strict_shl_exact(2);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn strict_shl_exact(self, rhs: Rhs) -> Self::Output;
-}
-
 /// Performs right bitwise shift that returns `None` if the shift amount is greater than
 /// or equal to the number of bits in the type.
 ///
@@ -537,52 +450,11 @@ pub trait CheckedShr<Rhs = Self>: Shr<Rhs> + Sized {
     unsafe fn unchecked_shr(self, rhs: Rhs) -> Self::Output;
 }
 
-/// Performs exact right bitwise shift that returns `None` if the shift amount is greater than
-/// or equal to the number of bits in the type, or if any of the bits shifted out are not zero.
-pub trait CheckedShrExact<Rhs = Self>: Shr<Rhs> + Sized {
-    /// Performs the `>>` operation, returning `None` if the shift amount is greater than
-    /// or equal to the number of bits in the type, or if any of the bits shifted out are not zero.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// assert_eq!(4u32.checked_shr_exact(2), Some(1));
-    /// assert_eq!(4u32.checked_shr_exact(32), None);
-    /// assert_eq!(5u32.checked_shr_exact(2), None);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn shr_exact(self, rhs: Rhs) -> Option<Self::Output>;
-
-    /// Performs the `>>` operation, panicking if the shift amount is greater than
-    /// or equal to the number of bits in the type, or if any of the bits shifted out are not zero.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the shift amount is greater than or equal to the number of bits in the type, or if any of the bits shifted out are not zero.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// assert_eq!(4u32.strict_shr_exact(2), 1);
-    /// ```
-    ///
-    /// The following panics because the shift amount is greater than or equal to the number of bits in the type:
-    ///
-    /// ```should_panic
-    /// let _ = 4u32.strict_shr_exact(32);
-    /// ```
-    ///
-    /// The following panics because some of the bits shifted out are not zero:
-    ///
-    /// ```should_panic
-    /// let _ = 5u32.strict_shr_exact(2);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn strict_shr_exact(self, rhs: Rhs) -> Self::Output;
-}
-
 /// Performs checked absolute value calculation that returns `None` instead of wrapping around on overflow.
 pub trait CheckedAbs: Sized {
+    /// The resulting type after applying the absolute value operation.
+    type Output;
+
     /// Returns the absolute value of `self`, or `None` if overflow occurred.
     ///
     /// # Example
@@ -593,7 +465,7 @@ pub trait CheckedAbs: Sized {
     /// assert_eq!(i32::MIN.checked_abs(), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn checked_abs(self) -> Option<Self>;
+    fn checked_abs(self) -> Option<Self::Output>;
 
     /// Returns the absolute value of `self`, panicking if overflow occurred.
     ///
@@ -614,11 +486,14 @@ pub trait CheckedAbs: Sized {
     /// let _ = i32::MIN.strict_abs();
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn strict_abs(self) -> Self;
+    fn strict_abs(self) -> Self::Output;
 }
 
 /// Performs checked exponentiation that returns `None` instead of wrapping around on overflow.
 pub trait CheckedPow<Exp = Self>: Sized {
+    ///  The resulting type after applying the exponentiation operation.
+    type Output;
+
     /// Returns `self` raised to the power of `exp`, or `None` if overflow occurred.
     ///
     /// # Example
@@ -628,7 +503,7 @@ pub trait CheckedPow<Exp = Self>: Sized {
     /// assert_eq!(i32::MAX.checked_pow(2), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn checked_pow(self, exp: Exp) -> Option<Self>;
+    fn checked_pow(self, exp: Exp) -> Option<Self::Output>;
 
     /// Returns `self` raised to the power of `exp`, panicking if overflow occurred.
     ///
@@ -648,67 +523,201 @@ pub trait CheckedPow<Exp = Self>: Sized {
     /// let _ = i32::MAX.strict_pow(2);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn strict_pow(self, exp: Exp) -> Self;
+    fn strict_pow(self, exp: Exp) -> Self::Output;
 }
 
-/// Performs checked integer square root calculation that returns `None` if `self` is negative.
-pub trait CheckedISqrt: Sized {
-    /// Returns the integer square root of `self`, rounded down, or `None` if `self` is negative.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// assert_eq!(16.checked_isqrt(), Some(4));
-    /// assert_eq!(15.checked_isqrt(), Some(3));
-    /// assert_eq!((-1).checked_isqrt(), None);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn checked_isqrt(self) -> Option<Self>;
+macro_rules! impl_checked_ops {
+    ($($t:ty),*) => {
+        $(
+            impl CheckedAdd for $t {
+                #[inline]
+                fn checked_add(self, rhs: Self) -> Option<Self::Output> {
+                    <$t>::checked_add(self, rhs)
+                }
+
+                #[inline]
+                fn strict_add(self, rhs: Self) -> Self::Output {
+                    <$t>::strict_add(self, rhs)
+                }
+
+                #[inline]
+                unsafe fn unchecked_add(self, rhs: Self) -> Self::Output {
+                    unsafe { <$t>::unchecked_add(self, rhs) }
+                }
+            }
+
+            impl CheckedSub for $t {
+                #[inline]
+                fn checked_sub(self, rhs: Self) -> Option<Self::Output> {
+                    <$t>::checked_sub(self, rhs)
+                }
+
+                #[inline]
+                fn strict_sub(self, rhs: Self) -> Self::Output {
+                    <$t>::strict_sub(self, rhs)
+                }
+
+                #[inline]
+                unsafe fn unchecked_sub(self, rhs: Self) -> Self::Output {
+                    unsafe { <$t>::unchecked_sub(self, rhs) }
+                }
+            }
+
+            impl CheckedMul for $t {
+                #[inline]
+                fn checked_mul(self, rhs: Self) -> Option<Self::Output> {
+                    <$t>::checked_mul(self, rhs)
+                }
+
+                #[inline]
+                fn strict_mul(self, rhs: Self) -> Self::Output {
+                    <$t>::strict_mul(self, rhs)
+                }
+
+                #[inline]
+                unsafe fn unchecked_mul(self, rhs: Self) -> Self::Output {
+                    unsafe { <$t>::unchecked_mul(self, rhs) }
+                }
+            }
+
+            impl CheckedDiv for $t {
+                #[inline]
+                fn checked_div(self, rhs: Self) -> Option<Self::Output> {
+                    <$t>::checked_div(self, rhs)
+                }
+
+                #[inline]
+                fn strict_div(self, rhs: Self) -> Self::Output {
+                    <$t>::strict_div(self, rhs)
+                }
+            }
+
+            impl CheckedRem for $t {
+                #[inline]
+                fn checked_rem(self, rhs: Self) -> Option<Self::Output> {
+                    <$t>::checked_rem(self, rhs)
+                }
+
+                #[inline]
+                fn strict_rem(self, rhs: Self) -> Self::Output {
+                    <$t>::strict_rem(self, rhs)
+                }
+             }
+
+            impl CheckedDivEuclid for $t {
+                #[inline]
+                fn checked_div_euclid(self, rhs: Self) -> Option<Self::Output> {
+                    <$t>::checked_div_euclid(self, rhs)
+                }
+
+                #[inline]
+                fn strict_div_euclid(self, rhs: Self) -> Self::Output {
+                    <$t>::strict_div_euclid(self, rhs)
+                }
+            }
+
+            impl CheckedRemEuclid for $t {
+                #[inline]
+                fn checked_rem_euclid(self, rhs: Self) -> Option<Self::Output> {
+                    <$t>::checked_rem_euclid(self, rhs)
+                }
+
+                #[inline]
+                fn strict_rem_euclid(self, rhs: Self) -> Self::Output {
+                    <$t>::strict_rem_euclid(self, rhs)
+                }
+            }
+
+            impl CheckedShl<u32> for $t {
+                #[inline]
+                fn checked_shl(self, rhs: u32) -> Option<Self::Output> {
+                    <$t>::checked_shl(self, rhs)
+                }
+
+                #[inline]
+                fn strict_shl(self, rhs: u32) -> Self::Output {
+                    <$t>::strict_shl(self, rhs)
+                }
+
+                #[inline]
+                unsafe fn unchecked_shl(self, rhs: u32) -> Self::Output {
+                    unsafe { <$t>::unchecked_shl(self, rhs) }
+                }
+            }
+
+            impl CheckedShr<u32> for $t {
+                #[inline]
+                fn checked_shr(self, rhs: u32) -> Option<Self::Output> {
+                    <$t>::checked_shr(self, rhs)
+                }
+
+                #[inline]
+                fn strict_shr(self, rhs: u32) -> Self::Output {
+                    <$t>::strict_shr(self, rhs)
+                }
+
+                #[inline]
+                unsafe fn unchecked_shr(self, rhs: u32) -> Self::Output {
+                    unsafe { <$t>::unchecked_shr(self, rhs) }
+                }
+            }
+
+            impl CheckedPow<u32> for $t {
+                type Output = $t;
+
+                #[inline]
+                fn checked_pow(self, exp: u32) -> Option<Self::Output> {
+                    <$t>::checked_pow(self, exp)
+                }
+
+                #[inline]
+                fn strict_pow(self, exp: u32) -> Self::Output {
+                    <$t>::strict_pow(self, exp)
+                }
+            }
+        )*
+    };
 }
 
-/// Performs checked integer logarithm calculation that returns `None` if `self` is zero or negative,
-/// or if `base` is less than 2.
-pub trait CheckedILog: Sized {
-    /// Returns the integer logarithm of `self` with respect to `base`, rounded down,
-    /// or `None` if `self` is zero or negative, or if `base` is less than 2.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// assert_eq!(16.checked_ilog(2), Some(4));
-    /// assert_eq!(15.checked_ilog(2), Some(3));
-    /// assert_eq!(0.checked_ilog(2), None);
-    /// assert_eq!((-1).checked_ilog(2), None);
-    /// assert_eq!(16.checked_ilog(1), None);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn checked_ilog(self, base: Self) -> Option<Self>;
+impl_checked_ops!(
+    u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize
+);
 
-    /// Returns the base 2 integer logarithm of `self`, rounded down,
-    /// or `None` if `self` is zero or negative.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// assert_eq!(16.checked_ilog2(), Some(4));
-    /// assert_eq!(15.checked_ilog2(), Some(3));
-    /// assert_eq!(0.checked_ilog2(), None);
-    /// assert_eq!((-1).checked_ilog2(), None);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn checked_ilog2(self) -> Option<Self>;
+macro_rules! impl_checked_signed_ops {
+    ($($t:ty),*) => {
+        $(
+            impl CheckedNeg for $t {
+                #[inline]
+                fn checked_neg(self) -> Option<Self::Output> {
+                    <$t>::checked_neg(self)
+                }
 
-    /// Returns the base 10 integer logarithm of `self`, rounded down,
-    /// or `None` if `self` is zero or negative.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// assert_eq!(100.checked_ilog10(), Some(2));
-    /// assert_eq!(99.checked_ilog10(), Some(1));
-    /// assert_eq!(0.checked_ilog10(), None);
-    /// assert_eq!((-1).checked_ilog10(), None);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn checked_ilog10(self) -> Option<Self>;
+                #[inline]
+                fn strict_neg(self) -> Self::Output {
+                    <$t>::strict_neg(self)
+                }
+
+                #[inline]
+                unsafe fn unchecked_neg(self) -> Self::Output {
+                    unsafe { <$t>::unchecked_neg(self) }
+                }
+            }
+
+            impl CheckedAbs for $t {
+                type Output = $t;
+
+                #[inline]
+                fn checked_abs(self) -> Option<Self::Output> {
+                    <$t>::checked_abs(self)
+                }
+
+                #[inline]
+                fn strict_abs(self) -> Self::Output {
+                    <$t>::strict_abs(self)
+                }
+            }
+        )*
+    };
 }
+
+impl_checked_signed_ops!(i8, i16, i32, i64, i128, isize);

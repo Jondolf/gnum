@@ -1,5 +1,7 @@
 use core::ops::*;
 
+use crate::traits::{impl_binary_op, impl_unary_op};
+
 /// Performs wrapping addition that wraps around on overflow.
 ///
 /// This is a wrapping version of the [`Add`] trait.
@@ -174,6 +176,9 @@ pub trait WrappingShr<Rhs = Self>: Shr<Rhs> {
 
 /// Performs wrapping absolute value calculation that wraps around on overflow.
 pub trait WrappingAbs: Sized {
+    /// The resulting type after applying the wrapping absolute value operation.
+    type Output;
+
     /// Returns the absolute value of `self`, wrapping around on overflow.
     ///
     /// # Example
@@ -184,11 +189,14 @@ pub trait WrappingAbs: Sized {
     /// assert_eq!(i32::MIN.wrapping_abs(), i32::MIN);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn wrapping_abs(self) -> Self;
+    fn wrapping_abs(self) -> Self::Output;
 }
 
 /// Performs wrapping exponentiation that wraps around on overflow.
 pub trait WrappingPow<Exp = Self>: Sized {
+    /// The resulting type after applying the wrapping exponentiation operation.
+    type Output;
+
     /// Returns `self` raised to the power of `exp`, wrapping around on overflow.
     ///
     /// # Example
@@ -198,5 +206,180 @@ pub trait WrappingPow<Exp = Self>: Sized {
     /// assert_eq!(i32::MAX.wrapping_pow(2), 1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn wrapping_pow(self, exp: Exp) -> Self;
+    fn wrapping_pow(self, exp: Exp) -> Self::Output;
 }
+
+impl_binary_op!(
+    WrappingAdd,
+    wrapping_add,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    usize,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+impl_binary_op!(
+    WrappingSub,
+    wrapping_sub,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    usize,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+impl_binary_op!(
+    WrappingMul,
+    wrapping_mul,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    usize,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+impl_binary_op!(
+    WrappingDiv,
+    wrapping_div,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    usize,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+impl_binary_op!(
+    WrappingRem,
+    wrapping_rem,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    usize,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+impl_binary_op!(
+    WrappingDivEuclid,
+    wrapping_div_euclid,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    usize,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+impl_binary_op!(
+    WrappingRemEuclid,
+    wrapping_rem_euclid,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    usize,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+impl_unary_op!(WrappingNeg, wrapping_neg, i8, i16, i32, i64, i128, isize);
+
+macro_rules! impl_wrapping_abs {
+    ($($t:ty),+) => {
+        $(
+        impl WrappingAbs for $t {
+            type Output = $t;
+
+            #[inline]
+            fn wrapping_abs(self) -> Self::Output {
+                <$t>::wrapping_abs(self)
+            }
+        }
+
+        impl WrappingAbs for &$t {
+            type Output = $t;
+
+            #[inline]
+            fn wrapping_abs(self) -> Self::Output {
+                <$t>::wrapping_abs(*self)
+            }
+        }
+        )+
+    };
+}
+
+impl_wrapping_abs!(i8, i16, i32, i64, i128, isize);
+
+macro_rules! impl_wrapping_pow {
+    ($($t:ty),+) => {
+        $(
+        impl WrappingPow<u32> for $t {
+            type Output = $t;
+
+            #[inline]
+            fn wrapping_pow(self, exp: u32) -> Self::Output {
+                <$t>::wrapping_pow(self, exp)
+            }
+        }
+
+        impl WrappingPow<u32> for &$t {
+            type Output = $t;
+
+            #[inline]
+            fn wrapping_pow(self, exp: u32) -> Self::Output {
+                <$t>::wrapping_pow(*self, exp)
+            }
+        }
+        )+
+    };
+}
+
+impl_wrapping_pow!(
+    u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize
+);

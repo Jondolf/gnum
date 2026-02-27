@@ -1,5 +1,7 @@
 use core::ops::*;
 
+use crate::traits::{impl_binary_op, impl_unary_op};
+
 /// Performs saturating addition that saturates at the numeric bounds instead of overflowing.
 ///
 /// This is a saturating version of the [`Add`] trait.
@@ -69,20 +71,6 @@ pub trait SaturatingDiv<Rhs = Self>: Div<Rhs> {
     fn saturating_div(self, rhs: Rhs) -> Self::Output;
 }
 
-/// Performs saturating exponentiation that saturates at the numeric bounds instead of overflowing.
-pub trait SaturatingPow<Exp = Self>: Sized {
-    /// Returns `self` raised to the power of `exp`, saturating at the numeric bounds instead of overflowing.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// assert_eq!(2.saturating_pow(3), 8);
-    /// assert_eq!(i32::MAX.saturating_pow(2), i32::MAX);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn saturating_pow(self, exp: Exp) -> Self;
-}
-
 /// Performs saturating negation that saturates at the numeric bounds instead of overflowing.
 pub trait SaturatingNeg: Neg {
     /// Performs the unary `-` operation, saturating at the numeric bounds instead of overflowing.
@@ -99,6 +87,9 @@ pub trait SaturatingNeg: Neg {
 
 /// Performs saturating absolute value calculation that saturates at the numeric bounds instead of overflowing.
 pub trait SaturatingAbs: Sized {
+    /// The resulting type after applying the saturating absolute value operation.
+    type Output;
+
     /// Returns the absolute value of `self`, saturating at the numeric bounds instead of overflowing.
     ///
     /// # Example
@@ -109,5 +100,155 @@ pub trait SaturatingAbs: Sized {
     /// assert_eq!(i32::MIN.saturating_abs(), i32::MAX);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn saturating_abs(self) -> Self;
+    fn saturating_abs(self) -> Self::Output;
 }
+
+/// Performs saturating exponentiation that saturates at the numeric bounds instead of overflowing.
+pub trait SaturatingPow<Exp = Self>: Sized {
+    /// The resulting type after applying the saturating exponentiation operation.
+    type Output;
+
+    /// Returns `self` raised to the power of `exp`, saturating at the numeric bounds instead of overflowing.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// assert_eq!(2.saturating_pow(3), 8);
+    /// assert_eq!(i32::MAX.saturating_pow(2), i32::MAX);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn saturating_pow(self, exp: Exp) -> Self::Output;
+}
+
+impl_binary_op!(
+    SaturatingAdd,
+    saturating_add,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    usize,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+impl_binary_op!(
+    SaturatingSub,
+    saturating_sub,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    usize,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+impl_binary_op!(
+    SaturatingMul,
+    saturating_mul,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    usize,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+impl_binary_op!(
+    SaturatingDiv,
+    saturating_div,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    usize,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+impl_unary_op!(
+    SaturatingNeg,
+    saturating_neg,
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    isize
+);
+
+macro_rules! impl_saturating_abs {
+    ($($t:ty),*) => {
+        $(
+            impl SaturatingAbs for $t {
+                type Output = $t;
+
+                #[inline]
+                fn saturating_abs(self) -> Self::Output {
+                    <$t>::saturating_abs(self)
+                }
+            }
+
+            impl SaturatingAbs for &$t {
+                type Output = $t;
+
+                #[inline]
+                fn saturating_abs(self) -> Self::Output {
+                    <$t>::saturating_abs(*self)
+                }
+            }
+        )*
+    };
+}
+
+impl_saturating_abs!(i8, i16, i32, i64, i128, isize);
+
+macro_rules! impl_saturating_pow {
+    ($($t:ty),*) => {
+        $(
+            impl SaturatingPow<u32> for $t {
+                type Output = $t;
+
+                #[inline]
+                fn saturating_pow(self, exp: u32) -> Self::Output {
+                    <$t>::saturating_pow(self, exp)
+                }
+            }
+
+            impl SaturatingPow<u32> for &$t {
+                type Output = $t;
+
+                #[inline]
+                fn saturating_pow(self, exp: u32) -> Self::Output {
+                    <$t>::saturating_pow(*self, exp)
+                }
+            }
+        )*
+    };
+}
+
+impl_saturating_pow!(
+    u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize
+);
