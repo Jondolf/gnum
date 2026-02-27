@@ -1,13 +1,9 @@
-use crate::{
-    simd::SimdValue,
-    traits::{Bounded, Num},
-};
+use crate::{simd::SimdValue, traits::Num};
 use core::ops::*;
 
 /// A trait for integer types such as [`i32`] and [`u64`].
 pub trait Int:
     Num
-    + Bounded
     + SimdValue
     + Copy
     + BitAnd<Output = Self>
@@ -17,6 +13,9 @@ pub trait Int:
     + Shl<Self, Output = Self>
     + Shr<Self, Output = Self>
 {
+    /// The 32-bit unsigned integer type.
+    type U32;
+
     /// The size of this integer type in bits.
     ///
     /// # Example
@@ -36,7 +35,7 @@ pub trait Int:
     /// assert_eq!(n.count_ones(), 3);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn count_ones(self) -> Self;
+    fn count_ones(self) -> Self::U32;
 
     /// Returns the number of zeros in the binary representation of `self`.
     ///
@@ -47,7 +46,7 @@ pub trait Int:
     /// assert_eq!(n.count_zeros(), 5);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn count_zeros(self) -> Self;
+    fn count_zeros(self) -> Self::U32;
 
     /// Returns the number of leading zeros in the binary representation of `self`.
     ///
@@ -58,7 +57,7 @@ pub trait Int:
     /// assert_eq!(n.leading_zeros(), 2);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn leading_zeros(self) -> Self;
+    fn leading_zeros(self) -> Self::U32;
 
     /// Returns the number of trailing zeros in the binary representation of `self`.
     ///
@@ -69,7 +68,7 @@ pub trait Int:
     /// assert_eq!(n.trailing_zeros(), 0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn trailing_zeros(self) -> Self;
+    fn trailing_zeros(self) -> Self::U32;
 
     /// Returns the number of leading ones in the binary representation of `self`.
     ///
@@ -80,7 +79,7 @@ pub trait Int:
     /// assert_eq!(n.leading_ones(), 2);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn leading_ones(self) -> Self;
+    fn leading_ones(self) -> Self::U32;
 
     /// Returns the number of trailing ones in the binary representation of `self`.
     ///
@@ -91,7 +90,7 @@ pub trait Int:
     /// assert_eq!(n.trailing_ones(), 1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn trailing_ones(self) -> Self;
+    fn trailing_ones(self) -> Self::U32;
 
     /// Shifts the bits to the left by `n` positions, wrapping the truncated bits to the end of the resulting integer.
     ///
@@ -109,7 +108,7 @@ pub trait Int:
     /// assert_eq!(n.rotate_left(8), n);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn rotate_left(self, n: Self) -> Self;
+    fn rotate_left(self, n: Self::U32) -> Self;
 
     /// Shifts the bits to the right by `n` positions, wrapping the truncated bits to the beginning of the resulting integer.
     ///
@@ -127,7 +126,7 @@ pub trait Int:
     /// assert_eq!(n.rotate_right(8), n);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn rotate_right(self, n: Self) -> Self;
+    fn rotate_right(self, n: Self::U32) -> Self;
 
     /// Reverses the byte order of `self`.
     ///
@@ -247,7 +246,7 @@ pub trait Int:
     /// let _ = 16.ilog(1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn ilog(self, base: Self) -> Self;
+    fn ilog(self, base: Self) -> Self::U32;
 
     /// Returns the base 2 integer logarithm of `self`, rounded down.
     ///
@@ -268,7 +267,7 @@ pub trait Int:
     /// let _ = 0.ilog2();
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn ilog2(self) -> Self;
+    fn ilog2(self) -> Self::U32;
 
     /// Returns the base 10 integer logarithm of `self`, rounded down.
     ///
@@ -289,7 +288,7 @@ pub trait Int:
     /// let _ = 0.ilog10();
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn ilog10(self) -> Self;
+    fn ilog10(self) -> Self::U32;
 
     /// Returns `self` raised to the power of `exp`.
     ///
@@ -300,7 +299,7 @@ pub trait Int:
     /// assert_eq!(5.pow(0), 1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn pow(self, exp: Self) -> Self;
+    fn pow(self, exp: Self::U32) -> Self;
 
     /// Returns the integer square root of `self`, rounded down.
     ///
@@ -401,3 +400,102 @@ pub trait Int:
         ((self ^ rhs) >> Self::ONE) + (self & rhs)
     }
 }
+
+macro_rules! impl_int {
+    ($($int:ty),*) => {
+        $(
+            impl Int for $int {
+                type U32 = u32;
+
+                const BITS: u32 = 8;
+
+                #[inline]
+                fn count_ones(self) -> Self::U32 {
+                    self.count_ones()
+                }
+                #[inline]
+                fn count_zeros(self) -> Self::U32 {
+                    self.count_zeros()
+                }
+                #[inline]
+                fn leading_zeros(self) -> Self::U32 {
+                    self.leading_zeros()
+                }
+                #[inline]
+                fn trailing_zeros(self) -> Self::U32 {
+                    self.trailing_zeros()
+                }
+                #[inline]
+                fn leading_ones(self) -> Self::U32 {
+                    self.leading_ones()
+                }
+                #[inline]
+                fn trailing_ones(self) -> Self::U32 {
+                    self.trailing_ones()
+                }
+                #[inline]
+                fn rotate_left(self, n: Self::U32) -> Self {
+                    self.rotate_left(n)
+                }
+                #[inline]
+                fn rotate_right(self, n: Self::U32) -> Self {
+                    self.rotate_right(n)
+                }
+                #[inline]
+                fn swap_bytes(self) -> Self {
+                    self.swap_bytes()
+                }
+                #[inline]
+                fn reverse_bits(self) -> Self {
+                    self.reverse_bits()
+                }
+                #[inline]
+                fn from_be(self) -> Self {
+                    <$int>::from_be(self)
+                }
+                #[inline]
+                fn from_le(self) -> Self {
+                    <$int>::from_le(self)
+                }
+                #[inline]
+                fn to_be(self) -> Self {
+                    self.to_be()
+                }
+                #[inline]
+                fn to_le(self) -> Self {
+                    self.to_le()
+                }
+                #[inline]
+                fn ilog(self, base: Self) -> Self::U32 {
+                    self.ilog(base)
+                }
+                #[inline]
+                fn ilog2(self) -> Self::U32 {
+                    self.ilog2()
+                }
+                #[inline]
+                fn ilog10(self) -> Self::U32 {
+                    self.ilog10()
+                }
+                #[inline]
+                fn pow(self, exp: Self::U32) -> Self {
+                    self.pow(exp)
+                }
+                #[inline]
+                fn isqrt(self) -> Self {
+                    self.isqrt()
+                }
+                #[inline]
+                fn div_euclid(self, rhs: Self) -> Self {
+                    self.div_euclid(rhs)
+                }
+                #[inline]
+                fn rem_euclid(self, rhs: Self) -> Self {
+                    self.rem_euclid(rhs)
+                }
+            }
+        )*
+    };
+}
+
+impl_int!(i8, i16, i32, i64, isize, u8, u16, u32, u64, usize);

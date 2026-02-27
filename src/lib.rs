@@ -8,7 +8,5 @@
 
 pub mod bytes;
 pub mod cmp;
-pub mod float;
-pub mod num;
 pub mod simd;
 pub mod traits;

@@ -1,6 +1,7 @@
 use crate::{
+    cmp::SimdPartialOrd,
     simd::SimdValue,
-    traits::{Bounded, Num, Signed},
+    traits::{Num, Signed},
 };
 use core::ops::*;
 
@@ -65,10 +66,52 @@ pub trait RealConstants {
     const SQRT_3: Self;
 }
 
+macro_rules! impl_real_constants {
+    ($($real:tt),*) => {
+        $(
+            impl RealConstants for $real {
+                const E: Self = core::$real::consts::E;
+                const FRAC_1_PI: Self = core::$real::consts::FRAC_1_PI;
+                const FRAC_1_SQRT_2: Self = core::$real::consts::FRAC_1_SQRT_2;
+                const FRAC_2_PI: Self = core::$real::consts::FRAC_2_PI;
+                const FRAC_2_SQRT_PI: Self = core::$real::consts::FRAC_2_SQRT_PI;
+                const FRAC_PI_2: Self = core::$real::consts::FRAC_PI_2;
+                const FRAC_PI_3: Self = core::$real::consts::FRAC_PI_3;
+                const FRAC_PI_4: Self = core::$real::consts::FRAC_PI_4;
+                const FRAC_PI_6: Self = core::$real::consts::FRAC_PI_6;
+                const FRAC_PI_8: Self = core::$real::consts::FRAC_PI_8;
+                const LN_2: Self = core::$real::consts::LN_2;
+                const LN_10: Self = core::$real::consts::LN_10;
+                const LOG2_10: Self = core::$real::consts::LOG2_10;
+                const LOG2_E: Self = core::$real::consts::LOG2_E;
+                const LOG10_2: Self = core::$real::consts::LOG10_2;
+                const LOG10_E: Self = core::$real::consts::LOG10_E;
+                const PI: Self = core::$real::consts::PI;
+                const SQRT_2: Self = core::$real::consts::SQRT_2;
+                const TAU: Self = core::$real::consts::TAU;
+                #[cfg(feature = "more_float_constants")]
+                const EGAMMA: Self = core::$real::consts::EGAMMA;
+                #[cfg(feature = "more_float_constants")]
+                const FRAC_1_SQRT_3: Self = core::$real::consts::FRAC_1_SQRT_3;
+                #[cfg(feature = "more_float_constants")]
+                const FRAC_1_SQRT_2PI: Self = core::$real::consts::FRAC_1_SQRT_2PI;
+                #[cfg(feature = "more_float_constants")]
+                const FRAC_1_SQRT_PI: Self = core::$real::consts::FRAC_1_SQRT_PI;
+                #[cfg(feature = "more_float_constants")]
+                const PHI: Self = core::$real::consts::PHI;
+                #[cfg(feature = "more_float_constants")]
+                const SQRT_3: Self = core::$real::consts::SQRT_3;
+            }
+        )*
+    };
+}
+
+impl_real_constants!(f32, f64);
+
 /// A trait for [real number] types such as [`f32`] and [`f64`].
 ///
 /// [real numbers]: https://en.wikipedia.org/wiki/Real_number
-pub trait Real: Num + Bounded + Signed + SimdValue + Copy + Neg<Output = Self> {
+pub trait Real: Num + Signed + SimdValue + SimdPartialOrd + Copy + Neg<Output = Self> {
     /// Returns the largest integer less than or equal to `self`.
     ///
     /// # Example
@@ -628,4 +671,173 @@ pub trait Real: Num + Bounded + Signed + SimdValue + Copy + Neg<Output = Self> {
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn clamp(self, min: Self, max: Self) -> Self;
+
+    /// Returns a number with the magnitude of `self` and the sign of `sign`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f32 = 3.0;
+    /// let y: f32 = -2.0;
+    ///
+    /// assert_eq!(x.copysign(y), -3.0);
+    /// assert_eq!(y.copysign(x), 2.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn copysign(self, sign: Self) -> Self;
 }
+
+macro_rules! impl_real {
+    ($($float:ty),*) => {
+        $(
+            impl Real for $float {
+                #[inline]
+                fn floor(self) -> Self {
+                    self.floor()
+                }
+                #[inline]
+                fn ceil(self) -> Self {
+                    self.ceil()
+                }
+                #[inline]
+                fn round(self) -> Self {
+                    self.round()
+                }
+                #[inline]
+                fn trunc(self) -> Self {
+                    self.trunc()
+                }
+                #[inline]
+                fn fract(self) -> Self {
+                    self.fract()
+                }
+                #[inline]
+                fn div_euclid(self, rhs: Self) -> Self {
+                    self.div_euclid(rhs)
+                }
+                #[inline]
+                fn rem_euclid(self, rhs: Self) -> Self {
+                    self.rem_euclid(rhs)
+                }
+                #[inline]
+                fn sqrt(self) -> Self {
+                    self.sqrt()
+                }
+                #[inline]
+                fn exp(self) -> Self {
+                    self.exp()
+                }
+                #[inline]
+                fn exp2(self) -> Self {
+                    self.exp2()
+                }
+                #[inline]
+                fn log(self, base: Self) -> Self {
+                    self.log(base)
+                }
+                #[inline]
+                fn ln(self) -> Self {
+                    self.ln()
+                }
+                #[inline]
+                fn log2(self) -> Self {
+                    self.log2()
+                }
+                #[inline]
+                fn log10(self) -> Self {
+                    self.log10()
+                }
+                #[inline]
+                fn cbrt(self) -> Self {
+                    self.cbrt()
+                }
+                #[inline]
+                fn hypot(self, other: Self) -> Self {
+                    self.hypot(other)
+                }
+                #[inline]
+                fn sin(self) -> Self {
+                    self.sin()
+                }
+                #[inline]
+                fn cos(self) -> Self {
+                    self.cos()
+                }
+                #[inline]
+                fn tan(self) -> Self {
+                    self.tan()
+                }
+                #[inline]
+                fn asin(self) -> Self {
+                    self.asin()
+                }
+                #[inline]
+                fn acos(self) -> Self {
+                    self.acos()
+                }
+                #[inline]
+                fn atan(self) -> Self {
+                    self.atan()
+                }
+                #[inline]
+                fn atan2(self, other: Self) -> Self {
+                    self.atan2(other)
+                }
+                #[inline]
+                fn sin_cos(self) -> (Self, Self) {
+                    self.sin_cos()
+                }
+                #[inline]
+                fn sinh(self) -> Self {
+                    self.sinh()
+                }
+                #[inline]
+                fn cosh(self) -> Self {
+                    self.cosh()
+                }
+                #[inline]
+                fn tanh(self) -> Self {
+                    self.tanh()
+                }
+                #[inline]
+                fn asinh(self) -> Self {
+                    self.asinh()
+                }
+                #[inline]
+                fn acosh(self) -> Self {
+                    self.acosh()
+                }
+                #[inline]
+                fn atanh(self) -> Self {
+                    self.atanh()
+                }
+                #[inline]
+                fn recip(self) -> Self {
+                    self.recip()
+                }
+                #[inline]
+                fn to_degrees(self) -> Self {
+                    self.to_degrees()
+                }
+                #[inline]
+                fn to_radians(self) -> Self {
+                    self.to_radians()
+                }
+                #[inline]
+                fn midpoint(self, other: Self) -> Self {
+                    self.midpoint(other)
+                }
+                #[inline]
+                fn clamp(self, min: Self, max: Self) -> Self {
+                    self.clamp(min, max)
+                }
+                #[inline]
+                fn copysign(self, sign: Self) -> Self {
+                    self.copysign(sign)
+                }
+            }
+        )*
+    };
+}
+
+impl_real!(f32, f64);

@@ -4,7 +4,10 @@ use core::simd::{LaneCount, Simd, SupportedLaneCount};
 macro_rules! impl_num_simd {
     ($($t:ty),*) => {
         $(
-            impl<const N: usize> Num for Simd<$t, N> where LaneCount<N>: SupportedLaneCount {}
+            impl<const N: usize> Num for Simd<$t, N> where LaneCount<N>: SupportedLaneCount {
+                const MIN: Self = Self::MIN;
+                const MAX: Self = Self::MAX;
+            }
         )*
     };
 }

@@ -349,3 +349,85 @@ pub trait Float: Real {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn max(self, other: Self) -> Self;
 }
+
+macro_rules! impl_float {
+    ($($float:ty),*) => {
+        $(
+            impl Float for $float {
+                type Int = i32;
+
+                const RADIX: u32 = <$float>::RADIX;
+                const MANTISSA_DIGITS: u32 = <$float>::MANTISSA_DIGITS;
+                const DIGITS: u32 = <$float>::DIGITS;
+                const EPSILON: Self = <$float>::EPSILON;
+                const MIN_POSITIVE: Self = <$float>::MIN_POSITIVE;
+                const MIN_EXP: i32 = <$float>::MIN_EXP;
+                const MAX_EXP: i32 = <$float>::MAX_EXP;
+                const MIN_10_EXP: i32 = <$float>::MIN_10_EXP;
+                const MAX_10_EXP: i32 = <$float>::MAX_10_EXP;
+                const NAN: Self = <$float>::NAN;
+                const INFINITY: Self = <$float>::INFINITY;
+                const NEG_INFINITY: Self = <$float>::NEG_INFINITY;
+
+                #[inline]
+                fn mul_add(self, a: Self, b: Self) -> Self {
+                    self.mul_add(a, b)
+                }
+                #[inline]
+                fn powi(self, n: i32) -> Self {
+                    self.powi(n)
+                }
+                #[inline]
+                fn powf(self, n: Self) -> Self {
+                    self.powf(n)
+                }
+                #[inline]
+                fn is_nan(self) -> bool {
+                    self.is_nan()
+                }
+                #[inline]
+                fn is_infinite(self) -> bool {
+                    self.is_infinite()
+                }
+                #[inline]
+                fn is_finite(self) -> bool {
+                    self.is_finite()
+                }
+                #[inline]
+                fn is_subnormal(self) -> bool {
+                    self.is_subnormal()
+                }
+                #[inline]
+                fn is_normal(self) -> bool {
+                    self.is_normal()
+                }
+                #[inline]
+                fn is_sign_positive(self) -> bool {
+                    self.is_sign_positive()
+                }
+                #[inline]
+                fn is_sign_negative(self) -> bool {
+                    self.is_sign_negative()
+                }
+                #[inline]
+                fn next_up(self) -> Self {
+                    self.next_up()
+                }
+                #[inline]
+                fn next_down(self) -> Self {
+                    self.next_down()
+                }
+                #[inline]
+                fn min(self, other: Self) -> Self {
+                    self.min(other)
+                }
+                #[inline]
+                fn max(self, other: Self) -> Self {
+                    self.max(other)
+                }
+            }
+        )*
+    };
+}
+
+impl_float!(f32, f64);
