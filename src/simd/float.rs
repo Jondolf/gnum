@@ -47,21 +47,27 @@ macro_rules! impl_real_simd {
         where
             LaneCount<N>: SupportedLaneCount,
         {
+            #[inline]
             fn floor(self) -> Self {
                 StdFloat::floor(self)
             }
+            #[inline]
             fn ceil(self) -> Self {
                 StdFloat::ceil(self)
             }
+            #[inline]
             fn round(self) -> Self {
                 StdFloat::round(self)
             }
+            #[inline]
             fn trunc(self) -> Self {
                 StdFloat::trunc(self)
             }
+            #[inline]
             fn fract(self) -> Self {
                 StdFloat::fract(self)
             }
+            #[inline]
             fn div_euclid(self, rhs: Self) -> Self {
                 let q = Real::trunc(self / rhs);
                 let r = self - q * rhs;
@@ -70,36 +76,46 @@ macro_rules! impl_real_simd {
                 let correction = Signed::signum(rhs);
                 mask.select(q - correction, q)
             }
+            #[inline]
             fn rem_euclid(self, rhs: Self) -> Self {
                 let r = self % rhs;
                 let mask = r.simd_lt(Self::ZERO);
                 let adjusted = r + Signed::abs(rhs);
                 mask.select(adjusted, r)
             }
+            #[inline]
             fn sqrt(self) -> Self {
                 StdFloat::sqrt(self)
             }
+            #[inline]
             fn exp(self) -> Self {
                 StdFloat::exp(self)
             }
+            #[inline]
             fn exp2(self) -> Self {
                 StdFloat::exp2(self)
             }
+            #[inline]
             fn ln(self) -> Self {
                 StdFloat::ln(self)
             }
+            #[inline]
             fn log(self, base: Self) -> Self {
                 StdFloat::log(self, base)
             }
+            #[inline]
             fn log2(self) -> Self {
                 StdFloat::log2(self)
             }
+            #[inline]
             fn log10(self) -> Self {
                 StdFloat::log10(self)
             }
+            #[inline]
             fn cbrt(self) -> Self {
                 self.as_array().map(|x| x.cbrt()).into()
             }
+            #[inline]
             fn hypot(self, other: Self) -> Self {
                 let mut result = self;
                 for i in 0..Self::LEN {
@@ -107,24 +123,31 @@ macro_rules! impl_real_simd {
                 }
                 result
             }
+            #[inline]
             fn sin(self) -> Self {
                 StdFloat::sin(self)
             }
+            #[inline]
             fn cos(self) -> Self {
                 StdFloat::cos(self)
             }
+            #[inline]
             fn tan(self) -> Self {
                 self.as_array().map(|x| x.tan()).into()
             }
+            #[inline]
             fn asin(self) -> Self {
                 self.as_array().map(|x| x.asin()).into()
             }
+            #[inline]
             fn acos(self) -> Self {
                 self.as_array().map(|x| x.acos()).into()
             }
+            #[inline]
             fn atan(self) -> Self {
                 self.as_array().map(|x| x.atan()).into()
             }
+            #[inline]
             fn atan2(self, other: Self) -> Self {
                 let mut result = self;
                 for i in 0..Self::LEN {
@@ -132,6 +155,7 @@ macro_rules! impl_real_simd {
                 }
                 result
             }
+            #[inline]
             fn sin_cos(self) -> (Self, Self) {
                 let mut sin = self;
                 let mut cos = self;
@@ -142,33 +166,43 @@ macro_rules! impl_real_simd {
                 }
                 (sin, cos)
             }
+            #[inline]
             fn sinh(self) -> Self {
                 self.as_array().map(|x| x.sinh()).into()
             }
+            #[inline]
             fn cosh(self) -> Self {
                 self.as_array().map(|x| x.cosh()).into()
             }
+            #[inline]
             fn tanh(self) -> Self {
                 self.as_array().map(|x| x.tanh()).into()
             }
+            #[inline]
             fn asinh(self) -> Self {
                 self.as_array().map(|x| x.asinh()).into()
             }
+            #[inline]
             fn acosh(self) -> Self {
                 self.as_array().map(|x| x.acosh()).into()
             }
+            #[inline]
             fn atanh(self) -> Self {
                 self.as_array().map(|x| x.atanh()).into()
             }
+            #[inline]
             fn recip(self) -> Self {
                 SimdFloat::recip(self)
             }
+            #[inline]
             fn to_degrees(self) -> Self {
                 SimdFloat::to_degrees(self)
             }
+            #[inline]
             fn to_radians(self) -> Self {
                 SimdFloat::to_radians(self)
             }
+            #[inline]
             fn midpoint(self, other: Self) -> Self {
                 let mut result = self;
                 for i in 0..Self::LEN {
@@ -176,9 +210,11 @@ macro_rules! impl_real_simd {
                 }
                 result
             }
+            #[inline]
             fn clamp(self, min: Self, max: Self) -> Self {
                 SimdFloat::simd_clamp(self, min, max)
             }
+            #[inline]
             fn copysign(self, sign: Self) -> Self {
                 SimdFloat::copysign(self, sign)
             }
@@ -210,9 +246,11 @@ macro_rules! impl_float_simd {
             const INFINITY: Self = Self::splat($float::INFINITY);
             const NEG_INFINITY: Self = Self::splat($float::NEG_INFINITY);
 
+            #[inline]
             fn mul_add(self, a: Self, b: Self) -> Self {
                 StdFloat::mul_add(self, a, b)
             }
+            #[inline]
             fn powi(self, n: Self::Int) -> Self {
                 let mut result = self;
                 for i in 0..Self::LEN {
@@ -220,6 +258,7 @@ macro_rules! impl_float_simd {
                 }
                 result
             }
+            #[inline]
             fn powf(self, n: Self) -> Self {
                 let mut result = self;
                 for i in 0..Self::LEN {
@@ -227,36 +266,47 @@ macro_rules! impl_float_simd {
                 }
                 result
             }
+            #[inline]
             fn is_nan(self) -> Self::Bool {
                 SimdFloat::is_nan(self)
             }
+            #[inline]
             fn is_infinite(self) -> Self::Bool {
                 SimdFloat::is_infinite(self)
             }
+            #[inline]
             fn is_finite(self) -> Self::Bool {
                 SimdFloat::is_finite(self)
             }
+            #[inline]
             fn is_subnormal(self) -> Self::Bool {
                 SimdFloat::is_subnormal(self)
             }
+            #[inline]
             fn is_normal(self) -> Self::Bool {
                 SimdFloat::is_normal(self)
             }
+            #[inline]
             fn is_sign_positive(self) -> Self::Bool {
                 SimdFloat::is_sign_positive(self)
             }
+            #[inline]
             fn is_sign_negative(self) -> Self::Bool {
                 SimdFloat::is_sign_negative(self)
             }
+            #[inline]
             fn next_up(self) -> Self {
                 self.as_array().map(|x| x.next_up()).into()
             }
+            #[inline]
             fn next_down(self) -> Self {
                 self.as_array().map(|x| x.next_down()).into()
             }
+            #[inline]
             fn min(self, other: Self) -> Self {
                 SimdFloat::simd_min(self, other)
             }
+            #[inline]
             fn max(self, other: Self) -> Self {
                 SimdFloat::simd_max(self, other)
             }

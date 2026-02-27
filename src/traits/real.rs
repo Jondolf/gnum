@@ -1,6 +1,5 @@
 use crate::{
-    cmp::SimdPartialOrd,
-    simd::SimdValue,
+    simd::{SimdPartialOrd, SimdValue},
     traits::{Num, Signed},
 };
 use core::ops::*;

@@ -4,9 +4,6 @@ use std::simd::{LaneCount, Mask, Simd, SimdElement, SupportedLaneCount};
 ///
 /// For each element in the mask, choose the corresponding element from `true_values` if
 /// that element mask is true, and `false_values` if that element mask is false.
-///
-/// If the mask is `u64`, it's treated as a bitmask with the least significant bit
-/// corresponding to the first element.
 pub trait Select<T> {
     /// Choose elements from two vectors.
     ///

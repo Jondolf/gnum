@@ -1,9 +1,11 @@
-use crate::simd::Select;
-
-use super::SimdBool;
+use crate::simd::{Select, SimdBool};
 use core::simd::{LaneCount, SimdElement, SupportedLaneCount};
 
-/// Base trait for SIMD types.
+/// Base trait for SIMD-like types.
+///
+/// This trait is implemented by both scalar types and SIMD vector types, and abstracts the common
+/// behavior of these types. It is designed to be used in generic code that can work
+/// with both scalar and SIMD types in an AoSoA setting.
 pub trait SimdValue: Sized {
     /// The number of lanes of this SIMD value.
     const LANES: usize;
@@ -25,6 +27,7 @@ pub trait SimdValue: Sized {
     /// Extracts the i-th lane of `self` without bound-checking.
     ///
     /// # Safety
+    ///
     /// Undefined behavior if `i >= Self::LANES`.
     unsafe fn extract_unchecked(&self, i: usize) -> Self::Element;
 
@@ -36,6 +39,7 @@ pub trait SimdValue: Sized {
     /// Replaces the i-th lane of `self` by `val` without bound-checking.
     ///
     /// # Safety
+    ///
     /// Undefined behavior if `i >= Self::LANES`.
     unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element);
 

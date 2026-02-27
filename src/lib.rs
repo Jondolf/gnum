@@ -6,7 +6,5 @@
 #![cfg_attr(feature = "portable_simd", feature(portable_simd))]
 #![allow(clippy::wrong_self_convention)]
 
-pub mod bytes;
-pub mod cmp;
 pub mod simd;
 pub mod traits;

@@ -1,5 +1,5 @@
 use crate::{
-    cmp::SimdPartialOrd,
+    simd::SimdPartialOrd,
     traits::{Signed, Zero},
 };
 use core::simd::{LaneCount, Simd, SupportedLaneCount};

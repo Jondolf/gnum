@@ -1,6 +1,16 @@
 use crate::simd::SimdValue;
 use core::ops::{Add, Div, Mul, Rem, Sub};
 
+/// Base trait for numeric types.
+///
+/// This trait is implemented by all numeric types, including both scalar types and SIMD vector types.
+/// It encapsulates the common properties of numeric types, such as having a minimum and maximum value, and
+/// supporting basic arithmetic operations.
+///
+/// See [`Int`] and [`Float`] for more specific traits for integer and floating-point types, respectively.
+///
+/// [`Int`]: crate::traits::Int
+/// [`Float`]: crate::traits::Float
 pub trait Num: PartialEq + Zero + One + NumOps + SimdValue {
     /// The smallest finite value that can be represented by this type.
     const MIN: Self;
@@ -22,11 +32,15 @@ impl_num_scalar!(u8, u16, u32, u64, usize);
 impl_num_scalar!(i8, i16, i32, i64, isize);
 impl_num_scalar!(f32, f64);
 
+/// A trait for types that have an additive identity element `0`.
 pub trait Zero: Sized {
+    /// The additive identity element `0` for this type.
     const ZERO: Self;
 }
 
+/// A trait for types that have a multiplicative identity element `1`.
 pub trait One: Sized {
+    /// The multiplicative identity element `1` for this type.
     const ONE: Self;
 }
 
@@ -48,6 +62,13 @@ impl_zero_one_scalar!(u8, u16, u32, u64, usize);
 impl_zero_one_scalar!(i8, i16, i32, i64, isize);
 impl_zero_one_scalar!(f32, f64);
 
+/// A trait for types that support basic arithmetic operations:
+///
+/// - Addition ([`+`](Add))
+/// - Subtraction ([`-`](Sub))
+/// - Multiplication ([`*`](Mul))
+/// - Division ([`/`](Div))
+/// - Remainder ([`%`](Rem))
 pub trait NumOps<Rhs = Self, Output = Self>:
     Add<Rhs, Output = Output>
     + Sub<Rhs, Output = Output>
@@ -66,11 +87,18 @@ impl<T, Rhs, Output> NumOps<Rhs, Output> for T where
 {
 }
 
+/// A trait for types that support basic arithmetic operations with both owned and reference operands.
+///
+/// This trait is automatically implemented for any type that implements `NumOps` for both owned and reference operands.
 pub trait NumRefOps<Rhs = Self, Output = Self>:
     NumOps<Rhs, Output> + for<'a> NumOps<&'a Rhs, Output>
 {
 }
 
+/// A trait for types that support basic arithmetic operations with both owned and reference operands,
+/// where the reference operand is the same type as the implementing type.
+///
+/// This trait is automatically implemented for any type that implements `NumOps` for both owned and reference operands of the same type.
 pub trait RefNumOps<Rhs = Self, Output = Self>: for<'a> NumOps<&'a Rhs, Output> {}
 
 impl<T> NumRefOps for T where T: NumOps + for<'a> NumOps<&'a T> {}

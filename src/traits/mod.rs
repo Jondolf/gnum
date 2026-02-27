@@ -1,3 +1,4 @@
+mod bytes;
 mod float;
 mod int;
 mod num;
@@ -5,6 +6,7 @@ mod ops;
 mod real;
 mod signed;
 
+pub use bytes::ToBytes;
 pub use float::Float;
 pub use int::Int;
 pub use num::*;
