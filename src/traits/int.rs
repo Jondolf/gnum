@@ -407,7 +407,7 @@ macro_rules! impl_int {
             impl Int for $int {
                 type Unsigned = $uint;
 
-                const BITS: u32 = 8;
+                const BITS: u32 = <$int>::BITS;
 
                 #[inline]
                 fn count_ones(self) -> Self::Unsigned {

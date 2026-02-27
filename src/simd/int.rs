@@ -13,7 +13,7 @@ macro_rules! impl_int_simd {
             {
                 type Unsigned = Simd<$uint, N>;
 
-                const BITS: u32 = 8;
+                const BITS: u32 = <$int>::BITS;
 
                 #[inline]
                 fn count_ones(self) -> Self::Unsigned {
@@ -179,7 +179,7 @@ macro_rules! impl_uint_simd {
             {
                 type Unsigned = Self;
 
-                const BITS: u32 = 8;
+                const BITS: u32 = <$uint>::BITS;
 
                 #[inline]
                 fn count_ones(self) -> Self::Unsigned {
