@@ -211,6 +211,14 @@ macro_rules! impl_real_simd {
                 result
             }
             #[inline]
+            fn min(self, other: Self) -> Self {
+                SimdFloat::simd_min(self, other)
+            }
+            #[inline]
+            fn max(self, other: Self) -> Self {
+                SimdFloat::simd_max(self, other)
+            }
+            #[inline]
             fn clamp(self, min: Self, max: Self) -> Self {
                 SimdFloat::simd_clamp(self, min, max)
             }

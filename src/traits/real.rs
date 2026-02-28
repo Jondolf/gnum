@@ -1,8 +1,7 @@
 use crate::{
-    simd::{SimdPartialOrd, SimdValue},
+    simd::SimdPartialOrd,
     traits::{Num, Signed},
 };
-use core::ops::*;
 
 /// Basic mathematical constants for [`Real`] number types such as [`f32`] and [`f64`].
 pub trait RealConstants {
@@ -110,7 +109,7 @@ impl_real_constants!(f32, f64);
 /// A trait for [real number] types such as [`f32`] and [`f64`].
 ///
 /// [real numbers]: https://en.wikipedia.org/wiki/Real_number
-pub trait Real: Num + Signed + SimdValue + SimdPartialOrd + Copy + Neg<Output = Self> {
+pub trait Real: Num + Signed + RealConstants + SimdPartialOrd {
     /// Returns the largest integer less than or equal to `self`.
     ///
     /// # Example
@@ -640,8 +639,46 @@ pub trait Real: Num + Signed + SimdValue + SimdPartialOrd + Copy + Neg<Output = 
     fn to_radians(self) -> Self;
 
     /// Returns the midpoint (average) between `self` and `other`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f32 = 3.0;
+    /// let y: f32 = 5.0;
+    ///
+    /// assert_eq!(x.midpoint(y), 4.0);
+    /// assert_eq!(y.midpoint(x), 4.0);
+    /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn midpoint(self, other: Self) -> Self;
+
+    /// Returns the minimum of `self` and `other`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f32 = 3.0;
+    /// let y: f32 = 4.0;
+    ///
+    /// assert_eq!(x.min(y), 3.0);
+    /// assert_eq!(y.min(x), 3.0);
+    /// ```
+    #[must_use = "method returns a new vector and does not mutate the original value"]
+    fn min(self, other: Self) -> Self;
+
+    /// Returns the maximum of `self` and `other`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f32 = 3.0;
+    /// let y: f32 = 4.0;
+    ///
+    /// assert_eq!(x.max(y), 4.0);
+    /// assert_eq!(y.max(x), 4.0);
+    /// ```
+    #[must_use = "method returns a new vector and does not mutate the original value"]
+    fn max(self, other: Self) -> Self;
 
     /// Restricts `self` to the range defined by `min` and `max`.
     ///
@@ -825,6 +862,40 @@ macro_rules! impl_real {
                 #[inline]
                 fn midpoint(self, other: Self) -> Self {
                     self.midpoint(other)
+                }
+                /// Returns the minimum of `self` and `other`, ignoring NaN values.
+                ///
+                /// # Example
+                ///
+                /// ```
+                /// let x: f32 = 3.0;
+                /// let y: f32 = 4.0;
+                /// let nan: f32 = f32::NAN;
+                ///
+                /// assert_eq!(x.min(y), 3.0);
+                /// assert_eq!(x.min(nan), 3.0);
+                /// assert_eq!(nan.min(x), 3.0);
+                /// ```
+                #[inline]
+                fn min(self, other: Self) -> Self {
+                    self.min(other)
+                }
+                /// Returns the maximum of `self` and `other`, ignoring NaN values.
+                ///
+                /// # Example
+                ///
+                /// ```
+                /// let x: f32 = 3.0;
+                /// let y: f32 = 4.0;
+                /// let nan: f32 = f32::NAN;
+                ///
+                /// assert_eq!(x.max(y), 4.0);
+                /// assert_eq!(x.max(nan), 3.0);
+                /// assert_eq!(nan.max(x), 3.0);
+                /// ```
+                #[inline]
+                fn max(self, other: Self) -> Self {
+                    self.max(other)
                 }
                 #[inline]
                 fn clamp(self, min: Self, max: Self) -> Self {

@@ -27,15 +27,19 @@ pub trait SimdPartialOrd: SimdPartialEq {
     fn simd_ge(self, other: Self) -> Self::Bool;
 }
 
-/// Parallel `Ord`.
+/// Generalization of [`Ord`] for SIMD types.
+///
+/// This is implemented for both scalar and SIMD types, so that
+/// the same interface can be used for both. For scalar types,
+/// the mask type is always [`bool`].
 pub trait SimdOrd: SimdPartialOrd {
-    /// Returns the element-wise maximum with `other`.
-    #[must_use = "method returns a new vector and does not mutate the original value"]
-    fn simd_max(self, other: Self) -> Self;
-
     /// Returns the element-wise minimum with `other`.
     #[must_use = "method returns a new vector and does not mutate the original value"]
     fn simd_min(self, other: Self) -> Self;
+
+    /// Returns the element-wise maximum with `other`.
+    #[must_use = "method returns a new vector and does not mutate the original value"]
+    fn simd_max(self, other: Self) -> Self;
 
     /// Restrict each element to a certain interval.
     ///
@@ -106,7 +110,6 @@ macro_rules! impl_simd_ord_scalar {
 
 impl_simd_ord_scalar!(u8, u16, u32, u64, usize);
 impl_simd_ord_scalar!(i8, i16, i32, i64, isize);
-impl_simd_ord_scalar!(f32, f64);
 
 impl<T: SimdElement, const N: usize> SimdPartialOrd for core::simd::Simd<T, N>
 where

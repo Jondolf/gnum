@@ -12,6 +12,11 @@ pub trait Int:
     + Not<Output = Self>
     + Shl<Self, Output = Self>
     + Shr<Self, Output = Self>
+    + BitAndAssign<Self>
+    + BitOrAssign<Self>
+    + BitXorAssign<Self>
+    + ShlAssign<Self>
+    + ShrAssign<Self>
 {
     /// The unsigned integer type corresponding to this integer type.
     type Unsigned: Int;

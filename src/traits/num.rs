@@ -1,5 +1,5 @@
 use crate::simd::SimdValue;
-use core::ops::{Add, Div, Mul, Rem, Sub};
+use core::ops::*;
 
 /// Base trait for numeric types.
 ///
@@ -11,12 +11,13 @@ use core::ops::{Add, Div, Mul, Rem, Sub};
 ///
 /// [`Int`]: crate::traits::Int
 /// [`Float`]: crate::traits::Float
-pub trait Num: PartialEq + Zero + One + NumOps + SimdValue {
+pub trait Num: Copy + Zero + One + NumOps + SimdValue {
     /// The smallest finite value that can be represented by this type.
     const MIN: Self;
     /// The largest finite value that can be represented by this type.
     const MAX: Self;
 }
+
 macro_rules! impl_num_scalar {
     ($($t:ty),*) => {
         $(
@@ -44,6 +45,12 @@ pub trait One: Sized {
     const ONE: Self;
 }
 
+/// A trait for types that have a multiplicative identity element `-1`.
+pub trait NegOne: Sized {
+    /// The multiplicative identity element `-1` for this type.
+    const NEG_ONE: Self;
+}
+
 macro_rules! impl_zero_one_scalar {
     ($($t:ty),*) => {
         $(
@@ -62,6 +69,19 @@ impl_zero_one_scalar!(u8, u16, u32, u64, usize);
 impl_zero_one_scalar!(i8, i16, i32, i64, isize);
 impl_zero_one_scalar!(f32, f64);
 
+macro_rules! impl_neg_one_scalar {
+    ($($t:ty),*) => {
+        $(
+            impl NegOne for $t {
+                const NEG_ONE: Self = -1 as $t;
+            }
+        )*
+    };
+}
+
+impl_neg_one_scalar!(i8, i16, i32, i64, isize);
+impl_neg_one_scalar!(f32, f64);
+
 /// A trait for types that support basic arithmetic operations:
 ///
 /// - Addition ([`+`](Add))
@@ -75,6 +95,11 @@ pub trait NumOps<Rhs = Self, Output = Self>:
     + Mul<Rhs, Output = Output>
     + Div<Rhs, Output = Output>
     + Rem<Rhs, Output = Output>
+    + AddAssign<Rhs>
+    + SubAssign<Rhs>
+    + MulAssign<Rhs>
+    + DivAssign<Rhs>
+    + RemAssign<Rhs>
 {
 }
 
@@ -84,6 +109,11 @@ impl<T, Rhs, Output> NumOps<Rhs, Output> for T where
         + Mul<Rhs, Output = Output>
         + Div<Rhs, Output = Output>
         + Rem<Rhs, Output = Output>
+        + AddAssign<Rhs>
+        + SubAssign<Rhs>
+        + MulAssign<Rhs>
+        + DivAssign<Rhs>
+        + RemAssign<Rhs>
 {
 }
 

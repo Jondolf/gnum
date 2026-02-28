@@ -14,7 +14,13 @@ pub trait SimdBool:
     + BitXor<Self, Output = Self>
     + Not<Output = Self>
 {
-    /// A bit mask representing the boolean state of each lanes of `self`.
+    /// The true value for this type.
+    const TRUE: Self;
+
+    /// The false value for this type.
+    const FALSE: Self;
+
+    /// A bit mask representing the boolean state of each lane of `self`.
     ///
     /// The `i-th` bit of the result is `1` iff. the `i-th` lane of `self` is `true`.
     fn to_bitmask(self) -> u64;
@@ -27,6 +33,9 @@ pub trait SimdBool:
 }
 
 impl SimdBool for bool {
+    const TRUE: Self = true;
+    const FALSE: Self = false;
+
     #[inline(always)]
     fn to_bitmask(self) -> u64 {
         self as u64
@@ -47,6 +56,9 @@ impl<T: MaskElement, const N: usize> SimdBool for core::simd::Mask<T, N>
 where
     LaneCount<N>: SupportedLaneCount,
 {
+    const TRUE: Self = Self::TRUE;
+    const FALSE: Self = Self::FALSE;
+
     #[inline(always)]
     fn to_bitmask(self) -> u64 {
         self.to_bitmask()

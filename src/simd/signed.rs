@@ -2,8 +2,10 @@ use crate::{
     simd::SimdPartialOrd,
     traits::{Signed, Zero},
 };
-use core::simd::{LaneCount, Simd, SupportedLaneCount};
-use std::simd::num::{SimdFloat, SimdInt};
+use core::simd::{
+    LaneCount, Simd, SupportedLaneCount,
+    num::{SimdFloat, SimdInt},
+};
 
 macro_rules! impl_signed_simd {
     ($($int:ty => $uint:ty),*) => {

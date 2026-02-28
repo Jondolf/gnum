@@ -1,5 +1,5 @@
 use crate::simd::{Select, SimdBool};
-use core::simd::{LaneCount, SimdElement, SupportedLaneCount};
+use core::simd::{LaneCount, MaskElement, SimdElement, SupportedLaneCount};
 
 /// Base trait for SIMD-like types.
 ///
@@ -135,6 +135,41 @@ impl_simd_value_scalar!(u8, u16, u32, u64, usize);
 impl_simd_value_scalar!(i8, i16, i32, i64, isize);
 impl_simd_value_scalar!(f32, f64);
 
+impl SimdValue for bool {
+    const LANES: usize = 1;
+    type Element = Self;
+    type Bool = Self;
+
+    #[inline]
+    fn splat(val: Self::Element) -> Self {
+        val
+    }
+
+    #[inline]
+    fn extract(&self, i: usize) -> Self::Element {
+        debug_assert!(i == 0, "index out of bounds");
+        *self
+    }
+
+    #[inline]
+    unsafe fn extract_unchecked(&self, i: usize) -> Self::Element {
+        debug_assert!(i == 0, "index out of bounds");
+        *self
+    }
+
+    #[inline]
+    fn replace(&mut self, i: usize, val: Self::Element) {
+        debug_assert!(i == 0, "index out of bounds");
+        *self = val;
+    }
+
+    #[inline]
+    unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
+        debug_assert!(i == 0, "index out of bounds");
+        *self = val;
+    }
+}
+
 impl<T: SimdElement + SimdValue<Element = T, Bool = bool>, const N: usize> SimdValue
     for core::simd::Simd<T, N>
 where
@@ -167,5 +202,40 @@ where
     #[inline]
     unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
         self[i] = val;
+    }
+}
+
+impl<T: MaskElement + SimdValue<Element = T, Bool = bool>, const N: usize> SimdValue
+    for core::simd::Mask<T, N>
+where
+    LaneCount<N>: SupportedLaneCount,
+{
+    const LANES: usize = N;
+    type Element = bool;
+    type Bool = Self;
+
+    #[inline]
+    fn splat(val: Self::Element) -> Self {
+        Self::splat(val)
+    }
+
+    #[inline]
+    fn extract(&self, i: usize) -> Self::Element {
+        self.test(i)
+    }
+
+    #[inline]
+    unsafe fn extract_unchecked(&self, i: usize) -> Self::Element {
+        self.test(i)
+    }
+
+    #[inline]
+    fn replace(&mut self, i: usize, val: Self::Element) {
+        self.set(i, val);
+    }
+
+    #[inline]
+    unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
+        self.set(i, val);
     }
 }
