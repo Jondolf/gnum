@@ -1,5 +1,5 @@
 use crate::{
-    simd::SimdPartialOrd,
+    simd::NumOrd,
     traits::{Signed, Zero},
 };
 use core::simd::{
@@ -66,11 +66,11 @@ macro_rules! impl_signed_float_simd {
                 }
                 #[inline]
                 fn is_positive(self) -> Self::Bool {
-                    self.simd_gt(Self::ZERO)
+                    self.num_gt(Self::ZERO)
                 }
                 #[inline]
                 fn is_negative(self) -> Self::Bool {
-                    self.simd_lt(Self::ZERO)
+                    self.num_lt(Self::ZERO)
                 }
             }
         )*

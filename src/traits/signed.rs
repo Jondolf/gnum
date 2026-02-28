@@ -7,7 +7,7 @@ use core::ops::Neg;
 /// A trait for signed types such as [`i32`] and [`f32`].
 pub trait Signed: Num + NegOne + SimdValue + Neg<Output = Self> {
     /// The corresponding unsigned type for this signed type.
-    type Unsigned;
+    type Unsigned: Num;
 
     /// Returns the absolute value of `self`.
     #[must_use = "this returns the result of the operation, without modifying the original"]

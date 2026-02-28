@@ -1,11 +1,10 @@
-use crate::{simd::SimdValue, traits::Num};
+use crate::{simd::NumOrd, traits::Num};
 use core::ops::*;
 
 /// A trait for integer types such as [`i32`] and [`u64`].
 pub trait Int:
     Num
-    + SimdValue
-    + Copy
+    + NumOrd
     + BitAnd<Output = Self>
     + BitOr<Output = Self>
     + BitXor<Output = Self>
@@ -321,67 +320,6 @@ pub trait Int:
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn isqrt(self) -> Self;
 
-    /// Returns the quotient of Euclidean division of `self` by `rhs`.
-    ///
-    /// This computes the integer `q` such that `self = q * rhs + r`, with
-    /// `r = self.rem_euclid(rhs)` and `0 <= r < abs(rhs)`.
-    ///
-    /// In other words, the result is `self / rhs` rounded to the integer `q`
-    /// such that `self >= q * rhs`.
-    ///
-    /// - If `self > 0`, this is equal to rounding towards zero (the default in Rust);
-    /// - If `self < 0`, this is equal to rounding away from zero (towards +/- infinity).
-    /// - If `rhs > 0`, this is equal to rounding towards -infinity;
-    /// - If `rhs < 0`, this is equal to rounding towards +infinity.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `rhs` is zero or if `self` is `Self::MIN` and `rhs` is -1.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let a = 7;
-    /// let b = 4;
-    ///
-    /// assert_eq!(a.div_euclid(b), 1); // 7 >= 4 * 1
-    /// assert_eq!(a.div_euclid(-b), -1); // 7 >= -4 * -1
-    /// assert_eq!((-a).div_euclid(b), -2); // -7 >= 4 * -2
-    /// assert_eq!((-a).div_euclid(-b), 2); // -7 >= -4 * 2
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn div_euclid(self, rhs: Self) -> Self;
-
-    /// Calculates the least nonnegative remainder of `self (mod rhs)`.
-    ///
-    /// This is done as if by the Euclidean division algorithm -- given
-    /// `r = self.rem_euclid(rhs)`, the result satisfies
-    /// `self = rhs * self.div_euclid(rhs) + r` and `0 <= r < abs(rhs)`.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `rhs` is zero or if `self` is `Self::MIN` and `rhs` is -1.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let a = 7;
-    /// let b = 4;
-    ///
-    /// assert_eq!(a.rem_euclid(b), 3);
-    /// assert_eq!((-a).rem_euclid(b), 1);
-    /// assert_eq!(a.rem_euclid(-b), 3);
-    /// assert_eq!((-a).rem_euclid(-b), 1);
-    /// ```
-    ///
-    /// This will panic:
-    ///
-    /// ```should_panic
-    /// let _ = i16::MIN.rem_euclid(-1);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn rem_euclid(self, rhs: Self) -> Self;
-
     /// Calculates the midpoint (average) between `self` and `rhs`.
     ///
     /// `midpoint(a, b)` is `(a + b) / 2` as if it were performed in a
@@ -489,14 +427,6 @@ macro_rules! impl_int {
                 #[inline]
                 fn isqrt(self) -> Self {
                     self.isqrt()
-                }
-                #[inline]
-                fn div_euclid(self, rhs: Self) -> Self {
-                    self.div_euclid(rhs)
-                }
-                #[inline]
-                fn rem_euclid(self, rhs: Self) -> Self {
-                    self.rem_euclid(rhs)
                 }
             }
         )*

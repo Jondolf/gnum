@@ -1,5 +1,5 @@
 use crate::{
-    simd::SimdPartialOrd,
+    simd::NumOrd,
     traits::{Num, Signed},
 };
 
@@ -109,7 +109,7 @@ impl_real_constants!(f32, f64);
 /// A trait for [real number] types such as [`f32`] and [`f64`].
 ///
 /// [real numbers]: https://en.wikipedia.org/wiki/Real_number
-pub trait Real: Num + Signed + RealConstants + SimdPartialOrd {
+pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// Returns the largest integer less than or equal to `self`.
     ///
     /// # Example
@@ -187,44 +187,6 @@ pub trait Real: Num + Signed + RealConstants + SimdPartialOrd {
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn fract(self) -> Self;
-
-    /// Returns the Euclidean division of `self` by `rhs`.
-    ///
-    /// This computes the integer `n` such that `self = n * rhs + self.rem_euclid(rhs)`.
-    /// In other words, the result is `self / rhs` rounded to the integer `n` such that `self >= n * rhs`.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let a = 7.0;
-    /// let b = 4.0;
-    ///
-    /// assert_eq!(a.div_euclid(b), 1.0); // 7 >= 4 * 1.0
-    /// assert_eq!(a.div_euclid(-b), -1.0); // 7 >= -4 * -1.0
-    /// assert_eq!((-a).div_euclid(b), -2.0); // -7 >= 4 * -2.0
-    /// assert_eq!((-a).div_euclid(-b), 2.0); // -7 >= -4 * 2.0
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn div_euclid(self, rhs: Self) -> Self;
-
-    /// Returns the least nonnegative remainder of `self (mod rhs)`.
-    ///
-    /// In particular, the return value `r` satisfied `0.0 <= r < abs(rhs)`.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let a = 7.0;
-    /// let b = 4.0;
-    ///
-    /// assert_eq!(a.rem_euclid(b), 3.0);
-    /// assert_eq!((-a).rem_euclid(b), 1.0);
-    /// assert_eq!(a.rem_euclid(-b), 3.0);
-    /// assert_eq!((-a).rem_euclid(-b), 1.0);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    #[doc(alias = "modulo", alias = "mod")]
-    fn rem_euclid(self, rhs: Self) -> Self;
 
     /// Returns the square root of `self`.
     ///
@@ -652,62 +614,6 @@ pub trait Real: Num + Signed + RealConstants + SimdPartialOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn midpoint(self, other: Self) -> Self;
 
-    /// Returns the minimum of `self` and `other`.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let x: f32 = 3.0;
-    /// let y: f32 = 4.0;
-    ///
-    /// assert_eq!(x.min(y), 3.0);
-    /// assert_eq!(y.min(x), 3.0);
-    /// ```
-    #[must_use = "method returns a new vector and does not mutate the original value"]
-    fn min(self, other: Self) -> Self;
-
-    /// Returns the maximum of `self` and `other`.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let x: f32 = 3.0;
-    /// let y: f32 = 4.0;
-    ///
-    /// assert_eq!(x.max(y), 4.0);
-    /// assert_eq!(y.max(x), 4.0);
-    /// ```
-    #[must_use = "method returns a new vector and does not mutate the original value"]
-    fn max(self, other: Self) -> Self;
-
-    /// Restricts `self` to the range defined by `min` and `max`.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `min > max`.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let x: f32 = 15.0;
-    /// let min: f32 = 0.0;
-    /// let max: f32 = 10.0;
-    ///
-    /// assert_eq!(x.clamp(min, max), 10.0);
-    /// ```
-    ////
-    /// The following panics because `min > max`:
-    ///
-    /// ```should_panic
-    /// let x: f32 = 15.0;
-    /// let min: f32 = 10.0;
-    /// let max: f32 = 0.0;
-    ///
-    /// let _ = x.clamp(min, max);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn clamp(self, min: Self, max: Self) -> Self;
-
     /// Returns a number with the magnitude of `self` and the sign of `sign`.
     ///
     /// # Example
@@ -746,14 +652,6 @@ macro_rules! impl_real {
                 #[inline]
                 fn fract(self) -> Self {
                     self.fract()
-                }
-                #[inline]
-                fn div_euclid(self, rhs: Self) -> Self {
-                    self.div_euclid(rhs)
-                }
-                #[inline]
-                fn rem_euclid(self, rhs: Self) -> Self {
-                    self.rem_euclid(rhs)
                 }
                 #[inline]
                 fn sqrt(self) -> Self {
@@ -862,44 +760,6 @@ macro_rules! impl_real {
                 #[inline]
                 fn midpoint(self, other: Self) -> Self {
                     self.midpoint(other)
-                }
-                /// Returns the minimum of `self` and `other`, ignoring NaN values.
-                ///
-                /// # Example
-                ///
-                /// ```
-                /// let x: f32 = 3.0;
-                /// let y: f32 = 4.0;
-                /// let nan: f32 = f32::NAN;
-                ///
-                /// assert_eq!(x.min(y), 3.0);
-                /// assert_eq!(x.min(nan), 3.0);
-                /// assert_eq!(nan.min(x), 3.0);
-                /// ```
-                #[inline]
-                fn min(self, other: Self) -> Self {
-                    self.min(other)
-                }
-                /// Returns the maximum of `self` and `other`, ignoring NaN values.
-                ///
-                /// # Example
-                ///
-                /// ```
-                /// let x: f32 = 3.0;
-                /// let y: f32 = 4.0;
-                /// let nan: f32 = f32::NAN;
-                ///
-                /// assert_eq!(x.max(y), 4.0);
-                /// assert_eq!(x.max(nan), 3.0);
-                /// assert_eq!(nan.max(x), 3.0);
-                /// ```
-                #[inline]
-                fn max(self, other: Self) -> Self {
-                    self.max(other)
-                }
-                #[inline]
-                fn clamp(self, min: Self, max: Self) -> Self {
-                    self.clamp(min, max)
                 }
                 #[inline]
                 fn copysign(self, sign: Self) -> Self {

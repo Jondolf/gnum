@@ -147,22 +147,6 @@ macro_rules! impl_int_simd {
                     }
                     result
                 }
-                #[inline]
-                fn div_euclid(self, rhs: Self) -> Self {
-                    let mut result = self;
-                    for i in 0..Self::LEN {
-                        result[i] = result[i].div_euclid(rhs[i]);
-                    }
-                    result
-                }
-                #[inline]
-                fn rem_euclid(self, rhs: Self) -> Self {
-                    let mut result = self;
-                    for i in 0..Self::LEN {
-                        result[i] = result[i].rem_euclid(rhs[i]);
-                    }
-                    result
-                }
             }
         )*
     };
@@ -310,22 +294,6 @@ macro_rules! impl_uint_simd {
                     let mut result = self;
                     for i in 0..Self::LEN {
                         result[i] = result[i].isqrt();
-                    }
-                    result
-                }
-                #[inline]
-                fn div_euclid(self, rhs: Self) -> Self {
-                    let mut result = self;
-                    for i in 0..Self::LEN {
-                        result[i] = result[i].div_euclid(rhs[i]);
-                    }
-                    result
-                }
-                #[inline]
-                fn rem_euclid(self, rhs: Self) -> Self {
-                    let mut result = self;
-                    for i in 0..Self::LEN {
-                        result[i] = result[i].rem_euclid(rhs[i]);
                     }
                     result
                 }

@@ -1,7 +1,5 @@
-use crate::traits::{Float, Real, RealConstants, Signed, Zero};
-use core::simd::{
-    LaneCount, Simd, SimdElement, SupportedLaneCount, cmp::SimdPartialOrd, num::SimdFloat,
-};
+use crate::traits::{Float, Real, RealConstants};
+use core::simd::{LaneCount, Simd, SimdElement, SupportedLaneCount, num::SimdFloat};
 use std::simd::StdFloat;
 
 impl<T: SimdElement + RealConstants, const N: usize> RealConstants for Simd<T, N>
@@ -66,22 +64,6 @@ macro_rules! impl_real_simd {
             #[inline]
             fn fract(self) -> Self {
                 StdFloat::fract(self)
-            }
-            #[inline]
-            fn div_euclid(self, rhs: Self) -> Self {
-                let q = Real::trunc(self / rhs);
-                let r = self - q * rhs;
-
-                let mask = r.simd_lt(Self::ZERO);
-                let correction = Signed::signum(rhs);
-                mask.select(q - correction, q)
-            }
-            #[inline]
-            fn rem_euclid(self, rhs: Self) -> Self {
-                let r = self % rhs;
-                let mask = r.simd_lt(Self::ZERO);
-                let adjusted = r + Signed::abs(rhs);
-                mask.select(adjusted, r)
             }
             #[inline]
             fn sqrt(self) -> Self {
@@ -209,18 +191,6 @@ macro_rules! impl_real_simd {
                     result[i] = result[i].midpoint(other[i]);
                 }
                 result
-            }
-            #[inline]
-            fn min(self, other: Self) -> Self {
-                SimdFloat::simd_min(self, other)
-            }
-            #[inline]
-            fn max(self, other: Self) -> Self {
-                SimdFloat::simd_max(self, other)
-            }
-            #[inline]
-            fn clamp(self, min: Self, max: Self) -> Self {
-                SimdFloat::simd_clamp(self, min, max)
             }
             #[inline]
             fn copysign(self, sign: Self) -> Self {
