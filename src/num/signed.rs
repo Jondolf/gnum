@@ -1,6 +1,6 @@
 use crate::{
+    num::{NegOne, Num},
     simd::SimdLike,
-    traits::{NegOne, Num},
 };
 use core::ops::Neg;
 

@@ -1,4 +1,4 @@
-use crate::traits::{Int, Real};
+use crate::num::{Int, Real};
 
 /// A trait for floating-point types representing [`Real`] numbers such as [`f32`] and [`f64`].
 ///

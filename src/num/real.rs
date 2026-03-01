@@ -1,6 +1,6 @@
 use crate::{
-    simd::NumOrd,
-    traits::{Num, Signed},
+    cmp::NumOrd,
+    num::{Num, Signed},
 };
 
 /// Basic mathematical constants for [`Real`] number types such as [`f32`] and [`f64`].

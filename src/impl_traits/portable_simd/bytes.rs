@@ -1,4 +1,4 @@
-use crate::traits::ToBytes;
+use crate::ToBytes;
 use core::simd::{LaneCount, Simd, SupportedLaneCount};
 
 macro_rules! impl_to_bytes_simd {

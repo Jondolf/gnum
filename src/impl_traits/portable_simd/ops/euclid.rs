@@ -1,6 +1,6 @@
 use crate::{
-    simd::NumOrd,
-    traits::{DivEuclid, Real, RemEuclid, Signed, Zero},
+    cmp::NumOrd,
+    num::{DivEuclid, Real, RemEuclid, Signed, Zero},
 };
 use core::simd::{LaneCount, Simd, SupportedLaneCount};
 

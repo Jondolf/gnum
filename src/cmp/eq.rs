@@ -1,5 +1,3 @@
-use core::simd::{LaneCount, MaskElement, SimdElement, SupportedLaneCount};
-
 use crate::simd::SimdLike;
 
 /// Element-wise equality and inequality comparisons for numeric types.
@@ -38,37 +36,3 @@ macro_rules! impl_num_eq_scalar {
 impl_num_eq_scalar!(u8, u16, u32, u64, usize);
 impl_num_eq_scalar!(i8, i16, i32, i64, isize);
 impl_num_eq_scalar!(f32, f64);
-
-impl<T: SimdElement, const N: usize> NumEq for core::simd::Simd<T, N>
-where
-    Self: SimdLike<Bool = <Self as core::simd::cmp::SimdPartialEq>::Mask>
-        + core::simd::cmp::SimdPartialEq,
-    LaneCount<N>: SupportedLaneCount,
-{
-    #[inline]
-    fn num_eq(self, other: Self) -> Self::Bool {
-        core::simd::cmp::SimdPartialEq::simd_eq(self, other)
-    }
-
-    #[inline]
-    fn num_ne(self, other: Self) -> Self::Bool {
-        core::simd::cmp::SimdPartialEq::simd_ne(self, other)
-    }
-}
-
-impl<T: MaskElement, const N: usize> NumEq for core::simd::Mask<T, N>
-where
-    Self: SimdLike<Bool = <Self as core::simd::cmp::SimdPartialEq>::Mask>
-        + core::simd::cmp::SimdPartialEq,
-    LaneCount<N>: SupportedLaneCount,
-{
-    #[inline]
-    fn num_eq(self, other: Self) -> Self::Bool {
-        core::simd::cmp::SimdPartialEq::simd_eq(self, other)
-    }
-
-    #[inline]
-    fn num_ne(self, other: Self) -> Self::Bool {
-        core::simd::cmp::SimdPartialEq::simd_ne(self, other)
-    }
-}

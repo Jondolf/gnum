@@ -1,4 +1,4 @@
-use crate::traits::Int;
+use crate::num::Int;
 use std::simd::{
     LaneCount, Simd, SupportedLaneCount,
     num::{SimdInt, SimdUint},

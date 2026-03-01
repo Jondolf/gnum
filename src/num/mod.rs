@@ -1,7 +1,18 @@
-use crate::{
-    simd::SimdLike,
-    traits::{Float, Int, Real},
-};
+//! Traits and types for generic numerics.
+
+mod float;
+mod int;
+mod ops;
+mod real;
+mod signed;
+
+pub use float::Float;
+pub use int::Int;
+pub use ops::*;
+pub use real::{Real, RealConstants};
+pub use signed::Signed;
+
+use crate::simd::SimdLike;
 use core::ops::*;
 
 /// Base trait for numeric types.

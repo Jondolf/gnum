@@ -1,4 +1,4 @@
-use crate::{simd::NumOrd, traits::Num};
+use crate::{cmp::NumOrd, num::Num};
 use core::ops::*;
 
 /// A trait for integer types such as [`i32`] and [`u64`].

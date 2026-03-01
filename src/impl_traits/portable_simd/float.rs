@@ -1,4 +1,4 @@
-use crate::traits::{Float, Real, RealConstants};
+use crate::num::{Float, Real, RealConstants};
 use core::simd::{LaneCount, Simd, SimdElement, SupportedLaneCount, num::SimdFloat};
 use std::simd::StdFloat;
 
