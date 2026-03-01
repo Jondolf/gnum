@@ -6,6 +6,7 @@ impl<T: SimdElement + RealConstants, const N: usize> RealConstants for Simd<T, N
 where
     LaneCount<N>: SupportedLaneCount,
 {
+    const HALF: Self = Self::splat(T::HALF);
     const E: Self = Self::splat(T::E);
     const FRAC_1_PI: Self = Self::splat(T::FRAC_1_PI);
     const FRAC_1_SQRT_2: Self = Self::splat(T::FRAC_1_SQRT_2);

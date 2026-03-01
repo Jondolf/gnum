@@ -1,5 +1,5 @@
 use crate::{
-    simd::SimdValue,
+    simd::SimdLike,
     traits::{Float, Int, Real},
 };
 use core::ops::*;
@@ -14,7 +14,7 @@ use core::ops::*;
 ///
 /// [`Int`]: crate::traits::Int
 /// [`Float`]: crate::traits::Float
-pub trait Num: Copy + Zero + One + NumOps + SimdValue {
+pub trait Num: Copy + Zero + One + NumOps + SimdLike {
     /// The smallest finite value that can be represented by this type.
     const MIN: Self;
     /// The largest finite value that can be represented by this type.

@@ -5,6 +5,8 @@ use crate::{
 
 /// Basic mathematical constants for [`Real`] number types such as [`f32`] and [`f64`].
 pub trait RealConstants {
+    /// 1/2
+    const HALF: Self;
     /// Euler's number (e)
     const E: Self;
     /// 1/π
@@ -68,6 +70,7 @@ macro_rules! impl_real_constants {
     ($($real:tt),*) => {
         $(
             impl RealConstants for $real {
+                const HALF: Self = 0.5;
                 const E: Self = core::$real::consts::E;
                 const FRAC_1_PI: Self = core::$real::consts::FRAC_1_PI;
                 const FRAC_1_SQRT_2: Self = core::$real::consts::FRAC_1_SQRT_2;

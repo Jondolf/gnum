@@ -1,25 +1,28 @@
-use crate::simd::{Select, SimdBool};
+use crate::simd::{MaskLike, Select};
 use core::simd::{LaneCount, MaskElement, SimdElement, SupportedLaneCount};
 
 /// Base trait for SIMD-like types.
 ///
-/// This trait is implemented by both scalar types and SIMD vector types, and abstracts the common
-/// behavior of these types. It is designed to be used in generic code that can work
-/// with both scalar and SIMD types in an AoSoA setting.
-pub trait SimdValue: Sized {
+/// This trait is implemented by both scalar types and SIMD vector types. It is designed to be used
+/// in generic code that can work with both scalar and SIMD types in an [AoSoA] setting.
+///
+/// [AoSoA]: https://en.wikipedia.org/wiki/AoS_and_SoA
+pub trait SimdLike: Sized {
     /// The number of lanes of this SIMD value.
     const LANES: usize;
 
     /// The type of the elements of each lane of this SIMD value.
-    type Element: SimdValue<Element = Self::Element, Bool = bool>;
+    type Element: SimdLike<Element = Self::Element, Bool = bool>;
 
     /// Type of the result of comparing two SIMD values like `self`.
-    type Bool: SimdBool + Select<Self>;
+    type Bool: MaskLike + Select<Self>;
 
     /// Initializes an SIMD value with each lanes set to `val`.
     fn splat(val: Self::Element) -> Self;
 
     /// Extracts the i-th lane of `self`.
+    ///
+    /// # Panics
     ///
     /// Panics if `i >= Self::LANES`.
     fn extract(&self, i: usize) -> Self::Element;
@@ -93,7 +96,7 @@ pub trait SimdValue: Sized {
 macro_rules! impl_simd_value_scalar {
     ($($t:ty),*) => {
         $(
-            impl SimdValue for $t {
+            impl SimdLike for $t {
                 const LANES: usize = 1;
                 type Element = Self;
                 type Bool = bool;
@@ -135,7 +138,7 @@ impl_simd_value_scalar!(u8, u16, u32, u64, usize);
 impl_simd_value_scalar!(i8, i16, i32, i64, isize);
 impl_simd_value_scalar!(f32, f64);
 
-impl SimdValue for bool {
+impl SimdLike for bool {
     const LANES: usize = 1;
     type Element = Self;
     type Bool = Self;
@@ -170,7 +173,7 @@ impl SimdValue for bool {
     }
 }
 
-impl<T: SimdElement + SimdValue<Element = T, Bool = bool>, const N: usize> SimdValue
+impl<T: SimdElement + SimdLike<Element = T, Bool = bool>, const N: usize> SimdLike
     for core::simd::Simd<T, N>
 where
     LaneCount<N>: SupportedLaneCount,
@@ -205,7 +208,7 @@ where
     }
 }
 
-impl<T: MaskElement + SimdValue<Element = T, Bool = bool>, const N: usize> SimdValue
+impl<T: MaskElement + SimdLike<Element = T, Bool = bool>, const N: usize> SimdLike
     for core::simd::Mask<T, N>
 where
     LaneCount<N>: SupportedLaneCount,

@@ -1,11 +1,11 @@
 use crate::{
-    simd::SimdValue,
+    simd::SimdLike,
     traits::{NegOne, Num},
 };
 use core::ops::Neg;
 
 /// A trait for signed types such as [`i32`] and [`f32`].
-pub trait Signed: Num + NegOne + SimdValue + Neg<Output = Self> {
+pub trait Signed: Num + NegOne + SimdLike + Neg<Output = Self> {
     /// The corresponding unsigned type for this signed type.
     type Unsigned: Num;
 

@@ -1,13 +1,13 @@
 use core::simd::{LaneCount, MaskElement, SimdElement, SupportedLaneCount};
 
-use crate::simd::SimdValue;
+use crate::simd::SimdLike;
 
 /// Element-wise equality and inequality comparisons for numeric types.
 ///
 /// This is implemented for both scalar and SIMD types, so that
 /// the same interface can be used for both. For scalar types,
 /// the mask type is always [`bool`].
-pub trait NumEq: SimdValue {
+pub trait NumEq: SimdLike {
     /// Test if each element is equal to the corresponding element in `other`.
     #[must_use = "method returns a new mask and does not mutate the original value"]
     fn num_eq(self, other: Self) -> Self::Bool;
@@ -41,7 +41,7 @@ impl_num_eq_scalar!(f32, f64);
 
 impl<T: SimdElement, const N: usize> NumEq for core::simd::Simd<T, N>
 where
-    Self: SimdValue<Bool = <Self as core::simd::cmp::SimdPartialEq>::Mask>
+    Self: SimdLike<Bool = <Self as core::simd::cmp::SimdPartialEq>::Mask>
         + core::simd::cmp::SimdPartialEq,
     LaneCount<N>: SupportedLaneCount,
 {
@@ -58,7 +58,7 @@ where
 
 impl<T: MaskElement, const N: usize> NumEq for core::simd::Mask<T, N>
 where
-    Self: SimdValue<Bool = <Self as core::simd::cmp::SimdPartialEq>::Mask>
+    Self: SimdLike<Bool = <Self as core::simd::cmp::SimdPartialEq>::Mask>
         + core::simd::cmp::SimdPartialEq,
     LaneCount<N>: SupportedLaneCount,
 {
