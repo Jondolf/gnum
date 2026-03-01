@@ -2,12 +2,14 @@
 
 mod float;
 mod int;
+mod markers;
 mod ops;
 mod real;
 mod signed;
 
 pub use float::Float;
 pub use int::Int;
+pub use markers::*;
 pub use ops::*;
 pub use real::{Real, RealConstants};
 pub use signed::Signed;
@@ -147,31 +149,3 @@ pub trait RefNumOps<Rhs = Self, Output = Self>: for<'a> NumOps<&'a Rhs, Output> 
 
 impl<T> NumRefOps for T where T: NumOps + for<'a> NumOps<&'a T> {}
 impl<T> RefNumOps for T where T: for<'a> NumOps<&'a T> {}
-
-/// A marker trait for scalar [`Real`] types.
-///
-/// This trait is implemented by all scalar types that implement [`Real`] with `Bool = bool`.
-/// It allows easily constraining generic parameters to support only scalar types,
-/// allowing the use of comparison operators and other methods that involve `bool` values,
-/// which may not be supported by SIMD vector types.
-pub trait ScalarReal: Real<Bool = bool> + PartialEq + PartialOrd {}
-
-/// A marker trait for scalar [`Float`] types.
-///
-/// This trait is implemented by all scalar types that implement [`Float`] with `Bool = bool`.
-/// It allows easily constraining generic parameters to support only scalar types,
-/// allowing the use of comparison operators and other methods that involve `bool` values,
-/// which may not be supported by SIMD vector types.
-pub trait ScalarFloat: Float<Bool = bool> + PartialEq + PartialOrd {}
-
-/// A marker trait for scalar [`Int`] types.
-///
-/// This trait is implemented by all scalar types that implement [`Int`] with `Bool = bool`.
-/// It allows easily constraining generic parameters to support only scalar types,
-/// allowing the use of comparison operators and other methods that involve `bool` values,
-/// which may not be supported by SIMD vector types.
-pub trait ScalarInt: Int<Bool = bool> + PartialEq + PartialOrd {}
-
-impl<T: Real<Bool = bool> + PartialEq + PartialOrd> ScalarReal for T {}
-impl<T: Float<Bool = bool> + PartialEq + PartialOrd> ScalarFloat for T {}
-impl<T: Int<Bool = bool> + PartialEq + PartialOrd> ScalarInt for T {}
