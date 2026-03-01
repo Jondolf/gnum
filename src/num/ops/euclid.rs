@@ -2,6 +2,7 @@
 ///
 /// [Euclidean division]: https://en.wikipedia.org/wiki/Euclidean_division
 pub trait DivEuclid<Rhs = Self> {
+    /// The resulting type after applying the `div_euclid` operation.
     type Output;
 
     /// Performs the `div_euclid` operation, which returns the quotient
@@ -23,6 +24,7 @@ pub trait DivEuclid<Rhs = Self> {
 ///
 /// [Euclidean remainder]: https://en.wikipedia.org/wiki/Euclidean_division
 pub trait RemEuclid<Rhs = Self> {
+    /// The resulting type after applying the `rem_euclid` operation.
     type Output;
 
     /// Performs the `rem_euclid` operation, which returns the remainder

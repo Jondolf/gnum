@@ -50,6 +50,7 @@ pub trait RealConstants {
     /// The Euler-Mascheroni constant (γ)
     #[cfg(feature = "more_float_constants")]
     const EGAMMA: Self;
+    /// 1/sqrt(3)
     #[cfg(feature = "more_float_constants")]
     const FRAC_1_SQRT_3: Self;
     /// 1/sqrt(2π)
