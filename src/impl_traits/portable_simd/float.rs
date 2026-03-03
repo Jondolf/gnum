@@ -47,6 +47,14 @@ macro_rules! impl_real_simd {
             LaneCount<N>: SupportedLaneCount,
         {
             #[inline]
+            fn from_f32(n: f32) -> Self {
+                Self::splat(n as $real)
+            }
+            #[inline]
+            fn from_f64(n: f64) -> Self {
+                Self::splat(n as $real)
+            }
+            #[inline]
             fn floor(self) -> Self {
                 StdFloat::floor(self)
             }

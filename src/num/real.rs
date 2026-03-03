@@ -114,6 +114,14 @@ impl_real_constants!(f32, f64);
 ///
 /// [real numbers]: https://en.wikipedia.org/wiki/Real_number
 pub trait Real: Num + Signed + RealConstants + NumOrd {
+    /// Creates a real number from an [`f32`] value.
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn from_f32(n: f32) -> Self;
+
+    /// Creates a real number from an [`f64`] value.
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn from_f64(n: f64) -> Self;
+
     /// Returns the largest integer less than or equal to `self`.
     ///
     /// # Example
@@ -637,6 +645,14 @@ macro_rules! impl_real {
     ($($float:ty),*) => {
         $(
             impl Real for $float {
+                #[inline]
+                fn from_f32(n: f32) -> Self {
+                    n as Self
+                }
+                #[inline]
+                fn from_f64(n: f64) -> Self {
+                    n as Self
+                }
                 #[inline]
                 fn floor(self) -> Self {
                     self.floor()
