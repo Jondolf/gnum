@@ -3,17 +3,14 @@ use crate::{
     num::{Signed, Zero},
 };
 use core::simd::{
-    LaneCount, Simd, SupportedLaneCount,
+    Simd,
     num::{SimdFloat, SimdInt},
 };
 
 macro_rules! impl_signed_simd {
     ($($int:ty => $uint:ty),*) => {
         $(
-            impl<const N: usize> Signed for Simd<$int, N>
-            where
-                LaneCount<N>: SupportedLaneCount,
-            {
+            impl<const N: usize> Signed for Simd<$int, N> {
                 type Unsigned = Simd<$uint, N>;
 
                 #[inline]
@@ -46,10 +43,7 @@ impl_signed_simd!(i8 => u8, i16 => u16, i32 => u32, i64 => u64, isize => usize);
 macro_rules! impl_signed_float_simd {
     ($($float:ty),*) => {
         $(
-            impl<const N: usize> Signed for Simd<$float, N>
-            where
-                LaneCount<N>: SupportedLaneCount,
-            {
+            impl<const N: usize> Signed for Simd<$float, N> {
                 type Unsigned = Self;
 
                 #[inline]

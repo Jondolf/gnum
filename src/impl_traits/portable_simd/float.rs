@@ -1,13 +1,11 @@
 use crate::num::{Float, Real, RealConstants};
-use core::simd::{LaneCount, Simd, SimdElement, SupportedLaneCount, num::SimdFloat};
+use core::simd::{Simd, SimdElement, num::SimdFloat};
 use std::simd::StdFloat;
 
-impl<T: SimdElement + RealConstants, const N: usize> RealConstants for Simd<T, N>
-where
-    LaneCount<N>: SupportedLaneCount,
-{
+impl<T: SimdElement + RealConstants, const N: usize> RealConstants for Simd<T, N> {
     const HALF: Self = Self::splat(T::HALF);
     const E: Self = Self::splat(T::E);
+    const EULER_GAMMA: Self = Self::splat(T::EULER_GAMMA);
     const FRAC_1_PI: Self = Self::splat(T::FRAC_1_PI);
     const FRAC_1_SQRT_2: Self = Self::splat(T::FRAC_1_SQRT_2);
     const FRAC_2_PI: Self = Self::splat(T::FRAC_2_PI);
@@ -17,6 +15,7 @@ where
     const FRAC_PI_4: Self = Self::splat(T::FRAC_PI_4);
     const FRAC_PI_6: Self = Self::splat(T::FRAC_PI_6);
     const FRAC_PI_8: Self = Self::splat(T::FRAC_PI_8);
+    const GOLDEN_RATIO: Self = Self::splat(T::GOLDEN_RATIO);
     const LN_2: Self = Self::splat(T::LN_2);
     const LN_10: Self = Self::splat(T::LN_10);
     const LOG2_10: Self = Self::splat(T::LOG2_10);
@@ -26,26 +25,11 @@ where
     const PI: Self = Self::splat(T::PI);
     const SQRT_2: Self = Self::splat(T::SQRT_2);
     const TAU: Self = Self::splat(T::TAU);
-    #[cfg(feature = "more_float_constants")]
-    const EGAMMA: Self = Self::splat(T::EGAMMA);
-    #[cfg(feature = "more_float_constants")]
-    const FRAC_1_SQRT_3: Self = Self::splat(T::FRAC_1_SQRT_3);
-    #[cfg(feature = "more_float_constants")]
-    const FRAC_1_SQRT_2PI: Self = Self::splat(T::FRAC_1_SQRT_2PI);
-    #[cfg(feature = "more_float_constants")]
-    const FRAC_1_SQRT_PI: Self = Self::splat(T::FRAC_1_SQRT_PI);
-    #[cfg(feature = "more_float_constants")]
-    const PHI: Self = Self::splat(T::PHI);
-    #[cfg(feature = "more_float_constants")]
-    const SQRT_3: Self = Self::splat(T::SQRT_3);
 }
 
 macro_rules! impl_real_simd {
     ($real:tt, $int:ty) => {
-        impl<const N: usize> Real for Simd<$real, N>
-        where
-            LaneCount<N>: SupportedLaneCount,
-        {
+        impl<const N: usize> Real for Simd<$real, N> {
             #[inline]
             fn from_f32(n: f32) -> Self {
                 Self::splat(n as $real)
@@ -214,12 +198,7 @@ impl_real_simd!(f64, i64);
 
 macro_rules! impl_float_simd {
     ($float:tt, $int:ty) => {
-        impl<const N: usize> Float for Simd<$float, N>
-        where
-            LaneCount<N>: SupportedLaneCount,
-        {
-            type Int = Simd<i32, N>;
-
+        impl<const N: usize> Float for Simd<$float, N> {
             const RADIX: u32 = $float::RADIX;
             const MANTISSA_DIGITS: u32 = $float::MANTISSA_DIGITS;
             const DIGITS: u32 = $float::DIGITS;
@@ -236,14 +215,6 @@ macro_rules! impl_float_simd {
             #[inline]
             fn mul_add(self, a: Self, b: Self) -> Self {
                 StdFloat::mul_add(self, a, b)
-            }
-            #[inline]
-            fn powi(self, n: Self::Int) -> Self {
-                let mut result = self;
-                for i in 0..Self::LEN {
-                    result[i] = result[i].powi(n[i]);
-                }
-                result
             }
             #[inline]
             fn powf(self, n: Self) -> Self {

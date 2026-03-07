@@ -1,10 +1,8 @@
 use crate::simd::SimdLike;
-use core::simd::{LaneCount, MaskElement, SimdElement, SupportedLaneCount};
+use core::simd::{MaskElement, SimdElement};
 
 impl<T: SimdElement + SimdLike<Element = T, Bool = bool>, const N: usize> SimdLike
     for core::simd::Simd<T, N>
-where
-    LaneCount<N>: SupportedLaneCount,
 {
     const LANES: usize = N;
     type Element = T;
@@ -38,8 +36,6 @@ where
 
 impl<T: MaskElement + SimdLike<Element = T, Bool = bool>, const N: usize> SimdLike
     for core::simd::Mask<T, N>
-where
-    LaneCount<N>: SupportedLaneCount,
 {
     const LANES: usize = N;
     type Element = bool;

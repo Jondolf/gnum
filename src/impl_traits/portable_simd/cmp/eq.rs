@@ -1,11 +1,10 @@
 use crate::{cmp::NumEq, simd::SimdLike};
-use core::simd::{LaneCount, MaskElement, SimdElement, SupportedLaneCount};
+use core::simd::{MaskElement, SimdElement};
 
 impl<T: SimdElement, const N: usize> NumEq for core::simd::Simd<T, N>
 where
     Self: SimdLike<Bool = <Self as core::simd::cmp::SimdPartialEq>::Mask>
         + core::simd::cmp::SimdPartialEq,
-    LaneCount<N>: SupportedLaneCount,
 {
     #[inline]
     fn num_eq(self, other: Self) -> Self::Bool {
@@ -22,7 +21,6 @@ impl<T: MaskElement, const N: usize> NumEq for core::simd::Mask<T, N>
 where
     Self: SimdLike<Bool = <Self as core::simd::cmp::SimdPartialEq>::Mask>
         + core::simd::cmp::SimdPartialEq,
-    LaneCount<N>: SupportedLaneCount,
 {
     #[inline]
     fn num_eq(self, other: Self) -> Self::Bool {

@@ -1,42 +1,37 @@
 use crate::{
     cmp::NumOrd,
     num::{DivEuclid, Real, RemEuclid, Signed, Zero},
+    simd::Select,
 };
-use core::simd::{LaneCount, Simd, SupportedLaneCount};
+use core::simd::Simd;
 
 macro_rules! impl_div_rem_euclid_int {
     ($($t:ty),*) => {
         $(
-            impl<const N: usize> DivEuclid for Simd<$t, N>
-            where
-                LaneCount<N>: SupportedLaneCount,
-            {
+            impl<const N: usize> DivEuclid for Simd<$t, N> {
                 type Output = Self;
 
                 #[inline]
                 fn div_euclid(self, rhs: Self) -> Self {
-                // TODO: Do this properly
-                let mut result = self;
-                for i in 0..Self::LEN {
-                    result[i] = result[i].div_euclid(rhs[i]);
-                }
-                result
+                    // TODO: Do this properly
+                    let mut result = self;
+                    for i in 0..Self::LEN {
+                        result[i] = result[i].div_euclid(rhs[i]);
+                    }
+                    result
                 }
             }
 
-            impl<const N: usize> RemEuclid for Simd<$t, N>
-            where
-                LaneCount<N>: SupportedLaneCount,
-            {
+            impl<const N: usize> RemEuclid for Simd<$t, N> {
                 type Output = Self;
 
                 #[inline]
                 fn rem_euclid(self, rhs: Self) -> Self {
-                let mut result = self;
-                for i in 0..Self::LEN {
-                    result[i] = result[i].rem_euclid(rhs[i]);
-                }
-                result
+                    let mut result = self;
+                    for i in 0..Self::LEN {
+                        result[i] = result[i].rem_euclid(rhs[i]);
+                    }
+                    result
                 }
             }
         )*
@@ -49,10 +44,7 @@ impl_div_rem_euclid_int!(u8, u16, u32, u64, usize);
 macro_rules! impl_div_rem_euclid_real_simd {
     ($($t:ty),*) => {
         $(
-            impl<const N: usize> DivEuclid for Simd<$t, N>
-            where
-                LaneCount<N>: SupportedLaneCount,
-            {
+            impl<const N: usize> DivEuclid for Simd<$t, N> {
                 type Output = Self;
 
                 #[inline]
@@ -66,10 +58,7 @@ macro_rules! impl_div_rem_euclid_real_simd {
                 }
             }
 
-            impl<const N: usize> RemEuclid for Simd<$t, N>
-            where
-                LaneCount<N>: SupportedLaneCount,
-            {
+            impl<const N: usize> RemEuclid for Simd<$t, N> {
                 type Output = Self;
 
                 #[inline]

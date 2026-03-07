@@ -1,5 +1,5 @@
 use crate::ToBytes;
-use core::simd::{LaneCount, Simd, SupportedLaneCount};
+use core::simd::Simd;
 
 macro_rules! impl_to_bytes_simd {
     ($($t:ty),*) => {
@@ -7,7 +7,6 @@ macro_rules! impl_to_bytes_simd {
             impl<const N: usize> ToBytes for Simd<$t, N>
             where
                 Self: core::simd::ToBytes,
-                LaneCount<N>: SupportedLaneCount,
             {
                 type Bytes = <Self as core::simd::ToBytes>::Bytes;
 

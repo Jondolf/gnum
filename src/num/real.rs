@@ -9,6 +9,8 @@ pub trait RealConstants {
     const HALF: Self;
     /// Euler's number (e)
     const E: Self;
+    /// The Euler-Mascheroni constant (γ)
+    const EULER_GAMMA: Self;
     /// 1/π
     const FRAC_1_PI: Self;
     /// 1/sqrt(2)
@@ -27,6 +29,8 @@ pub trait RealConstants {
     const FRAC_PI_6: Self;
     /// π/8
     const FRAC_PI_8: Self;
+    /// The golden ratio (φ)
+    const GOLDEN_RATIO: Self;
     /// ln(2)
     const LN_2: Self;
     /// ln(10)
@@ -47,24 +51,6 @@ pub trait RealConstants {
     ///
     /// Equal to 2π.
     const TAU: Self;
-    /// The Euler-Mascheroni constant (γ)
-    #[cfg(feature = "more_float_constants")]
-    const EGAMMA: Self;
-    /// 1/sqrt(3)
-    #[cfg(feature = "more_float_constants")]
-    const FRAC_1_SQRT_3: Self;
-    /// 1/sqrt(2π)
-    #[cfg(feature = "more_float_constants")]
-    const FRAC_1_SQRT_2PI: Self;
-    /// 1/sqrt(π)
-    #[cfg(feature = "more_float_constants")]
-    const FRAC_1_SQRT_PI: Self;
-    /// The golden ratio (φ)
-    #[cfg(feature = "more_float_constants")]
-    const PHI: Self;
-    /// sqrt(3)
-    #[cfg(feature = "more_float_constants")]
-    const SQRT_3: Self;
 }
 
 macro_rules! impl_real_constants {
@@ -73,6 +59,7 @@ macro_rules! impl_real_constants {
             impl RealConstants for $real {
                 const HALF: Self = 0.5;
                 const E: Self = core::$real::consts::E;
+                const EULER_GAMMA: Self = core::$real::consts::EULER_GAMMA;
                 const FRAC_1_PI: Self = core::$real::consts::FRAC_1_PI;
                 const FRAC_1_SQRT_2: Self = core::$real::consts::FRAC_1_SQRT_2;
                 const FRAC_2_PI: Self = core::$real::consts::FRAC_2_PI;
@@ -82,6 +69,7 @@ macro_rules! impl_real_constants {
                 const FRAC_PI_4: Self = core::$real::consts::FRAC_PI_4;
                 const FRAC_PI_6: Self = core::$real::consts::FRAC_PI_6;
                 const FRAC_PI_8: Self = core::$real::consts::FRAC_PI_8;
+                const GOLDEN_RATIO: Self = core::$real::consts::GOLDEN_RATIO;
                 const LN_2: Self = core::$real::consts::LN_2;
                 const LN_10: Self = core::$real::consts::LN_10;
                 const LOG2_10: Self = core::$real::consts::LOG2_10;
@@ -91,18 +79,6 @@ macro_rules! impl_real_constants {
                 const PI: Self = core::$real::consts::PI;
                 const SQRT_2: Self = core::$real::consts::SQRT_2;
                 const TAU: Self = core::$real::consts::TAU;
-                #[cfg(feature = "more_float_constants")]
-                const EGAMMA: Self = core::$real::consts::EGAMMA;
-                #[cfg(feature = "more_float_constants")]
-                const FRAC_1_SQRT_3: Self = core::$real::consts::FRAC_1_SQRT_3;
-                #[cfg(feature = "more_float_constants")]
-                const FRAC_1_SQRT_2PI: Self = core::$real::consts::FRAC_1_SQRT_2PI;
-                #[cfg(feature = "more_float_constants")]
-                const FRAC_1_SQRT_PI: Self = core::$real::consts::FRAC_1_SQRT_PI;
-                #[cfg(feature = "more_float_constants")]
-                const PHI: Self = core::$real::consts::PHI;
-                #[cfg(feature = "more_float_constants")]
-                const SQRT_3: Self = core::$real::consts::SQRT_3;
             }
         )*
     };

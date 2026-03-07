@@ -1,10 +1,10 @@
 use crate::num::{NegOne, Num, One, Zero};
-use core::simd::{LaneCount, Simd, SupportedLaneCount};
+use core::simd::Simd;
 
 macro_rules! impl_num_simd {
     ($($t:ty),*) => {
         $(
-            impl<const N: usize> Num for Simd<$t, N> where LaneCount<N>: SupportedLaneCount {
+            impl<const N: usize> Num for Simd<$t, N> {
                 const MIN: Self = Self::MIN;
                 const MAX: Self = Self::MAX;
             }
@@ -19,17 +19,11 @@ impl_num_simd!(f32, f64);
 macro_rules! impl_zero_one_simd {
     ($($t:ty),*) => {
         $(
-            impl<const N: usize> Zero for Simd<$t, N>
-            where
-                LaneCount<N>: SupportedLaneCount,
-            {
+            impl<const N: usize> Zero for Simd<$t, N> {
                 const ZERO: Self = Self::splat(0 as $t);
             }
 
-            impl<const N: usize> One for Simd<$t, N>
-            where
-                LaneCount<N>: SupportedLaneCount,
-            {
+            impl<const N: usize> One for Simd<$t, N> {
                 const ONE: Self = Self::splat(1 as $t);
             }
         )*
@@ -43,10 +37,7 @@ impl_zero_one_simd!(f32, f64);
 macro_rules! impl_neg_one_simd {
     ($($t:ty),*) => {
         $(
-            impl<const N: usize> NegOne for Simd<$t, N>
-            where
-                LaneCount<N>: SupportedLaneCount,
-            {
+            impl<const N: usize> NegOne for Simd<$t, N> {
                 const NEG_ONE: Self = Self::splat(-1 as $t);
             }
         )*

@@ -1,13 +1,10 @@
 use crate::cmp::NumOrd;
-use core::simd::{LaneCount, Mask, Simd, SupportedLaneCount, num::SimdFloat};
+use core::simd::{Mask, Simd, num::SimdFloat};
 
 macro_rules! impl_num_ord_simd_int {
     ($simd:ident, $($int:ty),*) => {
         $(
-             impl<const N: usize> NumOrd for $simd<$int, N>
-             where
-                 LaneCount<N>: SupportedLaneCount,
-             {
+             impl<const N: usize> NumOrd for $simd<$int, N> {
                  #[inline]
                  fn num_lt(self, other: Self) -> Self::Bool {
                      core::simd::cmp::SimdPartialOrd::simd_lt(self, other)
@@ -54,10 +51,7 @@ impl_num_ord_simd_int!(Mask, i8, i16, i32, i64, isize);
 macro_rules! impl_num_ord_simd_float {
     ($simd:ident, $($float:ty),*) => {
         $(
-             impl<const N: usize> NumOrd for $simd<$float, N>
-             where
-                 LaneCount<N>: SupportedLaneCount,
-             {
+             impl<const N: usize> NumOrd for $simd<$float, N> {
                  #[inline]
                  fn num_lt(self, other: Self) -> Self::Bool {
                      core::simd::cmp::SimdPartialOrd::simd_lt(self, other)

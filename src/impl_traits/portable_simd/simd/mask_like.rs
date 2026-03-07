@@ -1,10 +1,7 @@
 use crate::simd::MaskLike;
-use core::simd::{LaneCount, MaskElement, SupportedLaneCount};
+use core::simd::MaskElement;
 
-impl<T: MaskElement, const N: usize> MaskLike for core::simd::Mask<T, N>
-where
-    LaneCount<N>: SupportedLaneCount,
-{
+impl<T: MaskElement, const N: usize> MaskLike for core::simd::Mask<T, N> {
     const TRUE: Self = Self::TRUE;
     const FALSE: Self = Self::FALSE;
 

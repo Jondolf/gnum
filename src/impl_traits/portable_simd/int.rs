@@ -1,16 +1,13 @@
 use crate::num::Int;
 use std::simd::{
-    LaneCount, Simd, SupportedLaneCount,
+    Simd,
     num::{SimdInt, SimdUint},
 };
 
 macro_rules! impl_int_simd {
     ($($int:ty => $uint:ty),*) => {
         $(
-            impl<const N: usize> Int for Simd<$int, N>
-            where
-                LaneCount<N>: SupportedLaneCount,
-            {
+            impl<const N: usize> Int for Simd<$int, N> {
                 type Unsigned = Simd<$uint, N>;
 
                 const BITS: u32 = <$int>::BITS;
@@ -157,10 +154,7 @@ impl_int_simd!(i8 => u8, i16 => u16, i32 => u32, i64 => u64, isize => usize);
 macro_rules! impl_uint_simd {
     ($($uint:ty),*) => {
         $(
-            impl<const N: usize> Int for Simd<$uint, N>
-            where
-                LaneCount<N>: SupportedLaneCount,
-            {
+            impl<const N: usize> Int for Simd<$uint, N> {
                 type Unsigned = Self;
 
                 const BITS: u32 = <$uint>::BITS;

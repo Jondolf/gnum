@@ -1,14 +1,9 @@
-use crate::num::{Int, Real};
+use crate::num::Real;
 
 /// A trait for floating-point types representing [`Real`] numbers such as [`f32`] and [`f64`].
 ///
 /// Floating-point types are expected to conform to the IEEE 754-2008 standard.
 pub trait Float: Real {
-    /// The integer type associated with this floating-point type.
-    ///
-    /// Used for methods that require an integer argument such as [`powi`](Self::powi).
-    type Int: Int;
-
     /// The radix or base of the internal representation of the floating-point type.
     const RADIX: u32;
 
@@ -117,6 +112,7 @@ pub trait Float: Real {
     #[doc(alias = "fmaf", alias = "fusedMultiplyAdd")]
     fn mul_add(self, a: Self, b: Self) -> Self;
 
+    /* TODO: Some number backends might not support integers properly
     /// Returns `self` raised to the integer power of `n`.
     ///
     /// Using this function is generally faster than using [`powf`](Self::powf).
@@ -135,6 +131,7 @@ pub trait Float: Real {
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn powi(self, n: Self::Int) -> Self;
+    */
 
     /// Returns `self` raised to the power of `n`.
     ///
@@ -354,8 +351,6 @@ macro_rules! impl_float {
     ($($float:ty),*) => {
         $(
             impl Float for $float {
-                type Int = i32;
-
                 const RADIX: u32 = <$float>::RADIX;
                 const MANTISSA_DIGITS: u32 = <$float>::MANTISSA_DIGITS;
                 const DIGITS: u32 = <$float>::DIGITS;
@@ -372,10 +367,6 @@ macro_rules! impl_float {
                 #[inline]
                 fn mul_add(self, a: Self, b: Self) -> Self {
                     self.mul_add(a, b)
-                }
-                #[inline]
-                fn powi(self, n: i32) -> Self {
-                    self.powi(n)
                 }
                 #[inline]
                 fn powf(self, n: Self) -> Self {

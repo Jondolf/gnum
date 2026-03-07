@@ -6,16 +6,10 @@ readme = "README.md"
 
 [features]
 # Experimental APIs
-more_float_constants = []
-float_algebraic = []
 portable_simd = []
 
 [dependencies]
 
 [dev-dependencies]
 # For benchmarking and testing
-gnum = { path = "./", features = [
-    "more_float_constants",
-    "float_algebraic",
-    "portable_simd",
-] }
+gnum = { path = "./", features = ["portable_simd"] }
