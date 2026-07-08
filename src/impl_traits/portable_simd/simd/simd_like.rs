@@ -1,8 +1,12 @@
-use crate::simd::SimdLike;
-use core::simd::{MaskElement, SimdElement};
+use crate::{
+    num::{Int, Signed},
+    simd::SimdLike,
+};
+use core::simd::{MaskElement, Simd, SimdElement};
 
-impl<T: SimdElement + SimdLike<Element = T, Bool = bool>, const N: usize> SimdLike
-    for core::simd::Simd<T, N>
+impl<T: SimdElement + SimdLike<Element = T, Bool = bool>, const N: usize> SimdLike for Simd<T, N>
+where
+    Simd<T::Mask, N>: Int + Signed,
 {
     const LANES: usize = N;
     type Element = T;
@@ -24,26 +28,28 @@ impl<T: SimdElement + SimdLike<Element = T, Bool = bool>, const N: usize> SimdLi
     }
 
     #[inline]
-    fn replace(&mut self, i: usize, val: Self::Element) {
-        self[i] = val;
+    fn replace(&mut self, i: usize, value: Self::Element) {
+        self[i] = value;
     }
 
     #[inline]
-    unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
-        self[i] = val;
+    unsafe fn replace_unchecked(&mut self, i: usize, value: Self::Element) {
+        self[i] = value;
     }
 }
 
 impl<T: MaskElement + SimdLike<Element = T, Bool = bool>, const N: usize> SimdLike
     for core::simd::Mask<T, N>
+where
+    Simd<T, N>: Int + Signed,
 {
     const LANES: usize = N;
     type Element = bool;
     type Bool = Self;
 
     #[inline]
-    fn splat(val: Self::Element) -> Self {
-        Self::splat(val)
+    fn splat(value: Self::Element) -> Self {
+        Self::splat(value)
     }
 
     #[inline]
@@ -57,12 +63,12 @@ impl<T: MaskElement + SimdLike<Element = T, Bool = bool>, const N: usize> SimdLi
     }
 
     #[inline]
-    fn replace(&mut self, i: usize, val: Self::Element) {
-        self.set(i, val);
+    fn replace(&mut self, i: usize, value: Self::Element) {
+        self.set(i, value);
     }
 
     #[inline]
-    unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
-        self.set(i, val);
+    unsafe fn replace_unchecked(&mut self, i: usize, value: Self::Element) {
+        self.set(i, value);
     }
 }

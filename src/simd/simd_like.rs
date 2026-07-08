@@ -1,3 +1,5 @@
+use crate::simd::MaskCast;
+
 use super::{MaskLike, Select};
 
 /// Base trait for SIMD-like types.
@@ -14,36 +16,41 @@ pub trait SimdLike: Sized {
     type Element: SimdLike<Element = Self::Element, Bool = bool>;
 
     /// Type of the result of comparing two SIMD values like `self`.
-    type Bool: MaskLike + Select<Self>;
+    type Bool: MaskLike + MaskCast + Select<Self>;
 
-    /// Initializes an SIMD value with each lanes set to `val`.
-    fn splat(val: Self::Element) -> Self;
+    /// Initializes an SIMD value with each lanes set to `value`.
+    #[must_use = "method returns a new vector and does not mutate the original value"]
+    fn splat(value: Self::Element) -> Self;
 
     /// Extracts the i-th lane of `self`.
     ///
     /// # Panics
     ///
     /// Panics if `i >= Self::LANES`.
+    #[must_use = "method returns a new element and does not mutate the original value"]
     fn extract(&self, i: usize) -> Self::Element;
 
-    /// Extracts the i-th lane of `self` without bound-checking.
+    /// Extracts the i-th lane of `self` without bounds checking.
     ///
     /// # Safety
     ///
     /// Undefined behavior if `i >= Self::LANES`.
+    #[must_use = "method returns a new element and does not mutate the original value"]
     unsafe fn extract_unchecked(&self, i: usize) -> Self::Element;
 
-    /// Replaces the i-th lane of `self` by `val`.
+    /// Replaces the i-th lane of `self` with `value`.
+    ///
+    /// # Panics
     ///
     /// Panics if `i >= Self::LANES`.
-    fn replace(&mut self, i: usize, val: Self::Element);
+    fn replace(&mut self, i: usize, value: Self::Element);
 
-    /// Replaces the i-th lane of `self` by `val` without bound-checking.
+    /// Replaces the i-th lane of `self` with `value` without bounds checking.
     ///
     /// # Safety
     ///
     /// Undefined behavior if `i >= Self::LANES`.
-    unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element);
+    unsafe fn replace_unchecked(&mut self, i: usize, value: Self::Element);
 
     /// Applies a function to each lane of `self`.
     ///
@@ -101,8 +108,8 @@ macro_rules! impl_simd_value_scalar {
                 type Bool = bool;
 
                 #[inline]
-                fn splat(val: Self::Element) -> Self {
-                    val
+                fn splat(value: Self::Element) -> Self {
+                    value
                 }
 
                 #[inline]
@@ -118,15 +125,15 @@ macro_rules! impl_simd_value_scalar {
                 }
 
                 #[inline]
-                fn replace(&mut self, i: usize, val: Self::Element) {
+                fn replace(&mut self, i: usize, value: Self::Element) {
                     debug_assert!(i == 0, "index out of bounds");
-                    *self = val;
+                    *self = value;
                 }
 
                 #[inline]
-                unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
+                unsafe fn replace_unchecked(&mut self, i: usize, value: Self::Element) {
                     debug_assert!(i == 0, "index out of bounds");
-                    *self = val;
+                    *self = value;
                 }
             }
         )*
@@ -143,8 +150,8 @@ impl SimdLike for bool {
     type Bool = Self;
 
     #[inline]
-    fn splat(val: Self::Element) -> Self {
-        val
+    fn splat(value: Self::Element) -> Self {
+        value
     }
 
     #[inline]
@@ -160,14 +167,14 @@ impl SimdLike for bool {
     }
 
     #[inline]
-    fn replace(&mut self, i: usize, val: Self::Element) {
+    fn replace(&mut self, i: usize, value: Self::Element) {
         debug_assert!(i == 0, "index out of bounds");
-        *self = val;
+        *self = value;
     }
 
     #[inline]
-    unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
+    unsafe fn replace_unchecked(&mut self, i: usize, value: Self::Element) {
         debug_assert!(i == 0, "index out of bounds");
-        *self = val;
+        *self = value;
     }
 }

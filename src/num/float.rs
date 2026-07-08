@@ -303,48 +303,6 @@ pub trait Float: Real {
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn next_down(self) -> Self;
-
-    /// Returns the minimum of `self` and `other`, ignoring NaN.
-    ///
-    /// This corresponds to the IEEE 754 `minNum` operation,
-    /// except that it handles all NaNs the same way and avoids
-    /// `minNum`'s problems with associativity. This also matches
-    /// the behavior of libm's `fmin`.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let x: f32 = 1.0;
-    /// let y: f32 = 2.0;
-    /// let nan: f32 = f32::NAN;
-    ///
-    /// assert_eq!(x.min(y), 1.0);
-    /// assert_eq!(x.min(nan), 1.0);
-    /// assert_eq!(nan.min(x), 1.0);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn min(self, other: Self) -> Self;
-
-    /// Returns the maximum of `self` and `other`, ignoring NaN.
-    ///
-    /// This corresponds to the IEEE 754 `maxNum` operation,
-    /// except that it handles all NaNs the same way and avoids
-    /// `maxNum`'s problems with associativity. This also matches
-    /// the behavior of libm's `fmax`.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let x: f32 = 1.0;
-    /// let y: f32 = 2.0;
-    /// let nan: f32 = f32::NAN;
-    ///
-    /// assert_eq!(x.max(y), 2.0);
-    /// assert_eq!(x.max(nan), 1.0);
-    /// assert_eq!(nan.max(x), 1.0);
-    /// ```
-    #[must_use = "this returns the result of the operation, without modifying the original"]
-    fn max(self, other: Self) -> Self;
 }
 
 macro_rules! impl_float {
@@ -407,14 +365,6 @@ macro_rules! impl_float {
                 #[inline]
                 fn next_down(self) -> Self {
                     self.next_down()
-                }
-                #[inline]
-                fn min(self, other: Self) -> Self {
-                    self.min(other)
-                }
-                #[inline]
-                fn max(self, other: Self) -> Self {
-                    self.max(other)
                 }
             }
         )*

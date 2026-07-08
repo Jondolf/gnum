@@ -1,4 +1,7 @@
-use crate::num::{Float, Int, Num, Real};
+use crate::{
+    num::{Float, Int, Num, Real},
+    simd::SimdLike,
+};
 
 /// A marker trait for scalar types.
 ///
@@ -83,6 +86,11 @@ pub trait SimdFloat: Float + SimdValue {}
 /// with `Bool` being a SIMD mask type. It allows easily constraining generic parameters
 /// to support only SIMD vector types.
 pub trait SimdInt: Int + SimdValue {}
+
+impl<T: Num + ScalarValue + SimdLike<Bool = bool>> ScalarNum for T {}
+impl<T: Real + ScalarValue + SimdLike<Bool = bool>> ScalarReal for T {}
+impl<T: Float + ScalarValue + SimdLike<Bool = bool>> ScalarFloat for T {}
+impl<T: Int + ScalarValue + SimdLike<Bool = bool>> ScalarInt for T {}
 
 impl<T: Num + SimdValue> SimdNum for T {}
 impl<T: Real + SimdValue> SimdReal for T {}

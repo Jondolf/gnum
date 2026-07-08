@@ -5,8 +5,8 @@ macro_rules! impl_num_simd {
     ($($t:ty),*) => {
         $(
             impl<const N: usize> Num for Simd<$t, N> {
-                const MIN: Self = Self::MIN;
-                const MAX: Self = Self::MAX;
+                const MIN: Self = Simd::splat(<$t>::MIN);
+                const MAX: Self = Simd::splat(<$t>::MAX);
             }
         )*
     };

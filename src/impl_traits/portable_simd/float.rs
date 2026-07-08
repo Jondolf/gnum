@@ -28,8 +28,11 @@ impl<T: SimdElement + RealConstants, const N: usize> RealConstants for Simd<T, N
 }
 
 macro_rules! impl_real_simd {
-    ($real:tt, $int:ty) => {
+    ($($real:tt),+) => {
+        $(
         impl<const N: usize> Real for Simd<$real, N> {
+            type I32 = Simd<i32, N>;
+
             #[inline]
             fn from_f32(n: f32) -> Self {
                 Self::splat(n as $real)
@@ -190,11 +193,11 @@ macro_rules! impl_real_simd {
                 SimdFloat::copysign(self, sign)
             }
         }
+        )+
     };
 }
 
-impl_real_simd!(f32, i32);
-impl_real_simd!(f64, i64);
+impl_real_simd!(f32, f64);
 
 macro_rules! impl_float_simd {
     ($float:tt, $int:ty) => {
@@ -259,14 +262,6 @@ macro_rules! impl_float_simd {
             #[inline]
             fn next_down(self) -> Self {
                 self.as_array().map(|x| x.next_down()).into()
-            }
-            #[inline]
-            fn min(self, other: Self) -> Self {
-                SimdFloat::simd_min(self, other)
-            }
-            #[inline]
-            fn max(self, other: Self) -> Self {
-                SimdFloat::simd_max(self, other)
             }
         }
     };

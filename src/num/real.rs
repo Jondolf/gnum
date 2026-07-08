@@ -1,6 +1,6 @@
 use crate::{
     cmp::NumOrd,
-    num::{Num, Signed},
+    num::{Int, Num, Signed},
 };
 
 /// Basic mathematical constants for [`Real`] number types such as [`f32`] and [`f64`].
@@ -90,6 +90,9 @@ impl_real_constants!(f32, f64);
 ///
 /// [real numbers]: https://en.wikipedia.org/wiki/Real_number
 pub trait Real: Num + Signed + RealConstants + NumOrd {
+    /// The integer type associated with this real number type.
+    type I32: Int;
+
     /// Creates a real number from an [`f32`] value.
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn from_f32(n: f32) -> Self;
@@ -621,6 +624,8 @@ macro_rules! impl_real {
     ($($float:ty),*) => {
         $(
             impl Real for $float {
+                type I32 = i32;
+
                 #[inline]
                 fn from_f32(n: f32) -> Self {
                     n as Self
