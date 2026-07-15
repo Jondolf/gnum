@@ -4,6 +4,7 @@
 
 mod mask_cast;
 mod mask_like;
+mod reduce;
 mod select;
 mod shuffle;
 mod simd_like;
@@ -11,6 +12,7 @@ mod swizzle;
 
 pub use mask_cast::MaskCast;
 pub use mask_like::MaskLike;
+pub use reduce::{Reduce, ReduceBitwise};
 pub use select::Select;
 pub use shuffle::{Shuffle4, Shuffle8};
 pub use simd_like::SimdLike;
