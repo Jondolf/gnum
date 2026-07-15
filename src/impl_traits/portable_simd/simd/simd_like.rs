@@ -11,10 +11,16 @@ where
     const LANES: usize = N;
     type Element = T;
     type Bool = core::simd::Mask<T::Mask, N>;
+    type Array = [T; N];
 
     #[inline]
     fn splat(val: Self::Element) -> Self {
         Self::splat(val)
+    }
+
+    #[inline]
+    fn to_array(self) -> Self::Array {
+        Self::to_array(self)
     }
 
     #[inline]
@@ -46,10 +52,16 @@ where
     const LANES: usize = N;
     type Element = bool;
     type Bool = Self;
+    type Array = [bool; N];
 
     #[inline]
     fn splat(value: Self::Element) -> Self {
         Self::splat(value)
+    }
+
+    #[inline]
+    fn to_array(self) -> Self::Array {
+        Self::to_array(self)
     }
 
     #[inline]

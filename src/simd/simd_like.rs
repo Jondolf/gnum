@@ -18,9 +18,19 @@ pub trait SimdLike: Sized {
     /// Type of the result of comparing two SIMD values like `self`.
     type Bool: MaskLike + MaskCast + Select<Self>;
 
-    /// Initializes an SIMD value with each lanes set to `value`.
+    /// The array of lanes backing this SIMD value.
+    ///
+    /// This is an associated type rather than `[Self::Element; Self::LANES]` because associated
+    /// constants cannot yet be used as array lengths on stable Rust.
+    type Array;
+
+    /// Initializes a SIMD value with each lanes set to `value`.
     #[must_use = "method returns a new vector and does not mutate the original value"]
     fn splat(value: Self::Element) -> Self;
+
+    /// Converts a SIMD value to an array of its lanes.
+    #[must_use = "method returns a new array and does not mutate the original value"]
+    fn to_array(self) -> Self::Array;
 
     /// Extracts the i-th lane of `self`.
     ///
@@ -106,10 +116,16 @@ macro_rules! impl_simd_value_scalar {
                 const LANES: usize = 1;
                 type Element = Self;
                 type Bool = bool;
+                type Array = [Self; 1];
 
                 #[inline]
                 fn splat(value: Self::Element) -> Self {
                     value
+                }
+
+                #[inline]
+                fn to_array(self) -> Self::Array {
+                    [self]
                 }
 
                 #[inline]
@@ -148,10 +164,16 @@ impl SimdLike for bool {
     const LANES: usize = 1;
     type Element = Self;
     type Bool = Self;
+    type Array = [Self; 1];
 
     #[inline]
     fn splat(value: Self::Element) -> Self {
         value
+    }
+
+    #[inline]
+    fn to_array(self) -> Self::Array {
+        [self]
     }
 
     #[inline]
