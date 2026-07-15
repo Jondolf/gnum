@@ -1,3 +1,4 @@
+use super::round::RoundOps;
 use crate::num::{Float, Real, RealConstants};
 use core::simd::{Simd, SimdElement, num::SimdFloat};
 use std::simd::StdFloat;
@@ -41,21 +42,27 @@ macro_rules! impl_real_simd {
             fn from_f64(n: f64) -> Self {
                 Self::splat(n as $real)
             }
+            // These route through `RoundOps`, which uses the hardware rounding instruction
+            // for targets that have one, and a custom int round-trip emulation elsewhere.
             #[inline]
             fn floor(self) -> Self {
-                StdFloat::floor(self)
+                RoundOps::floor_internal(self)
             }
             #[inline]
             fn ceil(self) -> Self {
-                StdFloat::ceil(self)
+                RoundOps::ceil_internal(self)
             }
             #[inline]
             fn round(self) -> Self {
-                StdFloat::round(self)
+                RoundOps::round_internal(self)
+            }
+            #[inline]
+            fn round_ties_even(self) -> Self {
+                RoundOps::round_ties_even_internal(self)
             }
             #[inline]
             fn trunc(self) -> Self {
-                StdFloat::trunc(self)
+                RoundOps::trunc_internal(self)
             }
             #[inline]
             fn fract(self) -> Self {

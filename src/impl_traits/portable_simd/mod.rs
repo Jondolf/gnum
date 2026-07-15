@@ -6,6 +6,7 @@ mod float;
 mod int;
 mod markers;
 mod num;
+mod round;
 mod ops;
 mod signed;
 mod simd;
