@@ -137,15 +137,32 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// ```
     /// let x: f32 = 3.7;
-    /// let y: f32 = 3.5;
-    /// let z: f32 = -3.5;
+    /// let y: f32 = 4.5;
+    /// let z: f32 = -5.5;
     ///
     /// assert_eq!(x.round(), 4.0);
-    /// assert_eq!(y.round(), 4.0);
-    /// assert_eq!(z.round(), -4.0);
+    /// assert_eq!(y.round(), 5.0);
+    /// assert_eq!(z.round(), -6.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn round(self) -> Self;
+
+    /// Returns the integer nearest to `self`. If a value is half-way
+    /// between two integers, rounds to the number with an even
+    /// least significant digit.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let x: f32 = 3.7;
+    /// let y: f32 = 4.5;
+    /// let z: f32 = -5.5;
+    ///
+    /// assert_eq!(x.round_ties_even(), 4.0);
+    /// assert_eq!(y.round_ties_even(), 4.0);
+    /// assert_eq!(z.round_ties_even(), -6.0);
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn round_ties_even(self) -> Self;
 
     /// Returns the integer part of `self`. This means that noh-integer numbers
     /// are always truncated towards zero.
