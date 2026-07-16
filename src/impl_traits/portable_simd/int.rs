@@ -9,6 +9,7 @@ macro_rules! impl_int_simd {
         $(
             impl<const N: usize> Int for Simd<$int, N> {
                 type Unsigned = Simd<$uint, N>;
+                type Signed = Self;
 
                 const BITS: u32 = <$int>::BITS;
 
@@ -105,6 +106,14 @@ macro_rules! impl_int_simd {
                     }
                 }
                 #[inline]
+                fn cast_unsigned(self) -> Self::Unsigned {
+                    SimdInt::cast(self)
+                }
+                #[inline]
+                fn cast_signed(self) -> Self::Signed {
+                    self
+                }
+                #[inline]
                 fn ilog(self, base: Self) -> Self::Unsigned {
                     let mut result = Self::Unsigned::default();
                     for i in 0..Self::LEN {
@@ -152,10 +161,11 @@ macro_rules! impl_int_simd {
 impl_int_simd!(i8 => u8, i16 => u16, i32 => u32, i64 => u64, isize => usize);
 
 macro_rules! impl_uint_simd {
-    ($($uint:ty),*) => {
+    ($($uint:ty => $int:ty),*) => {
         $(
             impl<const N: usize> Int for Simd<$uint, N> {
                 type Unsigned = Self;
+                type Signed = Simd<$int, N>;
 
                 const BITS: u32 = <$uint>::BITS;
 
@@ -252,6 +262,14 @@ macro_rules! impl_uint_simd {
                     }
                 }
                 #[inline]
+                fn cast_unsigned(self) -> Self::Unsigned {
+                    self
+                }
+                #[inline]
+                fn cast_signed(self) -> Self::Signed {
+                    SimdUint::cast(self)
+                }
+                #[inline]
                 fn ilog(self, base: Self) -> Self::Unsigned {
                     let mut result = Self::Unsigned::default();
                     for i in 0..Self::LEN {
@@ -296,4 +314,4 @@ macro_rules! impl_uint_simd {
     };
 }
 
-impl_uint_simd!(u8, u16, u32, u64, usize);
+impl_uint_simd!(u8 => i8, u16 => i16, u32 => i32, u64 => i64, usize => isize);

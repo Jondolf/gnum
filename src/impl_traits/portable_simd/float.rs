@@ -1,6 +1,9 @@
 use super::round::RoundOps;
-use crate::num::{Float, Real, RealConstants};
-use core::simd::{Simd, SimdElement, num::SimdFloat};
+use crate::num::{Float, Real, RealConstants, Signed};
+use core::simd::{
+    Simd, SimdElement,
+    num::{SimdFloat, SimdInt},
+};
 use std::simd::StdFloat;
 
 impl<T: SimdElement + RealConstants, const N: usize> RealConstants for Simd<T, N> {
@@ -207,8 +210,10 @@ macro_rules! impl_real_simd {
 impl_real_simd!(f32, f64);
 
 macro_rules! impl_float_simd {
-    ($float:tt, $int:ty) => {
+    ($float:tt, $uint:ty, $int:ty) => {
         impl<const N: usize> Float for Simd<$float, N> {
+            type Bits = Simd<$uint, N>;
+
             const RADIX: u32 = $float::RADIX;
             const MANTISSA_DIGITS: u32 = $float::MANTISSA_DIGITS;
             const DIGITS: u32 = $float::DIGITS;
@@ -270,9 +275,25 @@ macro_rules! impl_float_simd {
             fn next_down(self) -> Self {
                 self.as_array().map(|x| x.next_down()).into()
             }
+            #[inline]
+            fn from_bits(bits: Self::Bits) -> Self {
+                SimdFloat::from_bits(bits)
+            }
+            #[inline]
+            fn to_bits(self) -> Self::Bits {
+                SimdFloat::to_bits(self)
+            }
+            #[inline]
+            fn from_int(int: Simd<$int, N>) -> Self {
+                SimdInt::cast(int)
+            }
+            #[inline]
+            fn to_int(self) -> Simd<$int, N> {
+                SimdFloat::cast(self)
+            }
         }
     };
 }
 
-impl_float_simd!(f32, i32);
-impl_float_simd!(f64, i64);
+impl_float_simd!(f32, u32, i32);
+impl_float_simd!(f64, u64, i64);

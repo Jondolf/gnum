@@ -1,9 +1,13 @@
-use crate::num::Real;
+use crate::num::{Int, Real};
 
 /// A trait for floating-point types representing [`Real`] numbers such as [`f32`] and [`f64`].
 ///
 /// Floating-point types are expected to conform to the IEEE 754-2008 standard.
 pub trait Float: Real {
+    /// The unsigned integer type used as the raw bit representation
+    /// of the floating-point type.
+    type Bits: Int<Unsigned = Self::Bits>;
+
     /// The radix or base of the internal representation of the floating-point type.
     const RADIX: u32;
 
@@ -303,12 +307,67 @@ pub trait Float: Real {
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn next_down(self) -> Self;
+
+    /// Raw transmutation from an unsigned integer to a floating-point type.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Float;
+    /// let x: f32 = 2.5;
+    /// let bits: u32 = Float::to_bits(x);
+    /// let y: f32 = Float::from_bits(bits);
+    /// assert_eq!(y, x);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn from_bits(bits: Self::Bits) -> Self;
+
+    /// Raw transmutation from a floating-point type to an unsigned integer.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Float;
+    /// let x: f32 = 2.5;
+    /// let bits: u32 = Float::to_bits(x);
+    /// let y: f32 = Float::from_bits(bits);
+    /// assert_eq!(y, x);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn to_bits(self) -> Self::Bits;
+
+    /// Converts a signed integer to the nearest representable floating-point value.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Float;
+    /// let x: f32 = Float::from_int(-3);
+    /// assert_eq!(x, -3.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn from_int(int: <Self::Bits as Int>::Signed) -> Self;
+
+    /// Rounds `self` toward zero and converts it to a signed integer.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Float;
+    /// let x: f32 = 3.7;
+    /// let y: i32 = Float::to_int(x);
+    /// assert_eq!(y, 3);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn to_int(self) -> <Self::Bits as Int>::Signed;
 }
 
 macro_rules! impl_float {
-    ($($float:ty),*) => {
+    ($($float:ty => $uint:ty, $int:ty),*) => {
         $(
             impl Float for $float {
+                type Bits = $uint;
+
                 const RADIX: u32 = <$float>::RADIX;
                 const MANTISSA_DIGITS: u32 = <$float>::MANTISSA_DIGITS;
                 const DIGITS: u32 = <$float>::DIGITS;
@@ -366,9 +425,25 @@ macro_rules! impl_float {
                 fn next_down(self) -> Self {
                     self.next_down()
                 }
+                #[inline]
+                fn from_bits(bits: Self::Bits) -> Self {
+                    <$float>::from_bits(bits)
+                }
+                #[inline]
+                fn to_bits(self) -> Self::Bits {
+                    <$float>::to_bits(self)
+                }
+                #[inline]
+                fn from_int(int: $int) -> Self {
+                    int as $float
+                }
+                #[inline]
+                fn to_int(self) -> $int {
+                    self as $int
+                }
             }
         )*
     };
 }
 
-impl_float!(f32, f64);
+impl_float!(f32 => u32, i32, f64 => u64, i64);

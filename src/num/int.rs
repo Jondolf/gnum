@@ -1,4 +1,7 @@
-use crate::{cmp::NumOrd, num::Num};
+use crate::{
+    cmp::NumOrd,
+    num::{Num, Signed},
+};
 use core::ops::*;
 
 /// A trait for integer types such as [`i32`] and [`u64`].
@@ -18,7 +21,10 @@ pub trait Int:
     + ShrAssign<Self>
 {
     /// The unsigned integer type corresponding to this integer type.
-    type Unsigned: Int;
+    type Unsigned: Int<Signed = Self::Signed>;
+
+    /// The signed integer type corresponding to this integer type.
+    type Signed: Int<Unsigned = Self::Unsigned> + Signed;
 
     /// The size of this integer type in bits.
     ///
@@ -225,6 +231,30 @@ pub trait Int:
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn to_le(self) -> Self;
 
+    /// Returns the bit pattern of `self` reinterpreted as an [unsigned](Self::Unsigned)
+    /// integer of the same size.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let n: u32 = -1;
+    /// assert_eq!(n.cast_unsigned(), u32::MAX);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn cast_unsigned(self) -> Self::Unsigned;
+
+    /// Returns the bit pattern of `self` reinterpreted as a [signed](Self::Signed)
+    /// integer of the same size.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let n = u32::MAX;
+    /// assert_eq!(n.cast_signed(), -1i32);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn cast_signed(self) -> Self::Signed;
+
     /// Returns the integer logarithm of `self` with respect to `base`, rounded down.
     ///
     /// # Panics
@@ -345,10 +375,11 @@ pub trait Int:
 }
 
 macro_rules! impl_int {
-    ($($int:ty => $uint:ty),*) => {
+    ($($int:ty => $uint:ty, $sint:ty),*) => {
         $(
             impl Int for $int {
                 type Unsigned = $uint;
+                type Signed = $sint;
 
                 const BITS: u32 = <$int>::BITS;
 
@@ -409,6 +440,14 @@ macro_rules! impl_int {
                     self.to_le()
                 }
                 #[inline]
+                fn cast_unsigned(self) -> Self::Unsigned {
+                    self as $uint
+                }
+                #[inline]
+                fn cast_signed(self) -> Self::Signed {
+                    self as $sint
+                }
+                #[inline]
                 fn ilog(self, base: Self) -> Self::Unsigned {
                     self.ilog(base) as $uint
                 }
@@ -433,5 +472,9 @@ macro_rules! impl_int {
     };
 }
 
-impl_int!(i8 => u8, i16 => u16, i32 => u32, i64 => u64, isize => usize);
-impl_int!(u8 => u8, u16 => u16, u32 => u32, u64 => u64, usize => usize);
+impl_int!(
+    i8 => u8, i8, i16 => u16, i16, i32 => u32, i32, i64 => u64, i64, isize => usize, isize
+);
+impl_int!(
+    u8 => u8, i8, u16 => u16, i16, u32 => u32, i32, u64 => u64, i64, usize => usize, isize
+);
