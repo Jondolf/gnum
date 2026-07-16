@@ -6,6 +6,7 @@ mod markers;
 mod ops;
 mod real;
 mod signed;
+pub(crate) mod stable;
 
 pub use float::Float;
 pub use int::Int;

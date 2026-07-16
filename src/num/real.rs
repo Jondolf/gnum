@@ -213,7 +213,17 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[doc(alias = "squareRoot")]
     fn sqrt(self) -> Self;
 
-    /// Returns `pow(e, self)`, (the exponential function).
+    /// Returns `pow(e, self)`, the exponential function.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`exp_stable`](Self::exp_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -227,7 +237,41 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn exp(self) -> Self;
 
+    /// Returns `pow(e, self)`, the exponential function, with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`exp`](Self::exp) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 1.0;
+    /// let y: f32 = 0.0;
+    ///
+    /// assert!((x.exp_stable() - core::f32::consts::E).abs() <= 1e-5);
+    /// assert_eq!(y.exp_stable(), 1.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn exp_stable(self) -> Self;
+
     /// Returns `pow(2, self)`.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`exp2_stable`](Self::exp2_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -241,9 +285,43 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn exp2(self) -> Self;
 
+    /// Returns `pow(2, self)`, with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`exp2`](Self::exp2) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 2.0;
+    /// let y: f32 = 0.0;
+    ///
+    /// assert!((x.exp2_stable() - 4.0).abs() <= 1e-5);
+    /// assert_eq!(y.exp2_stable(), 1.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn exp2_stable(self) -> Self;
+
     /// Returns the logarithm of `self` with respect to a given `base`.
     ///
     /// `self` must be positive.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`log_stable`](Self::log_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -258,9 +336,46 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn log(self, base: Self) -> Self;
 
+    /// Returns the logarithm of `self` with respect to a given `base`, with deterministic results.
+    ///
+    /// `self` must be positive.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`log`](Self::log) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let base: f32 = 2.0;
+    /// let x: f32 = 16.0;
+    /// let y: f32 = 0.0;
+    ///
+    /// assert!((x.log_stable(base) - 4.0).abs() <= 1e-5);
+    /// assert_eq!(y.log_stable(base), f32::NEG_INFINITY);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn log_stable(self, base: Self) -> Self;
+
     /// Returns the natural logarithm of `self`.
     ///
     /// `self` must be positive.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`ln_stable`](Self::ln_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -274,9 +389,45 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn ln(self) -> Self;
 
+    /// Returns the natural logarithm of `self`, with deterministic results.
+    ///
+    /// `self` must be positive.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`ln`](Self::ln) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = core::f32::consts::E;
+    /// let y: f32 = 0.0;
+    ///
+    /// assert!((x.ln_stable() - 1.0).abs() <= 1e-5);
+    /// assert_eq!(y.ln_stable(), f32::NEG_INFINITY);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn ln_stable(self) -> Self;
+
     /// Returns the base 2 logarithm of `self`.
     ///
     /// `self` must be positive.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`log2_stable`](Self::log2_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -290,9 +441,45 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn log2(self) -> Self;
 
+    /// Returns the base 2 logarithm of `self`, with deterministic results.
+    ///
+    /// `self` must be positive.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`log2`](Self::log2) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 16.0;
+    /// let y: f32 = 0.0;
+    ///
+    /// assert!((x.log2_stable() - 4.0).abs() <= 1e-5);
+    /// assert_eq!(y.log2_stable(), f32::NEG_INFINITY);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn log2_stable(self) -> Self;
+
     /// Returns the base 10 logarithm of `self`.
     ///
     /// `self` must be positive.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`log10_stable`](Self::log10_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -306,7 +493,43 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn log10(self) -> Self;
 
+    /// Returns the base 10 logarithm of `self`, with deterministic results.
+    ///
+    /// `self` must be positive.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`log10`](Self::log10) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 100.0;
+    /// let y: f32 = 0.0;
+    ///
+    /// assert!((x.log10_stable() - 2.0).abs() <= 1e-5);
+    /// assert_eq!(y.log10_stable(), f32::NEG_INFINITY);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn log10_stable(self) -> Self;
+
     /// Returns the cube root of `self`.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`cbrt_stable`](Self::cbrt_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -321,9 +544,44 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[doc(alias = "cubeRoot")]
     fn cbrt(self) -> Self;
 
+    /// Returns the cube root of `self`, with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`cbrt`](Self::cbrt) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 27.0;
+    /// let y: f32 = 0.0;
+    ///
+    /// assert!((x.cbrt_stable() - 3.0).abs() <= 1e-4);
+    /// assert_eq!(y.cbrt_stable(), 0.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    #[doc(alias = "cubeRootStable")]
+    fn cbrt_stable(self) -> Self;
+
     /// Returns the distance between the origin and a point (`x`, `y`) on the
     /// Euclidean plane. Equivalently, computes the length of the hypotenuse of a
     /// right-angle triangle with other sides having length `x.abs()` and `y.abs()`.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`hypot_stable`](Self::hypot_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -337,7 +595,44 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn hypot(self, other: Self) -> Self;
 
+    /// Returns the distance between the origin and a point (`x`, `y`) on the
+    /// Euclidean plane, with deterministic results. Equivalently, computes
+    /// the length of the hypotenuse of a right-angle triangle with other sides
+    /// having length `x.abs()` and `y.abs()`.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`hypot`](Self::hypot) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 3.0;
+    /// let y: f32 = 4.0;
+    ///
+    /// // sqrt(3^2 + 4^2) = sqrt(25) = 5
+    /// assert_eq!(x.hypot_stable(y), 5.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn hypot_stable(self, other: Self) -> Self;
+
     /// Returns the sine of `self` (in radians).
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`sin_stable`](Self::sin_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -349,7 +644,39 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn sin(self) -> Self;
 
+    /// Returns the sine of `self` (in radians), with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`sin`](Self::sin) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = core::f32::consts::FRAC_PI_2;
+    ///
+    /// assert!((x.sin_stable() - 1.0).abs() <= 1e-6);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn sin_stable(self) -> Self;
+
     /// Returns the cosine of `self` (in radians).
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`cos_stable`](Self::cos_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -361,7 +688,39 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn cos(self) -> Self;
 
+    /// Returns the cosine of `self` (in radians), with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`cos`](Self::cos) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = core::f32::consts::PI;
+    ///
+    /// assert!((x.cos_stable() - (-1.0)).abs() <= 1e-6);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn cos_stable(self) -> Self;
+
     /// Returns the tangent of `self` (in radians).
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`tan_stable`](Self::tan_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -373,10 +732,42 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn tan(self) -> Self;
 
+    /// Returns the tangent of `self` (in radians), with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`tan`](Self::tan) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = core::f32::consts::FRAC_PI_4;
+    ///
+    /// assert!((x.tan_stable() - 1.0).abs() <= 1e-6);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn tan_stable(self) -> Self;
+
     /// Returns the arcsine of `self` (in radians).
     ///
     /// The input must be in the range `[-1.0, 1.0]`.
     /// The output is in the range `[-pi/2, pi/2]`.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`asin_stable`](Self::asin_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -388,10 +779,45 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn asin(self) -> Self;
 
+    /// Returns the arcsine of `self` (in radians), with deterministic results.
+    ///
+    /// The input must be in the range `[-1.0, 1.0]`.
+    /// The output is in the range `[-pi/2, pi/2]`.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`asin`](Self::asin) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 1.0;
+    ///
+    /// assert_eq!(x.asin_stable(), core::f32::consts::FRAC_PI_2);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn asin_stable(self) -> Self;
+
     /// Returns the arccosine of `self` (in radians).
     ///
     /// The input must be in the range `[-1.0, 1.0]`.
     /// The output is in the range `[0.0, pi]`.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`acos_stable`](Self::acos_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -403,9 +829,44 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn acos(self) -> Self;
 
+    /// Returns the arccosine of `self` (in radians), with deterministic results.
+    ///
+    /// The input must be in the range `[-1.0, 1.0]`.
+    /// The output is in the range `[0.0, pi]`.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`acos`](Self::acos) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 0.0;
+    ///
+    /// assert_eq!(x.acos_stable(), core::f32::consts::FRAC_PI_2);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn acos_stable(self) -> Self;
+
     /// Returns the arctangent of `self` (in radians).
     ///
     /// The output is in the range `[-pi/2, pi/2]`.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`atan_stable`](Self::atan_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -417,6 +878,30 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn atan(self) -> Self;
 
+    /// Returns the arctangent of `self` (in radians), with deterministic results.
+    ///
+    /// The output is in the range `[-pi/2, pi/2]`.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`atan`](Self::atan) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 1.0;
+    ///
+    /// assert!((x.atan_stable() - core::f32::consts::FRAC_PI_4).abs() <= 1e-5);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn atan_stable(self) -> Self;
+
     /// Returns the four-quadrant arctangent of `self` (`y`) and `other` (`x`) (in radians).
     ///
     /// | `x`     | `y`     | Piecewise Definition | Range         |
@@ -426,16 +911,26 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// | `<= -0` | `>= +0` | `arctan(y/x) + pi`   | `[+pi/2, +pi]`|
     /// | `<= -0` | `<= -0` | `arctan(y/x) - pi`   | `[-pi, -pi/2]`|
     ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`atan2_stable`](Self::atan2_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
+    ///
     /// # Example
     ///
     /// ```
-    /// // Positive angles measured counter-clockwise
-    /// // from positive x axis
+    /// // Positive angles measured counterclockwise from the positive x axis
+    ///
     /// // -pi/4 radians (45 deg clockwise)
     /// let x1: f32 = 3.0;
     /// let y1: f32 = -3.0;
     ///
-    /// // 3pi/4 radians (135 deg counter-clockwise)
+    /// // 3pi/4 radians (135 deg counterclockwise)
     /// let x2: f32 = -3.0;
     /// let y2: f32 = 3.0;
     ///
@@ -448,8 +943,60 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn atan2(self, other: Self) -> Self;
 
+    /// Returns the four-quadrant arctangent of `self` (`y`) and `other` (`x`) (in radians),
+    /// with deterministic results.
+    ///
+    /// | `x`     | `y`     | Piecewise Definition | Range         |
+    /// |---------|---------|----------------------|---------------|
+    /// | `>= +0` | `>= +0` | `arctan(y/x)`        | `[+0, +pi/2]` |
+    /// | `>= +0` | `<= -0` | `arctan(y/x)`        | `[-pi/2, -0]` |
+    /// | `<= -0` | `>= +0` | `arctan(y/x) + pi`   | `[+pi/2, +pi]`|
+    /// | `<= -0` | `<= -0` | `arctan(y/x) - pi`   | `[-pi, -pi/2]`|
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`atan2`](Self::atan2) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// // Positive angles measured counterclockwise from the positive x axis
+    ///
+    /// // -pi/4 radians (45 deg clockwise)
+    /// let x1: f32 = 3.0;
+    /// let y1: f32 = -3.0;
+    ///
+    /// // 3pi/4 radians (135 deg counterclockwise)
+    /// let x2: f32 = -3.0;
+    /// let y2: f32 = 3.0;
+    ///
+    /// let abs_difference_1 = (y1.atan2_stable(x1) - (-core::f32::consts::FRAC_PI_4)).abs();
+    /// let abs_difference_2 = (y2.atan2_stable(x2) - (3.0 * core::f32::consts::FRAC_PI_4)).abs();
+    ///
+    /// assert!(abs_difference_1 <= 1e-5);
+    /// assert!(abs_difference_2 <= 1e-5);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn atan2_stable(self, other: Self) -> Self;
+
     /// Simultaneously computes the sine and cosine of `self` (in radians),
     /// and returns the result as a tuple `(sin(self), cos(self))`.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`sin_cos_stable`](Self::sin_cos_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -466,7 +1013,45 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn sin_cos(self) -> (Self, Self);
 
+    /// Simultaneously computes the sine and cosine of `self` (in radians),
+    /// and returns the result as a tuple `(sin(self), cos(self))`, with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`sin_cos`](Self::sin_cos) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = core::f32::consts::FRAC_PI_4;
+    /// let (s, c) = x.sin_cos_stable();
+    ///
+    /// let abs_difference_s = (s - core::f32::consts::FRAC_PI_4.sin()).abs();
+    /// let abs_difference_c = (c - core::f32::consts::FRAC_PI_4.cos()).abs();
+    ///
+    /// assert!(abs_difference_s <= 1e-5);
+    /// assert!(abs_difference_c <= 1e-5);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn sin_cos_stable(self) -> (Self, Self);
+
     /// Returns the hyperbolic sine of `self` (in radians).
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`sinh_stable`](Self::sinh_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -484,7 +1069,45 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn sinh(self) -> Self;
 
+    /// Returns the hyperbolic sine of `self` (in radians), with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`sinh`](Self::sinh) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let e = core::f32::consts::E;
+    /// let x: f32 = 1.0;
+    /// let f = x.sinh_stable();
+    ///
+    /// // Solving sinh() at 1 gives `(e^2-1)/(2e)`
+    /// let g = ((e * e) - 1.0) / (2.0 * e);
+    /// let abs_difference = (f - g).abs();
+    ///
+    /// assert!(abs_difference <= 1e-6);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn sinh_stable(self) -> Self;
+
     /// Returns the hyperbolic cosine of `self` (in radians).
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`cosh_stable`](Self::cosh_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -503,7 +1126,45 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn cosh(self) -> Self;
 
+    /// Returns the hyperbolic cosine of `self` (in radians), with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`cosh`](Self::cosh) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let e = core::f32::consts::E;
+    /// let x: f32 = 1.0;
+    /// let f = x.cosh_stable();
+    ///
+    /// // Solving cosh() at 1 gives this result
+    /// let g = ((e * e) + 1.0) / (2.0 * e);
+    /// let abs_difference = (f - g).abs();
+    ///
+    /// assert!(abs_difference <= 1e-6);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn cosh_stable(self) -> Self;
+
     /// Returns the hyperbolic tangent of `self` (in radians).
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`tanh_stable`](Self::tanh_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -521,7 +1182,45 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn tanh(self) -> Self;
 
+    /// Returns the hyperbolic tangent of `self` (in radians), with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`tanh`](Self::tanh) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let e = core::f32::consts::E;
+    /// let x: f32 = 1.0;
+    /// let f = x.tanh_stable();
+    ///
+    /// // Solving tanh() at 1 gives `(1 - e^(-2))/(1 + e^(-2))`
+    /// let g = (1.0 - e.powi(-2)) / (1.0 + e.powi(-2));
+    /// let abs_difference = (f - g).abs();
+    ///
+    /// assert!(abs_difference <= 1e-6);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn tanh_stable(self) -> Self;
+
     /// Returns the inverse hyperbolic sine of `self` (in radians).
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`asinh_stable`](Self::asinh_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -536,9 +1235,45 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn asinh(self) -> Self;
 
+    /// Returns the inverse hyperbolic sine of `self` (in radians),
+    /// with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`asinh`](Self::asinh) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 1.0;
+    /// let f = x.sinh_stable().asinh_stable();
+    ///
+    /// let abs_difference = (f - x).abs();
+    ///
+    /// assert!(abs_difference <= 1e-6);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn asinh_stable(self) -> Self;
+
     /// Returns the inverse hyperbolic cosine of `self` (in radians).
     ///
-    /// `self` must be greater than or equal to 1.0.
+    /// `self` must be greater than or equal to `1.0`.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`acosh_stable`](Self::acosh_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -553,9 +1288,47 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn acosh(self) -> Self;
 
+    /// Returns the inverse hyperbolic cosine of `self` (in radians),
+    /// with deterministic results.
+    ///
+    /// `self` must be greater than or equal to `1.0`.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`acosh`](Self::acosh) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 1.0;
+    /// let f = x.cosh_stable().acosh_stable();
+    ///
+    /// let abs_difference = (f - x).abs();
+    ///
+    /// assert!(abs_difference <= 1e-6);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn acosh_stable(self) -> Self;
+
     /// Returns the inverse hyperbolic tangent of `self` (in radians).
     ///
     /// The input must be in the range `(-1.0, 1.0)`.
+    ///
+    /// # Unspecified Precision
+    ///
+    /// For some types (ex: floating-point numbers), the precision of this function
+    /// is non-deterministic. This means it varies by platform, Rust version, and can
+    /// even differ within the same execution from one invocation to the next.
+    ///
+    /// See [`atanh_stable`](Self::atanh_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
     ///
     /// # Example
     ///
@@ -569,6 +1342,33 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn atanh(self) -> Self;
+
+    /// Returns the inverse hyperbolic tangent of `self` (in radians),
+    ///
+    /// The input must be in the range `(-1.0, 1.0)`.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`atanh`](Self::atanh) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gnum::num::Real;
+    /// #
+    /// let x: f32 = 0.5;
+    /// let f = x.tanh_stable().atanh_stable();
+    ///
+    /// let abs_difference = (f - x).abs();
+    ///
+    /// assert!(abs_difference <= 1e-6);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn atanh_stable(self) -> Self;
 
     /// Returns the multiplicative inverse of `self`, `1.0 / self`.
     ///
@@ -664,6 +1464,10 @@ macro_rules! impl_real {
                     self.round()
                 }
                 #[inline]
+                fn round_ties_even(self) -> Self {
+                    self.round_ties_even()
+                }
+                #[inline]
                 fn trunc(self) -> Self {
                     self.trunc()
                 }
@@ -680,88 +1484,176 @@ macro_rules! impl_real {
                     self.exp()
                 }
                 #[inline]
+                fn exp_stable(self) -> Self {
+                    crate::num::stable::exp(self)
+                }
+                #[inline]
                 fn exp2(self) -> Self {
                     self.exp2()
+                }
+                #[inline]
+                fn exp2_stable(self) -> Self {
+                    crate::num::stable::exp2(self)
                 }
                 #[inline]
                 fn log(self, base: Self) -> Self {
                     self.log(base)
                 }
                 #[inline]
+                fn log_stable(self, base: Self) -> Self {
+                    crate::num::stable::log(self, base)
+                }
+                #[inline]
                 fn ln(self) -> Self {
                     self.ln()
+                }
+                #[inline]
+                fn ln_stable(self) -> Self {
+                    crate::num::stable::ln(self)
                 }
                 #[inline]
                 fn log2(self) -> Self {
                     self.log2()
                 }
                 #[inline]
+                fn log2_stable(self) -> Self {
+                    crate::num::stable::log2(self)
+                }
+                #[inline]
                 fn log10(self) -> Self {
                     self.log10()
+                }
+                #[inline]
+                fn log10_stable(self) -> Self {
+                    crate::num::stable::log10(self)
                 }
                 #[inline]
                 fn cbrt(self) -> Self {
                     self.cbrt()
                 }
                 #[inline]
+                fn cbrt_stable(self) -> Self {
+                    crate::num::stable::cbrt(self)
+                }
+                #[inline]
                 fn hypot(self, other: Self) -> Self {
                     self.hypot(other)
+                }
+                #[inline]
+                fn hypot_stable(self, other: Self) -> Self {
+                    crate::num::stable::hypot(self, other)
                 }
                 #[inline]
                 fn sin(self) -> Self {
                     self.sin()
                 }
                 #[inline]
+                fn sin_stable(self) -> Self {
+                    crate::num::stable::sin(self)
+                }
+                #[inline]
                 fn cos(self) -> Self {
                     self.cos()
+                }
+                #[inline]
+                fn cos_stable(self) -> Self {
+                    crate::num::stable::cos(self)
                 }
                 #[inline]
                 fn tan(self) -> Self {
                     self.tan()
                 }
                 #[inline]
+                fn tan_stable(self) -> Self {
+                    crate::num::stable::tan(self)
+                }
+                #[inline]
                 fn asin(self) -> Self {
                     self.asin()
+                }
+                #[inline]
+                fn asin_stable(self) -> Self {
+                    crate::num::stable::asin(self)
                 }
                 #[inline]
                 fn acos(self) -> Self {
                     self.acos()
                 }
                 #[inline]
+                fn acos_stable(self) -> Self {
+                    crate::num::stable::acos(self)
+                }
+                #[inline]
                 fn atan(self) -> Self {
                     self.atan()
+                }
+                #[inline]
+                fn atan_stable(self) -> Self {
+                    crate::num::stable::atan(self)
                 }
                 #[inline]
                 fn atan2(self, other: Self) -> Self {
                     self.atan2(other)
                 }
                 #[inline]
+                fn atan2_stable(self, other: Self) -> Self {
+                    crate::num::stable::atan2(self, other)
+                }
+                #[inline]
                 fn sin_cos(self) -> (Self, Self) {
                     self.sin_cos()
+                }
+                #[inline]
+                fn sin_cos_stable(self) -> (Self, Self) {
+                    crate::num::stable::sin_cos(self)
                 }
                 #[inline]
                 fn sinh(self) -> Self {
                     self.sinh()
                 }
                 #[inline]
+                fn sinh_stable(self) -> Self {
+                    crate::num::stable::sinh(self)
+                }
+                #[inline]
                 fn cosh(self) -> Self {
                     self.cosh()
+                }
+                #[inline]
+                fn cosh_stable(self) -> Self {
+                    crate::num::stable::cosh(self)
                 }
                 #[inline]
                 fn tanh(self) -> Self {
                     self.tanh()
                 }
                 #[inline]
+                fn tanh_stable(self) -> Self {
+                    crate::num::stable::tanh(self)
+                }
+                #[inline]
                 fn asinh(self) -> Self {
                     self.asinh()
+                }
+                #[inline]
+                fn asinh_stable(self) -> Self {
+                    crate::num::stable::asinh(self)
                 }
                 #[inline]
                 fn acosh(self) -> Self {
                     self.acosh()
                 }
                 #[inline]
+                fn acosh_stable(self) -> Self {
+                    crate::num::stable::acosh(self)
+                }
+                #[inline]
                 fn atanh(self) -> Self {
                     self.atanh()
+                }
+                #[inline]
+                fn atanh_stable(self) -> Self {
+                    crate::num::stable::atanh(self)
                 }
                 #[inline]
                 fn recip(self) -> Self {

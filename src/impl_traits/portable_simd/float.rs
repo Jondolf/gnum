@@ -80,28 +80,56 @@ macro_rules! impl_real_simd {
                 StdFloat::exp(self)
             }
             #[inline]
+            fn exp_stable(self) -> Self {
+                crate::num::stable::exp(self)
+            }
+            #[inline]
             fn exp2(self) -> Self {
                 StdFloat::exp2(self)
             }
             #[inline]
-            fn ln(self) -> Self {
-                StdFloat::ln(self)
+            fn exp2_stable(self) -> Self {
+                crate::num::stable::exp2(self)
             }
             #[inline]
             fn log(self, base: Self) -> Self {
                 StdFloat::log(self, base)
             }
             #[inline]
+            fn log_stable(self, base: Self) -> Self {
+                crate::num::stable::log(self, base)
+            }
+            #[inline]
+            fn ln(self) -> Self {
+                StdFloat::ln(self)
+            }
+            #[inline]
+            fn ln_stable(self) -> Self {
+                crate::num::stable::ln(self)
+            }
+            #[inline]
             fn log2(self) -> Self {
                 StdFloat::log2(self)
+            }
+            #[inline]
+            fn log2_stable(self) -> Self {
+                crate::num::stable::log2(self)
             }
             #[inline]
             fn log10(self) -> Self {
                 StdFloat::log10(self)
             }
             #[inline]
+            fn log10_stable(self) -> Self {
+                crate::num::stable::log10(self)
+            }
+            #[inline]
             fn cbrt(self) -> Self {
                 self.as_array().map(|x| x.cbrt()).into()
+            }
+            #[inline]
+            fn cbrt_stable(self) -> Self {
+                crate::num::stable::cbrt(self)
             }
             #[inline]
             fn hypot(self, other: Self) -> Self {
@@ -112,28 +140,56 @@ macro_rules! impl_real_simd {
                 result
             }
             #[inline]
+            fn hypot_stable(self, other: Self) -> Self {
+                crate::num::stable::hypot(self, other)
+            }
+            #[inline]
             fn sin(self) -> Self {
                 StdFloat::sin(self)
+            }
+            #[inline]
+            fn sin_stable(self) -> Self {
+                crate::num::stable::sin(self)
             }
             #[inline]
             fn cos(self) -> Self {
                 StdFloat::cos(self)
             }
             #[inline]
+            fn cos_stable(self) -> Self {
+                crate::num::stable::cos(self)
+            }
+            #[inline]
             fn tan(self) -> Self {
                 self.as_array().map(|x| x.tan()).into()
+            }
+            #[inline]
+            fn tan_stable(self) -> Self {
+                crate::num::stable::tan(self)
             }
             #[inline]
             fn asin(self) -> Self {
                 self.as_array().map(|x| x.asin()).into()
             }
             #[inline]
+            fn asin_stable(self) -> Self {
+                crate::num::stable::asin(self)
+            }
+            #[inline]
             fn acos(self) -> Self {
                 self.as_array().map(|x| x.acos()).into()
             }
             #[inline]
+            fn acos_stable(self) -> Self {
+                crate::num::stable::acos(self)
+            }
+            #[inline]
             fn atan(self) -> Self {
                 self.as_array().map(|x| x.atan()).into()
+            }
+            #[inline]
+            fn atan_stable(self) -> Self {
+                crate::num::stable::atan(self)
             }
             #[inline]
             fn atan2(self, other: Self) -> Self {
@@ -142,6 +198,10 @@ macro_rules! impl_real_simd {
                     result[i] = result[i].atan2(other[i]);
                 }
                 result
+            }
+            #[inline]
+            fn atan2_stable(self, other: Self) -> Self {
+                crate::num::stable::atan2(self, other)
             }
             #[inline]
             fn sin_cos(self) -> (Self, Self) {
@@ -155,28 +215,56 @@ macro_rules! impl_real_simd {
                 (sin, cos)
             }
             #[inline]
+            fn sin_cos_stable(self) -> (Self, Self) {
+                crate::num::stable::sin_cos(self)
+            }
+            #[inline]
             fn sinh(self) -> Self {
                 self.as_array().map(|x| x.sinh()).into()
+            }
+            #[inline]
+            fn sinh_stable(self) -> Self {
+                crate::num::stable::sinh(self)
             }
             #[inline]
             fn cosh(self) -> Self {
                 self.as_array().map(|x| x.cosh()).into()
             }
             #[inline]
+            fn cosh_stable(self) -> Self {
+                crate::num::stable::cosh(self)
+            }
+            #[inline]
             fn tanh(self) -> Self {
                 self.as_array().map(|x| x.tanh()).into()
+            }
+            #[inline]
+            fn tanh_stable(self) -> Self {
+                crate::num::stable::tanh(self)
             }
             #[inline]
             fn asinh(self) -> Self {
                 self.as_array().map(|x| x.asinh()).into()
             }
             #[inline]
+            fn asinh_stable(self) -> Self {
+                crate::num::stable::asinh(self)
+            }
+            #[inline]
             fn acosh(self) -> Self {
                 self.as_array().map(|x| x.acosh()).into()
             }
             #[inline]
+            fn acosh_stable(self) -> Self {
+                crate::num::stable::acosh(self)
+            }
+            #[inline]
             fn atanh(self) -> Self {
                 self.as_array().map(|x| x.atanh()).into()
+            }
+            #[inline]
+            fn atanh_stable(self) -> Self {
+                crate::num::stable::atanh(self)
             }
             #[inline]
             fn recip(self) -> Self {
@@ -238,6 +326,10 @@ macro_rules! impl_float_simd {
                     result[i] = result[i].powf(n[i]);
                 }
                 result
+            }
+            #[inline]
+            fn powf_stable(self, n: Self) -> Self {
+                crate::num::stable::powf(self, n)
             }
             #[inline]
             fn is_nan(self) -> Self::Bool {

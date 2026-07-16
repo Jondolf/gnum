@@ -139,6 +139,16 @@ pub trait Float: Real {
 
     /// Returns `self` raised to the power of `n`.
     ///
+    /// # Unspecified Precision
+    ///
+    /// The precision of this function is non-deterministic. This means
+    /// it varies by platform, Rust version, and can even differ within
+    /// the same execution from one invocation to the next.
+    ///
+    /// See [`powf_stable`](Self::powf_stable) for a version of this function
+    /// that is guaranteed to be deterministic and returns identical results
+    /// across both scalar and vectorized types at the cost of some performance.
+    ///
     /// # Examples
     ///
     /// ```
@@ -152,6 +162,32 @@ pub trait Float: Real {
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn powf(self, n: Self) -> Self;
+
+    /// Returns `self` raised to the power of `n`, with deterministic results.
+    ///
+    /// # Precision
+    ///
+    /// This function is deterministic and returns identical results across
+    /// both scalar and vectorized types at the cost of some performance.
+    ///
+    /// See [`powf`](Self::powf) for a version of this function that may be faster
+    /// but can be non-deterministic.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use gnum::num::Float;
+    /// #
+    /// let x: f32 = 2.0;
+    /// let abs_difference = (x.powf_stable(2.0) - (x * x)).abs();
+    /// assert!(abs_difference <= 1e-5);
+    ///
+    /// assert_eq!(f32::powf_stable(1.0, f32::NAN), 1.0);
+    /// assert_eq!(f32::powf_stable(f32::NAN, 0.0), 1.0);
+    /// assert_eq!(f32::powf_stable(0.0, 0.0), 1.0);
+    /// ```
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn powf_stable(self, n: Self) -> Self;
 
     /// Returns `true` if `self` is NaN, and `false` otherwise.
     ///
@@ -388,6 +424,10 @@ macro_rules! impl_float {
                 #[inline]
                 fn powf(self, n: Self) -> Self {
                     self.powf(n)
+                }
+                #[inline]
+                fn powf_stable(self, n: Self) -> Self {
+                    crate::num::stable::powf(self, n)
                 }
                 #[inline]
                 fn is_nan(self) -> bool {
