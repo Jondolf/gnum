@@ -1,9 +1,10 @@
 //! Traits and types for generic numerics.
 
+pub mod ops;
+
 mod float;
 mod int;
 mod markers;
-mod ops;
 mod real;
 mod signed;
 pub(crate) mod stable;
@@ -11,7 +12,6 @@ pub(crate) mod stable;
 pub use float::Float;
 pub use int::Int;
 pub use markers::*;
-pub use ops::*;
 pub use real::{Real, RealConstants};
 pub use signed::Signed;
 

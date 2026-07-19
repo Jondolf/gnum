@@ -1,6 +1,6 @@
 use core::ops::*;
 
-use crate::num::{impl_binary_op, impl_unary_op};
+use crate::num::ops::{impl_binary_op, impl_unary_op};
 
 /// Performs wrapping addition that wraps around on overflow.
 ///

@@ -1,3 +1,8 @@
+//! Additional traits for operations on numeric types.
+//!
+//! These may not be supported by all types, but are provided
+//! for the ones that do.
+
 mod checked;
 mod euclid;
 mod helper_macros;

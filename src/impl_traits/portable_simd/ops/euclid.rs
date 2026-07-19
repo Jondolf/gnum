@@ -1,6 +1,9 @@
 use crate::{
     cmp::NumOrd,
-    num::{DivEuclid, Real, RemEuclid, Signed, Zero},
+    num::{
+        Real, Signed, Zero,
+        ops::{DivEuclid, RemEuclid},
+    },
     simd::Select,
 };
 use core::simd::Simd;
