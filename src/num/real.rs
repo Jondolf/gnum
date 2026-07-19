@@ -1422,6 +1422,29 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn midpoint(self, other: Self) -> Self;
 
+    /// Returns the midpoint (average) between `self` and `other`, computed as `(self + other) / 2`.
+    ///
+    /// This is a faster version of [`midpoint`](Self::midpoint), which additionally guards
+    /// against overflow and underflow. For example, `f32::MAX.midpoint(f32::MAX)` is `f32::MAX`,
+    /// but `f32::MAX.midpoint_fast(f32::MAX)` overflows to `f32::INFINITY`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use gnum::num::Real;
+    ///
+    /// assert_eq!(Real::midpoint_fast(3.0f32, 5.0), 4.0);
+    ///
+    /// // `midpoint_fast` can overflow, while `midpoint` does not
+    /// assert!(Real::midpoint_fast(f32::MAX, f32::MAX).is_infinite());
+    /// assert_eq!(Real::midpoint(f32::MAX, f32::MAX), f32::MAX);
+    /// ```
+    #[inline]
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn midpoint_fast(self, other: Self) -> Self {
+        (self + other) * Self::HALF
+    }
+
     /// Returns a number with the magnitude of `self` and the sign of `sign`.
     ///
     /// # Example
