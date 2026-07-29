@@ -849,7 +849,7 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// #
     /// let x: f32 = 0.0;
     ///
-    /// assert_eq!(x.acos_stable(), core::f32::consts::FRAC_PI_2);
+    /// assert!((x.acos_stable() - core::f32::consts::FRAC_PI_2).abs() <= 1e-6);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn acos_stable(self) -> Self;

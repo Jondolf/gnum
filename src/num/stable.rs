@@ -29,6 +29,13 @@ use crate::{
     simd::Select,
 };
 
+/// Negates `x` when the integer nearest to `q` is odd, applying the odd-quadrant sign.
+#[inline(always)]
+fn negate_if_odd<T: Float>(x: T, q: T) -> T {
+    let q_odd = (q * T::HALF).fract().num_ne(T::ZERO);
+    q_odd.select(-x, x)
+}
+
 // The high and low parts of ln(2) such that `LN_2_UPPER + LN_2_LOWER == ln(2)`
 // to beyond f32 precision. Used for the Cody–Waite reduction in `exp`/`expm1`.
 //
@@ -278,7 +285,7 @@ pub(crate) fn sin_cos<T: Float>(d: T) -> (T, T) {
     // then evaluate the polynomials on r and recover the full-range result from q.
     let q = (d * T::FRAC_2_PI).round();
 
-    // Cody-Waite reduction: subtract q*(pi/2) with pi/2 given as four constants.
+    // Cody-Waite reduction: subtract q*(pi/2) with pi/2 given as four constants
     // so each q * c is exact and no low-order bits of r are lost to cancellation.
     let mut r = q * -k::<T>(1.5703125) + d;
     r = q * -k::<T>(0.00048351287841796875) + r;
@@ -319,21 +326,96 @@ pub(crate) fn sin_cos<T: Float>(d: T) -> (T, T) {
 
 /// Computes sin(x).
 #[inline]
-pub(crate) fn sin<T: Float>(x: T) -> T {
-    sin_cos(x).0
+pub(crate) fn sin<T: Float>(d: T) -> T {
+    // SLEEF `xsinf`.
+
+    // Split d = q * pi + r
+    // where q is an integer and r is in [-pi/2, pi/2]
+    // so sin(d) = (-1)^q * sin(r).
+    let q = (d * T::FRAC_1_PI).round();
+
+    // Cody-Waite reduction: subtract q*pi with pi given as four constants
+    // so each q * c is exact and no low-order bits of r are lost to cancellation.
+    let mut r = q * -k::<T>(3.140625) + d;
+    r = q * -k::<T>(0.0009670257568359375) + r;
+    r = q * -k::<T>(6.2771141529083251953e-07) + r;
+    r = q * -k::<T>(1.2154201256553420762e-10) + r;
+
+    let s = r * r;
+
+    // Minimax polynomial for sin(r) on [-pi/2, pi/2] (Horner in s = r^2).
+    let mut u = k::<T>(2.6083159809786593541503e-06);
+    u = u * s + k::<T>(-0.0001981069071916863322258);
+    u = u * s + k::<T>(0.00833307858556509017944336);
+    u = u * s + k::<T>(-0.166666597127914428710938);
+    let sin_r = (r * s) * u + r;
+
+    // Odd q negates the result, since sin(r + q*pi) = (-1)^q * sin(r).
+    // The low bit of the integer q selects the negation.
+    negate_if_odd(sin_r, q)
 }
 
 /// Computes cos(x).
 #[inline]
-pub(crate) fn cos<T: Float>(x: T) -> T {
-    sin_cos(x).1
+pub(crate) fn cos<T: Float>(d: T) -> T {
+    // SLEEF `xcosf`
+
+    // Split d = q * (pi/2) + r
+    // where q = 2n + 1 is odd and r is in [-pi/2, pi/2].
+    //
+    // An odd q turns cos into a sin evaluation: cos(d) = +/- sin(r).
+    let n = (d * T::FRAC_1_PI - T::HALF).round();
+    let q = k::<T>(2.0) * n + T::ONE;
+
+    // Cody-Waite reduction: subtract q*(pi/2) with pi/2 given as four constants.
+    let mut r = q * -k::<T>(1.5703125) + d;
+    r = q * -k::<T>(0.00048351287841796875) + r;
+    r = q * -k::<T>(3.13855707645416259765e-07) + r;
+    r = q * -k::<T>(6.0771006282767103810e-11) + r;
+
+    let s = r * r;
+
+    // Minimax polynomial for sin(r) on [-pi/2, pi/2] (Horner in s = r^2).
+    let mut u = k::<T>(2.6083159809786593541503e-06);
+    u = u * s + k::<T>(-0.0001981069071916863322258);
+    u = u * s + k::<T>(0.00833307858556509017944336);
+    u = u * s + k::<T>(-0.166666597127914428710938);
+    let sin_r = (r * s) * u + r;
+
+    // q mod 4 == 1 (n even) negates the result. n + 1 is odd exactly when n is even,
+    // so negating on its parity applies the sign.
+    negate_if_odd(sin_r, n + T::ONE)
 }
 
-/// Computes tan(x) as sin(x) / cos(x).
+/// Computes tan(x).
 #[inline]
-pub(crate) fn tan<T: Float>(x: T) -> T {
-    let (s, c) = sin_cos(x);
-    s / c
+pub(crate) fn tan<T: Float>(d: T) -> T {
+    // SLEEF `xtanf`.
+
+    // Split d = q * (pi/2) + r
+    // where q is an integer and r is in [-pi/4, pi/4].
+    let q = (d * T::FRAC_2_PI).round();
+
+    // Cody-Waite reduction: subtract q*(pi/2) with pi/2 given as four constants.
+    let mut r = q * -k::<T>(1.5703125) + d;
+    r = q * -k::<T>(0.00048351287841796875) + r;
+    r = q * -k::<T>(3.13855707645416259765e-07) + r;
+    r = q * -k::<T>(6.0771006282767103810e-11) + r;
+
+    let s = r * r;
+
+    // Minimax polynomial for tan(r) on [-pi/4, pi/4] (Horner in s = r^2).
+    let mut u = k::<T>(0.00927245803177356719970703);
+    u = u * s + k::<T>(0.00331984995864331722259521);
+    u = u * s + k::<T>(0.0242998078465461730957031);
+    u = u * s + k::<T>(0.0534495301544666290283203);
+    u = u * s + k::<T>(0.133383005857467651367188);
+    u = u * s + k::<T>(0.333331853151321411132812);
+    let tan_r = (r * s) * u + r;
+
+    // Odd quadrants map tan to its negated reciprocal: tan(r + pi/2) = -1/tan(r).
+    let q_odd = (q * T::HALF).fract().num_ne(T::ZERO);
+    q_odd.select(-(T::ONE / tan_r), tan_r)
 }
 
 /// Computes atan(x).
@@ -406,18 +488,38 @@ pub(crate) fn atan2<T: Float>(y: T, x: T) -> T {
     (x.num_eq(T::ZERO) & y.num_eq(T::ZERO)).select(T::ZERO, r)
 }
 
-/// Computes asin(x) via the identity `asin(x) = atan2(x, sqrt(1 - x^2))`.
-#[inline]
-pub(crate) fn asin<T: Float>(x: T) -> T {
-    // sqrt((1 + x)(1 - x)) evaluates sqrt(1 - x^2) without the cancellation of
-    // `1 - x^2` as |x| approaches 1.
-    atan2(x, ((T::ONE + x) * (T::ONE - x)).sqrt())
+/// Evaluates the degree-7 minimax polynomial `P(x)` for which `acos(x) = sqrt(1 - x) * P(x)`
+/// on `[0, 1]` (DirectXMath `XMScalarAcos`). Shared by [`acos`] and [`asin`].
+#[inline(always)]
+fn acos_poly<T: Float>(x: T) -> T {
+    let mut u = k::<T>(-0.0012624911);
+    u = u * x + k::<T>(0.0066700901);
+    u = u * x + k::<T>(-0.0170881256);
+    u = u * x + k::<T>(0.0308918810);
+    u = u * x + k::<T>(-0.0501743046);
+    u = u * x + k::<T>(0.0889789874);
+    u = u * x + k::<T>(-0.2145988016);
+    u * x + k::<T>(1.5707963050)
 }
 
-/// Computes acos(x) via the identity `acos(x) = atan2(sqrt(1 - x^2), x)`.
+/// Computes asin(x).
 #[inline]
-pub(crate) fn acos<T: Float>(x: T) -> T {
-    atan2(((T::ONE + x) * (T::ONE - x)).sqrt(), x)
+pub(crate) fn asin<T: Float>(d: T) -> T {
+    // asin(x) = pi/2 - acos(|x|) for x in [-1, 1] (DirectXMath `XMScalarASin`)
+    let x = d.abs();
+    let acos_abs = acos_poly(x) * (T::ONE - x).sqrt();
+    (T::FRAC_PI_2 - acos_abs).copysign(d)
+}
+
+/// Computes acos(x).
+#[inline]
+pub(crate) fn acos<T: Float>(d: T) -> T {
+    // acos(x) = sqrt(1 - x) * P(x) for x in [0, 1] (DirectXMath `XMScalarAcos`)
+    let x = d.abs();
+    let r = acos_poly(x) * (T::ONE - x).sqrt();
+
+    // Reflect across pi for x < 0.
+    d.num_lt(T::ZERO).select(T::PI - r, r)
 }
 
 // == hyperbolic ==
@@ -432,7 +534,8 @@ pub(crate) fn sinh<T: Float>(x: T) -> T {
 /// Computes cosh(x) from the definition `cosh(x) = (e^x + e^-x) / 2`.
 #[inline]
 pub(crate) fn cosh<T: Float>(x: T) -> T {
-    (exp(x) + exp(-x)) * T::HALF
+    let e = exp(x);
+    (e + T::ONE / e) * T::HALF
 }
 
 /// Computes tanh(x) via `tanh(x) = expm1(2|x|) / (expm1(2|x|) + 2)`.
@@ -604,9 +707,11 @@ mod tests {
         // around |x| ~= 1e5. Past this, a Payne-Hanek reduction would be needed.
         sweep_unary("sin-mid", -1e4, 1e4, 3e-6, sin, f32::sin);
         sweep_unary("cos-mid", -1e4, 1e4, 3e-6, cos, f32::cos);
+        // Avoid the poles at +/- pi/2, where tan diverges.
+        sweep_unary("tan", -1.4, 1.4, 3e-6, tan, f32::tan);
         sweep_unary("atan", -20.0, 20.0, 3e-5, atan, f32::atan);
-        sweep_unary("asin", -1.0, 1.0, 3e-5, asin, f32::asin);
-        sweep_unary("acos", -1.0, 1.0, 3e-5, acos, f32::acos);
+        sweep_unary("asin", -1.0, 1.0, 5e-7, asin, f32::asin);
+        sweep_unary("acos", -1.0, 1.0, 1e-6, acos, f32::acos);
     }
 
     #[test]
