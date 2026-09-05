@@ -4,7 +4,8 @@ use crate::num::{Float, Real, RealConstants, Signed};
 use crate::simd::Select;
 use core::simd::{
     Simd, SimdElement,
-    num::{SimdFloat, SimdInt},
+    cmp::{SimdPartialEq, SimdPartialOrd},
+    num::{SimdFloat, SimdInt, SimdUint},
 };
 use std::simd::StdFloat;
 
@@ -71,7 +72,7 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn fract(self) -> Self {
-                StdFloat::fract(self)
+                self - RoundOps::trunc_internal(self)
             }
             #[inline]
             fn sqrt(self) -> Self {
@@ -135,11 +136,20 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn hypot(self, other: Self) -> Self {
-                let mut result = self;
-                for i in 0..Self::LEN {
-                    result[i] = result[i].hypot(other[i]);
-                }
-                result
+                // Scale by the larger magnitude so neither square can overflow or underflow.
+                let x = SimdFloat::abs(self);
+                let y = SimdFloat::abs(other);
+                let hi = SimdFloat::simd_max(x, y);
+                let lo = SimdFloat::simd_min(x, y);
+                let ratio = lo / hi;
+                let result = hi * StdFloat::sqrt(Simd::splat(1.0) + ratio * ratio);
+
+                // Restore `hypot` special cases.
+                let result = hi.simd_eq(Simd::splat(0.0)).select(Simd::splat(0.0), result);
+                let result = (SimdFloat::is_nan(self) | SimdFloat::is_nan(other))
+                    .select(self + other, result);
+                (SimdFloat::is_infinite(self) | SimdFloat::is_infinite(other))
+                    .select(Simd::splat(<$real>::INFINITY), result)
             }
             #[inline]
             fn hypot_stable(self, other: Self) -> Self {
@@ -163,7 +173,13 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn tan(self) -> Self {
-                self.as_array().map(|x| x.tan()).into()
+                if <$real>::MANTISSA_DIGITS == f32::MANTISSA_DIGITS {
+                    // LLVM combines these into the vector sin/cos lowering for f32,
+                    // but for f64 this is slower.
+                    StdFloat::sin(self) / StdFloat::cos(self)
+                } else {
+                    self.as_array().map(|x| x.tan()).into()
+                }
             }
             #[inline]
             fn tan_stable(self) -> Self {
@@ -222,7 +238,13 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn sinh(self) -> Self {
-                self.as_array().map(|x| x.sinh()).into()
+                let x = SimdFloat::abs(self);
+                let root_e = StdFloat::exp(x * Simd::splat(0.5));
+                let half_e = root_e * (root_e * Simd::splat(0.5));
+                let result = half_e - Simd::splat(0.25) / half_e;
+                let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
+                let result = x.simd_lt(small).select(x, result);
+                SimdFloat::copysign(result, self)
             }
             #[inline]
             fn sinh_stable(self) -> Self {
@@ -230,7 +252,9 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn cosh(self) -> Self {
-                self.as_array().map(|x| x.cosh()).into()
+                let root_e = StdFloat::exp(SimdFloat::abs(self) * Simd::splat(0.5));
+                let half_e = root_e * (root_e * Simd::splat(0.5));
+                half_e + Simd::splat(0.25) / half_e
             }
             #[inline]
             fn cosh_stable(self) -> Self {
@@ -238,7 +262,13 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn tanh(self) -> Self {
-                self.as_array().map(|x| x.tanh()).into()
+                let x = SimdFloat::abs(self);
+                let e = StdFloat::exp(x + x);
+                let result = (e - Simd::splat(1.0)) / (e + Simd::splat(1.0));
+                let result = SimdFloat::is_infinite(e).select(Simd::splat(1.0), result);
+                let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
+                let result = x.simd_lt(small).select(x, result);
+                SimdFloat::copysign(result, self)
             }
             #[inline]
             fn tanh_stable(self) -> Self {
@@ -246,7 +276,20 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn asinh(self) -> Self {
-                self.as_array().map(|x| x.asinh()).into()
+                if <$real>::MANTISSA_DIGITS == f32::MANTISSA_DIGITS {
+                    return self.as_array().map(|x| x.asinh()).into();
+                }
+
+                let x = SimdFloat::abs(self);
+                let square_limit = StdFloat::sqrt(Simd::splat(<$real>::MAX));
+                let regular = StdFloat::ln(
+                    x + StdFloat::sqrt(x * x + Simd::splat(1.0)),
+                );
+                let large = StdFloat::ln(x) + Simd::splat(<$real as RealConstants>::LN_2);
+                let result = x.simd_gt(square_limit).select(large, regular);
+                let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
+                let result = x.simd_lt(small).select(x, result);
+                SimdFloat::copysign(result, self)
             }
             #[inline]
             fn asinh_stable(self) -> Self {
@@ -254,7 +297,19 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn acosh(self) -> Self {
-                self.as_array().map(|x| x.acosh()).into()
+                if <$real>::MANTISSA_DIGITS == f32::MANTISSA_DIGITS {
+                    return self.as_array().map(|x| x.acosh()).into();
+                }
+
+                let square_limit = StdFloat::sqrt(Simd::splat(<$real>::MAX));
+                let regular = StdFloat::ln(
+                    self
+                        + StdFloat::sqrt(
+                            (self - Simd::splat(1.0)) * (self + Simd::splat(1.0)),
+                        ),
+                );
+                let large = StdFloat::ln(self) + Simd::splat(<$real as RealConstants>::LN_2);
+                self.simd_gt(square_limit).select(large, regular)
             }
             #[inline]
             fn acosh_stable(self) -> Self {
@@ -262,7 +317,13 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn atanh(self) -> Self {
-                self.as_array().map(|x| x.atanh()).into()
+                let abs = SimdFloat::abs(self);
+                let result = StdFloat::ln(
+                    (Simd::splat(1.0) + abs) / (Simd::splat(1.0) - abs),
+                ) * Simd::splat(0.5);
+                let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
+                let result = abs.simd_lt(small).select(abs, result);
+                SimdFloat::copysign(result, self)
             }
             #[inline]
             fn atanh_stable(self) -> Self {
@@ -376,11 +437,31 @@ macro_rules! impl_float_simd {
             }
             #[inline]
             fn next_up(self) -> Self {
-                self.as_array().map(|x| x.next_up()).into()
+                let bits: Simd<$int, N> = SimdUint::cast(SimdFloat::to_bits(self));
+                let magnitude = bits & Simd::splat(<$int>::MAX);
+                let is_zero = magnitude.simd_eq(Simd::splat(0));
+                let is_negative = bits.simd_lt(Simd::splat(0));
+                let adjacent = is_negative.select(bits - Simd::splat(1), bits + Simd::splat(1));
+                let candidate =
+                    SimdFloat::from_bits(SimdInt::cast(is_zero.select(Simd::splat(1), adjacent)));
+                let unchanged =
+                    SimdFloat::is_nan(self) | self.simd_eq(Simd::splat(<$float>::INFINITY));
+                unchanged.select(self, candidate)
             }
             #[inline]
             fn next_down(self) -> Self {
-                self.as_array().map(|x| x.next_down()).into()
+                let bits: Simd<$int, N> = SimdUint::cast(SimdFloat::to_bits(self));
+                let sign = Simd::splat(<$int>::MIN);
+                let magnitude = bits & Simd::splat(<$int>::MAX);
+                let is_zero = magnitude.simd_eq(Simd::splat(0));
+                let is_negative = bits.simd_lt(Simd::splat(0));
+                let adjacent = is_negative.select(bits + Simd::splat(1), bits - Simd::splat(1));
+                let negative_min = sign | Simd::splat(1);
+                let candidate =
+                    SimdFloat::from_bits(SimdInt::cast(is_zero.select(negative_min, adjacent)));
+                let unchanged =
+                    SimdFloat::is_nan(self) | self.simd_eq(Simd::splat(<$float>::NEG_INFINITY));
+                unchanged.select(self, candidate)
             }
             #[inline]
             fn from_bits(bits: Self::Bits) -> Self {

@@ -30,7 +30,7 @@ where
 
     #[inline]
     unsafe fn extract_unchecked(&self, i: usize) -> Self::Element {
-        self[i]
+        unsafe { *self.as_array().get_unchecked(i) }
     }
 
     #[inline]
@@ -40,7 +40,7 @@ where
 
     #[inline]
     unsafe fn replace_unchecked(&mut self, i: usize, value: Self::Element) {
-        self[i] = value;
+        unsafe { *self.as_mut_array().get_unchecked_mut(i) = value }
     }
 }
 
@@ -71,7 +71,7 @@ where
 
     #[inline]
     unsafe fn extract_unchecked(&self, i: usize) -> Self::Element {
-        self.test(i)
+        unsafe { self.test_unchecked(i) }
     }
 
     #[inline]
@@ -81,6 +81,6 @@ where
 
     #[inline]
     unsafe fn replace_unchecked(&mut self, i: usize, value: Self::Element) {
-        self.set(i, value);
+        unsafe { self.set_unchecked(i, value) }
     }
 }

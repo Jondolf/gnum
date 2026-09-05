@@ -2,8 +2,8 @@ use crate::simd::MaskLike;
 use core::simd::MaskElement;
 
 impl<T: MaskElement, const N: usize> MaskLike for core::simd::Mask<T, N> {
-    const TRUE: Self = Self::TRUE;
-    const FALSE: Self = Self::FALSE;
+    const TRUE: Self = Self::splat(true);
+    const FALSE: Self = Self::splat(false);
 
     #[inline(always)]
     fn test(&self, index: usize) -> bool {

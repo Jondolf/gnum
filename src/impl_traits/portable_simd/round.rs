@@ -8,8 +8,9 @@
 //! is derived from an int round-trip that is bit-identical to the scalar result
 //! but was measured to be 2-7x as fast.
 
-use crate::cmp::NumEq;
-use crate::simd::Select;
+#[allow(unused_imports, reason = "used on targets without hardware rounding")]
+use crate::{cmp::NumEq, simd::Select};
+#[allow(unused_imports, reason = "used on targets without hardware rounding")]
 use core::simd::{
     Simd,
     cmp::SimdPartialOrd,

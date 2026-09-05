@@ -16,7 +16,6 @@ macro_rules! impl_div_rem_euclid_int {
 
                 #[inline]
                 fn div_euclid(self, rhs: Self) -> Self {
-                    // TODO: Do this properly
                     let mut result = self;
                     for i in 0..Self::LEN {
                         result[i] = result[i].div_euclid(rhs[i]);
