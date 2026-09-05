@@ -5,3 +5,4 @@ mod select;
 mod shuffle;
 mod simd_like;
 mod swizzle;
+mod transpose;

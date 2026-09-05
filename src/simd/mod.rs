@@ -9,6 +9,7 @@ mod select;
 mod shuffle;
 mod simd_like;
 mod swizzle;
+mod transpose;
 
 pub use mask_cast::MaskCast;
 pub use mask_like::MaskLike;
@@ -17,3 +18,6 @@ pub use select::Select;
 pub use shuffle::{Shuffle4, Shuffle8};
 pub use simd_like::SimdLike;
 pub use swizzle::Swizzle;
+pub use transpose::Transpose;
+#[cfg(feature = "portable_simd")]
+pub(crate) use transpose::generic_transpose;

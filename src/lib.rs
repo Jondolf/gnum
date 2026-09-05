@@ -58,6 +58,7 @@
 //! - [`ReduceBitwise`] for bitwise reductions for integer SIMD types
 //! - [`Shuffle4`] and [`Shuffle8`] for lane-wise shuffling of SIMD values
 //! - [`Swizzle`] for common lane permutations like reversing, rotating, shifting, and interleaving
+//! - [`Transpose`] for transposing square matrices stored as SIMD row arrays
 //! - [`MaskCast`] for casting between mask types and their integer representations
 //!
 //! To scope generic code to only scalar or only SIMD types, the following traits are provided:
@@ -139,5 +140,6 @@ pub mod prelude {
     };
     pub use crate::simd::{
         MaskCast, MaskLike, Reduce, ReduceBitwise, Select, Shuffle4, Shuffle8, SimdLike, Swizzle,
+        Transpose,
     };
 }
