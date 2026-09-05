@@ -2,6 +2,7 @@
 
 pub mod ops;
 
+mod cast;
 mod float;
 mod int;
 mod markers;
@@ -9,6 +10,7 @@ mod real;
 mod signed;
 pub(crate) mod stable;
 
+pub use cast::NumCast;
 pub use float::Float;
 pub use int::Int;
 pub use markers::*;

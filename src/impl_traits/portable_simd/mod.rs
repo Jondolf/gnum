@@ -1,6 +1,7 @@
 //! Implementations of `gnum` traits for [`core::simd`] types.
 
 mod bytes;
+mod cast;
 mod cmp;
 mod float;
 mod int;

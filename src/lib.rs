@@ -50,6 +50,7 @@
 //! - [`NumEq`] for a lane-wise generalization of [`PartialEq`]/[`Eq`]
 //! - [`NumOrd`] for a lane-wise generalization of [`PartialOrd`]/[`Ord`]
 //! - [`Select`] for choosing elements from two SIMD-like values using a mask
+//! - [`NumCast`] for casting between numeric types with the semantics of the `as` operator
 //!
 //! More SIMD-specific traits include:
 //!
@@ -133,8 +134,8 @@ pub use bytes::ToBytes;
 pub mod prelude {
     pub use crate::cmp::{NumEq, NumOrd};
     pub use crate::num::{
-        Float, Int, Num, Real, RealConstants, ScalarFloat, ScalarInt, ScalarNum, ScalarReal,
-        ScalarValue, Signed, SimdFloat, SimdInt, SimdNum, SimdReal, SimdValue, ops::*,
+        Float, Int, Num, NumCast, Real, RealConstants, ScalarFloat, ScalarInt, ScalarNum,
+        ScalarReal, ScalarValue, Signed, SimdFloat, SimdInt, SimdNum, SimdReal, SimdValue, ops::*,
     };
     pub use crate::simd::{
         MaskCast, MaskLike, Reduce, ReduceBitwise, Select, Shuffle4, Shuffle8, SimdLike, Swizzle,
