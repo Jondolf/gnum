@@ -113,6 +113,20 @@
 //! a bug and should be reported on the [issue tracker].
 //!
 //! [issue tracker]: https://github.com/Jondolf/gnum/issues
+//!
+//! ## NaN Bit Patterns
+//!
+//! As with the standard library, `gnum` does not generally guarantee that NaN values
+//! returned from arithmetic operations have any particular sign, quiet bit, or payload,
+//! or that the bit pattern matches between scalar and SIMD implementations. This applies
+//! to both the standard and "stable" versions of operations.
+//!
+//! Do not rely on the exact bit patterns of NaN values returned from arithmetic operations.
+//! Treat them as unspecified and non-deterministic.
+//!
+//! See the [`f32` documentation on NaN bit patterns][NaN bit patterns] for more information.
+//!
+//! [NaN bit patterns]: https://doc.rust-lang.org/std/primitive.f32.html#nan-bit-patterns
 
 #![cfg_attr(feature = "portable_simd", feature(portable_simd))]
 #![allow(clippy::wrong_self_convention)]
