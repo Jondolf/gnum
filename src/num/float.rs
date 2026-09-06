@@ -103,6 +103,11 @@ pub trait Float: Real {
     /// has a dedicated `fma` CPU instruction. However, this is not always true, and will be heavily dependant
     /// on designing algorithms with specific target hardware in mind.
     ///
+    /// # NaN Behavior
+    ///
+    /// If the result is NaN, its sign and payload may differ between scalar and SIMD
+    /// implementations. Rust leaves those bits unspecified.
+    ///
     /// # Example
     ///
     /// ```

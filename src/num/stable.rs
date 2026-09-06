@@ -12,8 +12,8 @@
 //! native routines. Accurate double-precision implementations may be added in the future.
 //!
 //! The `*_stable` methods are typically slower than the non-`*_stable` methods
-//! for scalar `f32` and `f64` (1.4-3x), but competitive or even faster for
-//! SIMD types (0.4-1.2x). This can vary by operation and by platform.
+//! for scalar `f32` and `f64`, but competitive or even faster for SIMD types.
+//! This can vary by operation and by platform.
 //!
 //! [SLEEF]: https://sleef.org/
 //! [cephes]: https://www.netlib.org/cephes/
@@ -99,6 +99,36 @@ fn exp_lo<T: Float>() -> T {
     }
 }
 
+/// Scale that lifts any subnormal value into the normal range.
+#[inline(always)]
+fn subnormal_scale<T: Float>() -> T {
+    if <T::Bits as Int>::BITS == 32 {
+        k::<T>(16777216.0) // 2^24
+    } else {
+        k::<T>(18014398509481984.0) // 2^54
+    }
+}
+
+/// Base-2 logarithm of [`subnormal_scale`], to put back into an exponent.
+#[inline(always)]
+fn subnormal_shift<T: Float>() -> T {
+    if <T::Bits as Int>::BITS == 32 {
+        k::<T>(24.0)
+    } else {
+        k::<T>(54.0)
+    }
+}
+
+/// Cube root of [`subnormal_scale`], to undo it after a [`cbrt`].
+#[inline(always)]
+fn subnormal_cbrt_unscale<T: Float>() -> T {
+    if <T::Bits as Int>::BITS == 32 {
+        k::<T>(0.00390625) // 2^-8
+    } else {
+        k::<T>(3.814697265625e-06) // 2^-18
+    }
+}
+
 /// Computes `2^n` for an integer `n`.
 ///
 /// Valid while `n + bias` stays within the exponent range.
@@ -122,13 +152,34 @@ fn ilogb<T: Float>(x: T) -> Bits<T> {
     ((x.to_bits().cast_signed() >> mantissa_bits::<T>()) & exp_mask) - exp_bias::<T>()
 }
 
-/// Computes `2^n` like [`pow2i`], but valid for `|n|` up to
-/// roughly twice the exponent range.
+/// Returns `x * 2^-e`.
+///
+/// `x` must be non-negative, and `e` must be close enough to its exponent that
+/// the result stays normal, which holds when `e` is the exponent `x` was split on.
 #[inline(always)]
-fn pow2i_wide<T: Float>(n: Bits<T>) -> T {
-    // `half == floor(n / 2)` and `n - half == ceil(n / 2)`
-    let half = n >> ibits::<T>(1);
-    pow2i::<T>(half) * pow2i::<T>(n - half)
+fn scale_exp2<T: Float>(x: T, e: Bits<T>) -> T {
+    let shifted = x.to_bits().cast_signed() - (e << mantissa_bits::<T>());
+    T::from_bits(shifted.cast_unsigned())
+}
+
+/// Splits `x` into `m * 2^e` with `m` in `[3/4, 3/2)`, returning `m` and `e` as a float.
+/// The sign of `x` is ignored.
+#[inline(always)]
+fn split_near_one<T: Float>(x: T) -> (T, T) {
+    let mbits = mantissa_bits::<T>();
+    let abs_mask = !(ibits::<T>(1) << (mbits + exponent_bits::<T>()));
+    let nudge = ibits::<T>(1) << (mbits - ibits::<T>(1));
+
+    let subnormal = x.abs().num_lt(T::MIN_POSITIVE);
+    let normalized = subnormal.select(x * subnormal_scale::<T>(), x);
+
+    let bits = normalized.to_bits().cast_signed() & abs_mask;
+    let e = ((bits.cast_unsigned() + nudge.cast_unsigned()) >> mbits.cast_unsigned()).cast_signed()
+        - exp_bias::<T>();
+
+    let m = scale_exp2(T::from_bits(bits.cast_unsigned()), e);
+    let ef = T::from_int(e) - subnormal.select(subnormal_shift::<T>(), T::ZERO);
+    (m, ef)
 }
 
 // == exp and log ==
@@ -222,11 +273,9 @@ pub(crate) fn ln<T: Float>(d: T) -> T {
     // SLEEF `xlogf`
 
     // Split d = m * 2^e such that ln(d) = ln(m) + e * ln(2).
-    // Nudging by 1/0.75 before taking the exponent puts m in [2/3, 4/3),
-    // centered on 1 where the series below converges fastest.
-    let e = ilogb(d * k::<T>(1.0 / 0.75));
-    let m = d * pow2i::<T>(-e);
-    let ef = T::from_int(e);
+    // The split puts m in [3/4, 3/2), centered on 1 where the series
+    // below converges fastest.
+    let (m, ef) = split_near_one(d);
 
     // ln(m) = 2 * atanh(x) = 2 * (x + x^3/3 + x^5/5 + ...)
     // where x = (m - 1)/(m + 1), evaluated as 2 * x + x^3 * P(x^2)
@@ -415,7 +464,11 @@ pub(crate) fn tan<T: Float>(d: T) -> T {
 
     // Odd quadrants map tan to its negated reciprocal: tan(r + pi/2) = -1/tan(r).
     let q_odd = (q * T::HALF).fract().num_ne(T::ZERO);
-    q_odd.select(-(T::ONE / tan_r), tan_r)
+    let result = q_odd.select(-(T::ONE / tan_r), tan_r);
+
+    // Canonicalize infinities, while preserving NaN inputs and signed zero.
+    let result = (!d.is_finite()).select(T::NAN, result);
+    (d.is_nan() | d.num_eq(T::ZERO)).select(d, result)
 }
 
 /// Computes atan(x).
@@ -554,22 +607,37 @@ pub(crate) fn tanh<T: Float>(x: T) -> T {
     t.copysign(x)
 }
 
-/// Computes asinh(x) = ln(x + sqrt(x^2 + 1)).
+/// Computes asinh(x).
 #[inline]
 pub(crate) fn asinh<T: Float>(x: T) -> T {
-    ln(x + (x * x + T::ONE).sqrt())
+    let a = x.abs();
+
+    let large = a.num_gt(T::MAX.sqrt());
+    let arg = large.select(a, a + (a * a + T::ONE).sqrt());
+    let result = ln(arg) + large.select(T::LN_2, T::ZERO);
+
+    let result = a.num_lt(T::EPSILON.sqrt()).select(a, result);
+    let result = result.copysign(x);
+
+    x.is_nan().select(x, result)
 }
 
-/// Computes acosh(x) = ln(x + sqrt(x^2 - 1)).
+/// Computes acosh(x).
 #[inline]
 pub(crate) fn acosh<T: Float>(x: T) -> T {
-    ln(x + (x * x - T::ONE).sqrt())
+    let large = x.num_gt(T::MAX.sqrt());
+    let arg = large.select(x, x + ((x - T::ONE) * (x + T::ONE)).sqrt());
+    ln(arg) + large.select(T::LN_2, T::ZERO)
 }
 
-/// Computes atanh(x) = 0.5 * ln((1 + x) / (1 - x)).
+/// Computes atanh(x).
 #[inline]
 pub(crate) fn atanh<T: Float>(x: T) -> T {
-    ln((T::ONE + x) / (T::ONE - x)) * T::HALF
+    let a = x.abs();
+    let result = ln((T::ONE + a) / (T::ONE - a)) * T::HALF;
+    let result = a.num_lt(T::EPSILON.sqrt()).select(a, result);
+    let result = result.copysign(x);
+    x.is_nan().select(x, result)
 }
 
 // == roots and powers ==
@@ -582,21 +650,25 @@ pub(crate) fn cbrt<T: Float>(x: T) -> T {
     // Work on the absolute value, restoring the sign at the end.
     let a = x.abs();
 
+    let subnormal = a.num_lt(T::MIN_POSITIVE);
+    let a = subnormal.select(a * subnormal_scale::<T>(), a);
+    let unscale = subnormal.select(subnormal_cbrt_unscale::<T>(), T::ONE);
+    let three = ibits::<T>(3);
+
     // a = m * 2^e
     // where e = floor(log2(a)) + 1 and m is in [0.5, 1)
     let e = ilogb(a) + ibits::<T>(1);
-    let m = a * pow2i_wide::<T>(-e);
+    let m = scale_exp2(a, e);
 
     // Split e into 3 * scale + rem, where rem is in {0, 1, 2}.
     // Biasing by 6144, a multiple of 3, keeps the operands non-negative
     // so the division and remainder behave regardless of the sign of e.
-    let three = ibits::<T>(3);
     let biased = e + ibits::<T>(6144);
     let rem = T::from_int(biased % three);
     let scale = biased / three - ibits::<T>(2048);
 
-    // cbrt(a) = cbrt(m) * 2^scale * 2^(rem/3).
-    let mut factor = pow2i::<T>(scale);
+    // cbrt(a) = cbrt(m) * 2^scale * 2^(rem/3), undoing any subnormal scaling.
+    let mut factor = pow2i::<T>(scale) * unscale;
     factor = rem
         .num_eq(T::ONE)
         .select(factor * k::<T>(1.2599210498948731647672106), factor);
@@ -623,10 +695,20 @@ pub(crate) fn cbrt<T: Float>(x: T) -> T {
     x.is_nan().select(x, y)
 }
 
-/// Computes sqrt(x^2 + y^2) without overflow protection.
+/// Computes sqrt(x^2 + y^2) without overflowing or underflowing.
 #[inline]
 pub(crate) fn hypot<T: Float>(x: T, y: T) -> T {
-    (x * x + y * y).sqrt()
+    let ax = x.abs();
+    let ay = y.abs();
+    let swap = ax.num_lt(ay);
+    let hi = swap.select(ay, ax);
+    let lo = swap.select(ax, ay);
+    let ratio = lo / hi;
+    let result = hi * (T::ONE + ratio * ratio).sqrt();
+
+    let result = hi.num_eq(T::ZERO).select(T::ZERO, result);
+    let result = (x.is_nan() | y.is_nan()).select(T::NAN, result);
+    (x.is_infinite() | y.is_infinite()).select(T::INFINITY, result)
 }
 
 /// Computes x^y.
@@ -668,9 +750,13 @@ mod tests {
         let mut at = 0.0f32;
         let n = 4000;
         for i in 0..=n {
-            let x = lo + (hi - lo) * (i as f32) / (n as f32);
+            let x = lo + (hi - lo) * ((i as f32) / (n as f32));
             let e = reference(x);
             let a = approx(x);
+            assert!(
+                a.is_nan() == e.is_nan() && a.is_infinite() == e.is_infinite(),
+                "{name}: got {a:e}, wanted {e:e} at x={x:e}"
+            );
             let err = if e.abs() > 1.0 {
                 ((a - e) / e).abs()
             } else {
@@ -692,6 +778,24 @@ mod tests {
         sweep_unary("exp", -20.0, 20.0, 3e-6, exp, f32::exp);
         sweep_unary("exp2", -20.0, 20.0, 3e-6, exp2, f32::exp2);
         sweep_unary("ln", 1e-6, 1e6, 3e-6, ln, f32::ln);
+        sweep_unary("ln-big", 1e30, f32::MAX, 3e-6, ln, f32::ln);
+        sweep_unary("ln-small", f32::MIN_POSITIVE, 1e-30, 3e-6, ln, f32::ln);
+        sweep_unary(
+            "ln-subnormal",
+            f32::from_bits(1),
+            f32::MIN_POSITIVE,
+            3e-6,
+            ln,
+            f32::ln,
+        );
+        sweep_unary(
+            "cbrt-subnormal",
+            f32::from_bits(1),
+            f32::MIN_POSITIVE,
+            3e-6,
+            cbrt,
+            f32::cbrt,
+        );
         sweep_unary("log2", 1e-6, 1e6, 3e-6, log2, f32::log2);
         sweep_unary("log10", 1e-6, 1e6, 3e-6, log10, f32::log10);
         sweep_unary("cbrt", -1000.0, 1000.0, 3e-6, cbrt, f32::cbrt);
@@ -720,7 +824,12 @@ mod tests {
         sweep_unary("cosh", -10.0, 10.0, 3e-6, cosh, f32::cosh);
         sweep_unary("tanh", -10.0, 10.0, 3e-6, tanh, f32::tanh);
         sweep_unary("asinh", -10.0, 10.0, 3e-5, asinh, f32::asinh);
+        sweep_unary("acosh", 1.0, 10.0, 3e-5, acosh, f32::acosh);
         sweep_unary("atanh", -0.99, 0.99, 3e-5, atanh, f32::atanh);
+        sweep_unary("asinh-cross", 1e15, 1e25, 3e-5, asinh, f32::asinh);
+        sweep_unary("acosh-cross", 1e15, 1e25, 3e-5, acosh, f32::acosh);
+        sweep_unary("asinh-big", 1e30, f32::MAX, 3e-5, asinh, f32::asinh);
+        sweep_unary("acosh-big", 1e30, f32::MAX, 3e-5, acosh, f32::acosh);
     }
 
     #[test]
@@ -793,5 +902,130 @@ mod tests {
             };
             assert!(err <= 4e-6, "expm1 rel err {err:e} at x={x}");
         }
+    }
+
+    /// A NaN with a distinctive payload.
+    const PAYLOAD_NAN: f32 = f32::from_bits(0x7fc0_0005);
+
+    /// Sweeps through every `f32` subnormal and checks that the `ln` and `cbrt`
+    /// approximations are accurate.
+    #[test]
+    fn subnormals_are_normalized() {
+        let (mut worst_ln, mut worst_cbrt) = (0.0f32, 0.0f32);
+        let (mut at_ln, mut at_cbrt) = (0.0f32, 0.0f32);
+        for bits in 1..(1u32 << 23) {
+            let x = f32::from_bits(bits);
+            let e = x.ln();
+            let err = ((ln(x) - e) / e).abs();
+            if err > worst_ln {
+                worst_ln = err;
+                at_ln = x;
+            }
+            let e = x.cbrt();
+            let err = ((cbrt(x) - e) / e).abs();
+            if err > worst_cbrt {
+                worst_cbrt = err;
+                at_cbrt = x;
+            }
+        }
+        assert!(worst_ln <= 3e-6, "ln worst {worst_ln:e} at {at_ln:e}");
+        assert!(
+            worst_cbrt <= 3e-6,
+            "cbrt worst {worst_cbrt:e} at {at_cbrt:e}"
+        );
+    }
+
+    #[test]
+    fn tan_edge_cases() {
+        assert_eq!(tan(f32::INFINITY).to_bits(), f32::NAN.to_bits());
+        assert_eq!(tan(f32::NEG_INFINITY).to_bits(), f32::NAN.to_bits());
+        assert_eq!(tan(PAYLOAD_NAN).to_bits(), PAYLOAD_NAN.to_bits());
+        assert_eq!(tan(-f32::NAN).to_bits(), (-f32::NAN).to_bits());
+        assert_eq!(tan(0.0f32).to_bits(), 0.0f32.to_bits());
+        assert_eq!(tan(-0.0f32).to_bits(), (-0.0f32).to_bits());
+    }
+
+    #[test]
+    fn inverse_hyperbolic_edge_cases() {
+        let tiny = 1e-30f32;
+
+        // Zeros, tiny inputs, and NaN values return the input.
+        for f in [asinh, atanh] {
+            assert_eq!(f(0.0).to_bits(), 0.0f32.to_bits());
+            assert_eq!(f(-0.0).to_bits(), (-0.0f32).to_bits());
+            assert_eq!(f(tiny).to_bits(), tiny.to_bits());
+            assert_eq!(f(-tiny).to_bits(), (-tiny).to_bits());
+            assert_eq!(f(PAYLOAD_NAN).to_bits(), PAYLOAD_NAN.to_bits());
+        }
+
+        // Large inputs must stay finite rather than collapsing to infinity.
+        for x in [1e30f32, 1e35, 1e38, f32::MAX] {
+            let (a, e) = (asinh(x), x.asinh());
+            assert!(a.is_finite(), "asinh({x:e}) = {a:e}");
+            assert!(
+                ((a - e) / e).abs() <= 3e-5,
+                "asinh({x:e}) = {a:e}, wanted {e:e}"
+            );
+
+            assert_eq!(asinh(-x).to_bits(), (-asinh(x)).to_bits());
+
+            let (a, e) = (acosh(x), x.acosh());
+            assert!(a.is_finite(), "acosh({x:e}) = {a:e}");
+            assert!(
+                ((a - e) / e).abs() <= 3e-5,
+                "acosh({x:e}) = {a:e}, wanted {e:e}"
+            );
+        }
+
+        assert_eq!(asinh(f32::INFINITY), f32::INFINITY);
+        assert_eq!(asinh(f32::NEG_INFINITY), f32::NEG_INFINITY);
+
+        assert_eq!(acosh(1.0f32), 0.0);
+        assert_eq!(acosh(f32::INFINITY), f32::INFINITY);
+
+        // Below the domain.
+        assert!(acosh(0.5f32).is_nan());
+        assert!(acosh(f32::NAN).is_nan());
+
+        assert_eq!(atanh(1.0f32), f32::INFINITY);
+        assert_eq!(atanh(-1.0f32), f32::NEG_INFINITY);
+
+        // Outside the domain.
+        assert!(atanh(2.0f32).is_nan());
+        assert!(atanh(-2.0f32).is_nan());
+    }
+
+    #[test]
+    fn hypot_edge_cases() {
+        assert_eq!(hypot(3.0f32, 4.0), 5.0);
+        assert_eq!(hypot(-3.0f32, -4.0), 5.0);
+        assert_eq!(hypot(0.0f32, 0.0), 0.0);
+        assert_eq!(hypot(-0.0f32, -0.0).to_bits(), 0.0f32.to_bits());
+
+        // Squaring either side overflows or underflows way earlier than the result does,
+        // so these must not collapse to infinity or zero.
+        for (x, y) in [(1e30f32, 1e30f32), (1e-25, 1e-25), (f32::MAX, 1.0)] {
+            for (x, y) in [(x, y), (y, x)] {
+                let (a, e) = (hypot(x, y), x.hypot(y));
+                assert!(a.is_finite() && a > 0.0, "hypot({x:e}, {y:e}) = {a:e}");
+                assert!(
+                    ((a - e) / e).abs() <= 3e-6,
+                    "hypot({x:e}, {y:e}) = {a:e}, wanted {e:e}"
+                );
+            }
+        }
+
+        let min = f32::MIN_POSITIVE;
+        assert!(hypot(min, min) > min);
+
+        // A genuine overflow should still overflow.
+        assert_eq!(hypot(f32::MAX, f32::MAX), f32::INFINITY);
+
+        // IEEE-754 requires hypot to choose infinity over NaN.
+        assert_eq!(hypot(f32::INFINITY, f32::NAN), f32::INFINITY);
+        assert_eq!(hypot(f32::NAN, f32::NEG_INFINITY), f32::INFINITY);
+        assert_eq!(hypot(f32::NEG_INFINITY, 1.0), f32::INFINITY);
+        assert!(hypot(f32::NAN, 1.0).is_nan());
+        assert!(hypot(1.0, f32::NAN).is_nan());
     }
 }

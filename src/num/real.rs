@@ -1410,6 +1410,11 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
 
     /// Returns the midpoint (average) between `self` and `other`.
     ///
+    /// # NaN Behavior
+    ///
+    /// If the result is NaN, its sign and payload may differ between scalar and SIMD
+    /// implementations. Rust leaves those bits unspecified.
+    ///
     /// # Example
     ///
     /// ```
