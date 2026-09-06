@@ -146,10 +146,10 @@ macro_rules! impl_real_simd {
 
                 // Restore `hypot` special cases.
                 let result = hi.simd_eq(Simd::splat(0.0)).select(Simd::splat(0.0), result);
-                let result = (SimdFloat::is_nan(self) | SimdFloat::is_nan(other))
-                    .select(self + other, result);
+                let result =
+                    (SimdFloat::is_nan(self) | SimdFloat::is_nan(other)).select(Self::NAN, result);
                 (SimdFloat::is_infinite(self) | SimdFloat::is_infinite(other))
-                    .select(Simd::splat(<$real>::INFINITY), result)
+                    .select(Self::INFINITY, result)
             }
             #[inline]
             fn hypot_stable(self, other: Self) -> Self {
@@ -213,7 +213,7 @@ macro_rules! impl_real_simd {
             fn atan2(self, other: Self) -> Self {
                 let mut result = self;
                 for i in 0..Self::LEN {
-                    result[i] = result[i].atan2(other[i]);
+                    result[i] = self[i].atan2(other[i]);
                 }
                 result
             }
@@ -226,9 +226,7 @@ macro_rules! impl_real_simd {
                 let mut sin = self;
                 let mut cos = self;
                 for i in 0..Self::LEN {
-                    let (s, c) = sin[i].sin_cos();
-                    sin[i] = s;
-                    cos[i] = c;
+                    (sin[i], cos[i]) = self[i].sin_cos();
                 }
                 (sin, cos)
             }
@@ -263,9 +261,9 @@ macro_rules! impl_real_simd {
             #[inline]
             fn tanh(self) -> Self {
                 let x = SimdFloat::abs(self);
-                let e = StdFloat::exp(x + x);
-                let result = (e - Simd::splat(1.0)) / (e + Simd::splat(1.0));
-                let result = SimdFloat::is_infinite(e).select(Simd::splat(1.0), result);
+                let e2 = StdFloat::exp(x + x);
+                let result = (e2 - Simd::splat(1.0)) / (e2 + Simd::splat(1.0));
+                let result = SimdFloat::is_infinite(e2).select(Simd::splat(1.0), result);
                 let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
                 let result = x.simd_lt(small).select(x, result);
                 SimdFloat::copysign(result, self)
@@ -343,7 +341,7 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn midpoint(self, other: Self) -> Self {
-                // A branchless SIMD version of `$real::midpoint`.
+                // SIMD version of `$real::midpoint`.
                 // Verified to be bit-identical to the scalar version.
 
                 const HI: $real = <$real>::MAX / 2.0;
@@ -399,7 +397,7 @@ macro_rules! impl_float_simd {
             fn powf(self, n: Self) -> Self {
                 let mut result = self;
                 for i in 0..Self::LEN {
-                    result[i] = result[i].powf(n[i]);
+                    result[i] = self[i].powf(n[i]);
                 }
                 result
             }

@@ -1,6 +1,6 @@
 use core::simd::{Simd, SimdElement, simd_swizzle};
 
-use crate::simd::{Swizzle, Transpose, generic_transpose};
+use crate::simd::{Swizzle, Transpose, blocked_transpose, generic_transpose};
 
 #[inline]
 fn transpose4<T: SimdElement>(rows: [Simd<T, 4>; 4]) -> [Simd<T, 4>; 4] {
@@ -54,35 +54,21 @@ fn transpose8<T: SimdElement>(rows: [Simd<T, 8>; 8]) -> [Simd<T, 8>; 8] {
 }
 
 #[inline(always)]
-fn blocked_transpose<T: SimdElement, const N: usize, const BN: usize, const K: usize>(
+fn blocked<T: SimdElement, const N: usize, const BN: usize, const K: usize>(
     rows: [Simd<T, N>; N],
     transpose_block: impl Fn([Simd<T, BN>; BN]) -> [Simd<T, BN>; BN],
 ) -> [Simd<T, N>; N] {
-    let row_blocks: [[Simd<T, BN>; K]; N] = rows.map(|row| {
-        let lanes = row.to_array();
-        core::array::from_fn(|block| {
-            Simd::from_array(core::array::from_fn(|i| lanes[block * BN + i]))
-        })
-    });
-    let mut column_blocks = [[row_blocks[0][0]; K]; N];
-
-    let mut block_row = 0;
-    while block_row < K {
-        let mut block_column = 0;
-        while block_column < K {
-            let block = core::array::from_fn(|r| row_blocks[block_row * BN + r][block_column]);
-            let block = transpose_block(block);
-            let mut c = 0;
-            while c < BN {
-                column_blocks[block_column * BN + c][block_row] = block[c];
-                c += 1;
-            }
-            block_column += 1;
-        }
-        block_row += 1;
-    }
-
-    column_blocks.map(|blocks| Simd::from_array(core::array::from_fn(|i| blocks[i / BN][i % BN])))
+    blocked_transpose::<Simd<T, N>, Simd<T, BN>, N, BN, K>(
+        rows,
+        |row| {
+            let lanes = row.to_array();
+            core::array::from_fn(|block| {
+                Simd::from_array(core::array::from_fn(|i| lanes[block * BN + i]))
+            })
+        },
+        |blocks| Simd::from_array(core::array::from_fn(|i| blocks[i / BN][i % BN])),
+        transpose_block,
+    )
 }
 
 macro_rules! impl_generic {
@@ -139,6 +125,6 @@ where
         if size_of::<T>() <= 2 {
             return generic_transpose(self);
         }
-        blocked_transpose::<T, 16, 8, 2>(self, transpose8)
+        blocked::<T, 16, 8, 2>(self, transpose8)
     }
 }

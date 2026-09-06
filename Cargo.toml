@@ -4,12 +4,20 @@ version = "0.1.0"
 edition = "2024"
 readme = "README.md"
 
+[workspace]
+members = ["ssimd"]
+resolver = "2"
+
 [features]
-# Experimental APIs
+# Support for `core::simd`
 portable_simd = []
 
+# Support for `wide`
+wide = ["dep:wide"]
+
 [dependencies]
+wide = { version = "1.7", optional = true }
 
 [dev-dependencies]
-# For benchmarking and testing
-gnum = { path = "./", features = ["portable_simd"] }
+gnum = { path = "./", features = ["portable_simd", "wide"] }
+wide = { version = "1.7" }

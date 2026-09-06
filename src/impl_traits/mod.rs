@@ -2,3 +2,6 @@
 
 #[cfg(feature = "portable_simd")]
 mod portable_simd;
+
+#[cfg(feature = "wide")]
+mod wide;

@@ -13,11 +13,13 @@ mod transpose;
 
 pub use mask_cast::MaskCast;
 pub use mask_like::MaskLike;
+#[cfg(any(feature = "portable_simd", feature = "wide"))]
+pub(crate) use reduce::generic_reduce_stable;
 pub use reduce::{Reduce, ReduceBitwise};
 pub use select::Select;
 pub use shuffle::{Shuffle4, Shuffle8};
 pub use simd_like::SimdLike;
 pub use swizzle::Swizzle;
 pub use transpose::Transpose;
-#[cfg(feature = "portable_simd")]
-pub(crate) use transpose::generic_transpose;
+#[cfg(any(feature = "portable_simd", feature = "wide"))]
+pub(crate) use transpose::{blocked_transpose, generic_transpose};
