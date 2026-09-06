@@ -21,6 +21,16 @@ pub trait Reduce: SimdLike {
     ///
     /// For integers, this uses wrapping addition.
     ///
+    /// # Unspecified Order
+    ///
+    /// The *order* in which the lanes are summed is backend-defined.
+    /// For some non-associative types (ex: floating-point numbers),
+    /// this can result in different results across backends or compilation targets.
+    ///
+    /// See [`reduce_sum_stable`](Self::reduce_sum_stable) for a version of this function
+    /// that is commonly faster and more accurate, and guaranteed to be deterministic
+    /// and return identical results across backends.
+    ///
     /// # Example
     ///
     /// ```
@@ -32,9 +42,49 @@ pub trait Reduce: SimdLike {
     #[must_use = "method returns a new element and does not mutate the original value"]
     fn reduce_sum(self) -> Self::Element;
 
+    /// Returns the sum of the lanes of the vector.
+    ///
+    /// For integers, this uses wrapping addition.
+    ///
+    /// # Order
+    ///
+    /// The lanes are summed as a balanced binary tree, pairing each lane
+    /// with the one half a vector away and halving the width each round.
+    ///
+    /// For four lanes, this is `(v[0] + v[2]) + (v[1] + v[3])`, and for eight lanes,
+    /// this is `((v[0] + v[4]) + (v[2] + v[6])) + ((v[1] + v[5]) + (v[3] + v[7]))`.
+    ///
+    /// This is commonly both faster and more accurate than a sequential sum,
+    /// and is guaranteed to be deterministic and return identical results across backends.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use gnum::{f32x4, simd::Reduce};
+    ///
+    /// let v = f32x4([1.0, 2.0, 3.0, 4.0]);
+    /// assert_eq!(v.reduce_sum_stable(), 10.0);
+    ///
+    /// // The above is bit-identical to the following
+    /// let sum = (v[0] + v[2]) + (v[1] + v[3]);
+    /// assert_eq!(v.reduce_sum_stable(), sum);
+    /// ```
+    #[must_use = "method returns a new element and does not mutate the original value"]
+    fn reduce_sum_stable(self) -> Self::Element;
+
     /// Returns the product of the lanes of the vector.
     ///
     /// For integers, this uses wrapping multiplication.
+    ///
+    /// # Unspecified Order
+    ///
+    /// The *order* in which the lanes are multiplied is backend-defined.
+    /// For some non-associative types (ex: floating-point numbers),
+    /// this can result in different results across backends or compilation targets.
+    ///
+    /// See [`reduce_product_stable`](Self::reduce_product_stable) for a version of this function
+    /// that is commonly faster and more accurate, and guaranteed to be deterministic
+    /// and return identical results across backends.
     ///
     /// # Example
     ///
@@ -46,6 +96,36 @@ pub trait Reduce: SimdLike {
     /// ```
     #[must_use = "method returns a new element and does not mutate the original value"]
     fn reduce_product(self) -> Self::Element;
+
+    /// Returns the product of the lanes of the vector.
+    ///
+    /// For integers, this uses wrapping multiplication.
+    ///
+    /// # Order
+    ///
+    /// The lanes are multiplied as a balanced binary tree, pairing each lane
+    /// with the one half a vector away and halving the width each round.
+    ///
+    /// For four lanes, this is `(v[0] * v[2]) * (v[1] * v[3])`, and for eight lanes,
+    /// this is `((v[0] * v[4]) * (v[2] * v[6])) * ((v[1] * v[5]) * (v[3] * v[7]))`.
+    ///
+    /// This is commonly both faster and more accurate than a sequential product,
+    /// and is guaranteed to be deterministic and return identical results across backends.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use gnum::{f32x4, simd::Reduce};
+    ///
+    /// let v = f32x4([1.0, 2.0, 3.0, 4.0]);
+    /// assert_eq!(v.reduce_product_stable(), 24.0);
+    ///
+    /// // The above is bit-identical to the following
+    /// let product = (v[0] * v[2]) * (v[1] * v[3]);
+    /// assert_eq!(v.reduce_product_stable(), product);
+    /// ```
+    #[must_use = "method returns a new element and does not mutate the original value"]
+    fn reduce_product_stable(self) -> Self::Element;
 
     /// Returns the minimum lane of the vector.
     ///
@@ -156,6 +236,31 @@ pub trait ReduceBitwise: SimdLike {
     fn reduce_xor(self) -> Self::Element;
 }
 
+#[inline]
+#[cfg(any(feature = "portable_simd", feature = "wide"))]
+pub(crate) fn generic_reduce_stable<T: Copy, const N: usize>(
+    array: [T; N],
+    f: impl Fn(T, T) -> T,
+) -> T {
+    let mut current = array;
+    let mut len = N;
+
+    while len > 1 {
+        let half = len / 2;
+        let rest = len - half;
+
+        let mut i = 0;
+        while i < half {
+            current[i] = f(current[i], current[i + rest]);
+            i += 1;
+        }
+
+        len = rest;
+    }
+
+    current[0]
+}
+
 macro_rules! impl_reduce_scalar {
     ($($t:ty),*) => {
         $(
@@ -165,7 +270,15 @@ macro_rules! impl_reduce_scalar {
                     self
                 }
                 #[inline]
+                fn reduce_sum_stable(self) -> Self::Element {
+                    self
+                }
+                #[inline]
                 fn reduce_product(self) -> Self::Element {
+                    self
+                }
+                #[inline]
+                fn reduce_product_stable(self) -> Self::Element {
                     self
                 }
                 #[inline]

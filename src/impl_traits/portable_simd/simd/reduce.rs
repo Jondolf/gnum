@@ -1,4 +1,4 @@
-use crate::simd::{Reduce, ReduceBitwise, SimdLike};
+use crate::simd::{Reduce, ReduceBitwise, SimdLike, generic_reduce_stable};
 use core::simd::{
     Simd,
     num::{SimdFloat, SimdInt, SimdUint},
@@ -16,8 +16,16 @@ macro_rules! impl_reduce_float {
                     SimdFloat::reduce_sum(self)
                 }
                 #[inline]
+                fn reduce_sum_stable(self) -> Self::Element {
+                    generic_reduce_stable(Simd::to_array(self), |a: $t, b| a + b)
+                }
+                #[inline]
                 fn reduce_product(self) -> Self::Element {
                     SimdFloat::reduce_product(self)
+                }
+                #[inline]
+                fn reduce_product_stable(self) -> Self::Element {
+                    generic_reduce_stable(Simd::to_array(self), |a: $t, b| a * b)
                 }
                 #[inline]
                 fn reduce_max(self) -> Self::Element {
@@ -44,7 +52,15 @@ macro_rules! impl_reduce_int {
                     $trait::reduce_sum(self)
                 }
                 #[inline]
+                fn reduce_sum_stable(self) -> Self::Element {
+                    $trait::reduce_sum(self)
+                }
+                #[inline]
                 fn reduce_product(self) -> Self::Element {
+                    $trait::reduce_product(self)
+                }
+                #[inline]
+                fn reduce_product_stable(self) -> Self::Element {
                     $trait::reduce_product(self)
                 }
                 #[inline]
