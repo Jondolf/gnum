@@ -727,6 +727,7 @@ pub(crate) fn powf<T: Float>(x: T, y: T) -> T {
     let xneg = x.num_lt(T::ZERO);
     r = (xneg & !y_is_int).select(T::NAN, r);
     r = (xneg & y_is_odd).select(-r, r);
+    r = (x.is_nan() | y.is_nan()).select(T::NAN, r);
 
     // `x^0 == 1` and `1^y == 1` for every `y`, including NaN.
     r = x.num_eq(T::ONE).select(T::ONE, r);
