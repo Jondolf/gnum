@@ -10,7 +10,6 @@ Generic numerics with SIMD and determinism in Rust.
 - [Determinism](#determinism)
 - [`no_std` Support](#no_std-support)
 - [Related Crates](#related-crates)
-- [License](#license)
 
 ## Overview
 
@@ -165,7 +164,7 @@ for the same element type, except where otherwise noted. For example,
 calling `Real::sqrt` on four scalar `f32` values is guaranteed to produce
 the same results as calling `Real::sqrt` on an `f32x4` SIMD value.
 
-Some operations such as transcendental functions (`sin`, `cos`, `atan2`)
+Certain operations such as transcendental functions (`sin`, `cos`, `atan2`)
 are non-deterministic in both the standard library and in `gnum`, and are
 documented as such. For these methods, `gnum` provides "stable" alternatives
 such as `Real::sin_stable`, which are deterministic and guaranteed to produce
