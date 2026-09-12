@@ -1,4 +1,4 @@
-//! Generic numerics with [determinism](#determinism) and [SIMD](#simd) in Rust.
+//! Generic numerics with [SIMD](#simd) and [determinism](#determinism) in Rust.
 //!
 //! # Getting Started
 //!
@@ -11,26 +11,67 @@
 //! ```
 //!
 //! You can now start using the traits provided by `gnum` to write generic numeric code.
-//! For example, consider a 2D vector type with generic [`Real`] components, and a function
-//! to compute the distance between two vectors:
+//! For example, consider a 2D vector type with a generic number type and some basic operations:
 //!
 //! ```rust
-//! use gnum::num::{Float, Real};
+//! use gnum::num::Num;
 //!
 //! #[derive(Clone, Copy)]
-//! struct Vec2<T: Real> {
+//! struct Vec2<T: Num> {
 //!     x: T,
 //!     y: T,
 //! }
 //!
-//! impl<T: Real> Vec2<T> {
-//!     fn distance(self, other: Self) -> T {
-//!         let dx = self.x - other.x;
-//!         let dy = self.y - other.y;
-//!         (dx * dx + dy * dy).sqrt()
+//! impl<T: Num> Vec2<T> {
+//!     const fn new(x: T, y: T) -> Self {
+//!         Self { x, y }
+//!     }
+//!
+//!     fn dot(self, other: Self) -> T {
+//!         self.x * other.x + self.y * other.y
+//!     }
+//!
+//!     fn length_squared(self) -> T {
+//!         self.dot(self)
 //!     }
 //! }
 //! ```
+//!
+//! The `Vec2<T>` type can then be used with `f32`, `i32`, `u16`, or any other [`Num`] types.
+//! With <code>T: [Real]</code>, we also gain access to math that is only available on real numbers:
+//!
+//! ```rust
+//! use gnum::num::Real;
+//! # use gnum::num::Num;
+//! #
+//! # #[derive(Clone, Copy)]
+//! # struct Vec2<T: Num> {
+//! #     x: T,
+//! #     y: T,
+//! # }
+//! # impl<T: Num> Vec2<T> {
+//! #     fn length_squared(self) -> T {
+//! #         self.x * self.x + self.y * self.y
+//! #     }
+//! # }
+//!
+//! impl<T: Real> Vec2<T> {
+//!     fn length(self) -> T {
+//!         self.length_squared().sqrt()
+//!     }
+//!
+//!     fn normalize(self) -> Self {
+//!         let len = self.length();
+//!         Self {
+//!             x: self.x / len,
+//!             y: self.y / len,
+//!         }
+//!     }
+//! }
+//! ```
+//!
+//! The traits provided by `gnum` cover almost all numerical operations in the standard library,
+//! which makes it straightforward to express almost any mathematical code generically.
 //!
 //! # Traits
 //!
@@ -84,12 +125,60 @@
 //!
 //! # SIMD
 //!
-//! `gnum` supports [SIMD] for both [`core::simd`] (nightly) and the [`wide`] crate (stable).
-//! Almost all traits in `gnum` are implemented for both scalar and SIMD types,
-//! allowing code to be generic across both.
+//! `gnum` supports [SIMD] (_Single Instruction, Multiple Data_) for both [`core::simd`] (nightly)
+//! and the [`wide`] crate (stable). Almost all traits in `gnum` are implemented for both scalar
+//! and SIMD types, allowing code to be generic across both.
+//!
+//! For example, consider the earlier `Vec2<T>` type. We can use both the scalar `f32`
+//! and SIMD `f32x4` type with it, and notably, the results are guaranteed to be bit-identical:
+//!
+//! ```rust
+//! #![feature(portable_simd)]
+//!
+//! use core::simd::f32x4;
+//! use gnum::num::Real;
+//! #
+//! # #[derive(Clone, Copy)]
+//! # struct Vec2<T: Real> {
+//! #     x: T,
+//! #     y: T,
+//! # }
+//! #
+//! # impl<T: Real> Vec2<T> {
+//! #     const fn new(x: T, y: T) -> Self {
+//! #         Self { x, y }
+//! #     }
+//! #
+//! #     fn length(self) -> T {
+//! #         (self.x * self.x + self.y * self.y).sqrt()
+//! #     }
+//! # }
+//!
+//! // Create 4 vectors
+//! let v1: Vec2<f32> = Vec2::new(1.0, 2.0);
+//! let v2: Vec2<f32> = Vec2::new(3.0, 4.0);
+//! let v3: Vec2<f32> = Vec2::new(5.0, 6.0);
+//! let v4: Vec2<f32> = Vec2::new(7.0, 8.0);
+//!
+//! // Create an equivalent "wide" SIMD vector
+//! let v_wide: Vec2<f32x4> = Vec2::new(
+//!     f32x4::from_array([1.0, 3.0, 5.0, 7.0]),
+//!     f32x4::from_array([2.0, 4.0, 6.0, 8.0]),
+//! );
+//!
+//! // Compute the lengths
+//! let lengths = [v1.length(), v2.length(), v3.length(), v4.length()];
+//! let length_wide = v_wide.length();
+//!
+//! // Results are bit-identical
+//! assert_eq!(lengths, length_wide.to_array());
+//! ```
+//!
+//! See [Determinism](#determinism) for more information about the determinism
+//! contracts provided by `gnum`.
 //!
 //! [SIMD]: https://en.wikipedia.org/wiki/Single_instruction,_multiple_data
-//! [`wide`]: https://docs.rs/wide
+//! [`wide`]: https://crates.io/crates/wide
 //!
 //! # Determinism
 //!
@@ -128,6 +217,21 @@
 //! See the [`f32` documentation on NaN bit patterns][NaN bit patterns] for more information.
 //!
 //! [NaN bit patterns]: https://doc.rust-lang.org/std/primitive.f32.html#nan-bit-patterns
+//!
+//! # `no_std` Support
+//!
+//! `gnum` supports `no_std` when the default `std` feature is disabled.
+//! The determinism guarantees described in [Determinism](#determinism) are still upheld.
+//!
+//! Some operations like `sin` are normally only available in `std` environments.
+//! With `no_std`, these operations internally use the portable `_stable` alternatives
+//! described in [Determinism](#determinism). These can produce different results
+//! than the `std` versions, and may have lower precision or be slightly slower.
+//!
+//! If you need `no_std` math that may be more accurate but does not work with SIMD types,
+//! consider checking out [`libm`].
+//!
+//! [`libm`]: https://crates.io/crates/libm
 
 #![cfg_attr(feature = "portable_simd", feature(portable_simd))]
 #![cfg_attr(
