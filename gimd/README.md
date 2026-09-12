@@ -4,7 +4,7 @@ Generic [SIMD] for stable and nightly Rust.
 
 [SIMD]: https://en.wikipedia.org/wiki/Single_instruction,_multiple_data
 
-## Description
+## Overview
 
 `gimd` provides `Simd<T, N>` and `Mask<T, N>` types for [SIMD] (_Single Instruction, Multiple Data_)
 that works on both stable and nightly Rust, with a unified API that is similar to [`core::simd`].
@@ -20,17 +20,8 @@ built-in cross-platform determinism guarantees, and identical results across SIM
 See the [`gnum`] crate for more information.
 
 [`core::simd`]: https://doc.rust-lang.org/core/simd/index.html
-[`wide`]: https://github.com/Lokathor/wide
+[`wide`]: https://crates.io/crates/wide
 [`gnum`]: https://crates.io/crates/gnum
-
-## Features
-
-- `Simd<T, N>` and `Mask<T, N>` types similar to [`core::simd`]
-- Support for both stable and nightly toolchains
-    - The `wide` feature works on both stable and nightly Rust, using [`wide`]
-    - The `portable_simd` feature only works on nightly Rust, using [`core::simd`]
-- [`gnum`] support for generic numerics and SIMD math
-- Cross-platform determinism (via [`gnum`])
 
 ## Getting Started
 
