@@ -14,3 +14,12 @@ core APIs.
   types like `core::simd::Simd` (optional).
 
 In a way, `gnum` is a combination of `num_traits` and `simba` under a more modern and unified interface.
+
+## License
+
+`gnum` is free and open source. All code in this repository is dual-licensed under either:
+
+- MIT License ([LICENSE-MIT](/LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
+- Apache License, Version 2.0 ([LICENSE-APACHE](/LICENSE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0>)
+
+at your option.

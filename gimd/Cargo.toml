@@ -2,9 +2,20 @@
 name = "gimd"
 version = "0.1.0"
 edition = "2024"
+authors = ["Joona Aalto <jondolf.dev@gmail.com>"]
 description = "Generic SIMD for stable and nightly Rust"
 repository = "https://github.com/Jondolf/gnum"
 readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = [
+    "simd",
+    "wide",
+    "portable-simd",
+    "math",
+    "numerics",
+    "vectorization",
+]
+categories = ["data-structures", "mathematics", "no-std"]
 
 [features]
 default = ["wide"]
