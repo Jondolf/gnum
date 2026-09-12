@@ -11,8 +11,9 @@ pub trait SaturatingAdd<Rhs = Self>: Add<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.saturating_add(1), 13);
-    /// assert_eq!(i32::MAX.saturating_add(1), i32::MAX);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(SaturatingAdd::saturating_add(12, 1), 13);
+    /// assert_eq!(SaturatingAdd::saturating_add(i32::MAX, 1), i32::MAX);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn saturating_add(self, rhs: Rhs) -> Self::Output;
@@ -27,8 +28,9 @@ pub trait SaturatingSub<Rhs = Self>: Sub<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.saturating_sub(1), 11);
-    /// assert_eq!(i32::MIN.saturating_sub(1), i32::MIN);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(SaturatingSub::saturating_sub(12, 1), 11);
+    /// assert_eq!(SaturatingSub::saturating_sub(i32::MIN, 1), i32::MIN);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn saturating_sub(self, rhs: Rhs) -> Self::Output;
@@ -43,8 +45,9 @@ pub trait SaturatingMul<Rhs = Self>: Mul<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.saturating_mul(2), 24);
-    /// assert_eq!(i32::MAX.saturating_mul(2), i32::MAX);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(SaturatingMul::saturating_mul(12, 2), 24);
+    /// assert_eq!(SaturatingMul::saturating_mul(i32::MAX, 2), i32::MAX);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn saturating_mul(self, rhs: Rhs) -> Self::Output;
@@ -63,9 +66,9 @@ pub trait SaturatingDiv<Rhs = Self>: Div<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.saturating_div(2), 6);
-    /// assert_eq!(12.saturating_div(0), i32::MAX); // or i32::MIN for signed types
-    /// assert_eq!(i32::MIN.saturating_div(-1), i32::MAX);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(SaturatingDiv::saturating_div(12, 2), 6);
+    /// assert_eq!(SaturatingDiv::saturating_div(i32::MIN, -1), i32::MAX);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn saturating_div(self, rhs: Rhs) -> Self::Output;
@@ -78,8 +81,9 @@ pub trait SaturatingNeg: Neg {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.saturating_neg(), -12);
-    /// assert_eq!(i32::MIN.saturating_neg(), i32::MAX);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(SaturatingNeg::saturating_neg(12), -12);
+    /// assert_eq!(SaturatingNeg::saturating_neg(i32::MIN), i32::MAX);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn saturating_neg(self) -> Self::Output;
@@ -95,9 +99,10 @@ pub trait SaturatingAbs: Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.saturating_abs(), 12);
-    /// assert_eq!((-12).saturating_abs(), 12);
-    /// assert_eq!(i32::MIN.saturating_abs(), i32::MAX);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(SaturatingAbs::saturating_abs(12), 12);
+    /// assert_eq!(SaturatingAbs::saturating_abs(-12), 12);
+    /// assert_eq!(SaturatingAbs::saturating_abs(i32::MIN), i32::MAX);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn saturating_abs(self) -> Self::Output;
@@ -113,8 +118,9 @@ pub trait SaturatingPow<Exp = Self>: Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(2.saturating_pow(3), 8);
-    /// assert_eq!(i32::MAX.saturating_pow(2), i32::MAX);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(SaturatingPow::saturating_pow(2i32, 3u32), 8);
+    /// assert_eq!(SaturatingPow::saturating_pow(i32::MAX, 2u32), i32::MAX);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn saturating_pow(self, exp: Exp) -> Self::Output;

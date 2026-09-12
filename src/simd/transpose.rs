@@ -13,7 +13,7 @@ use super::Swizzle;
 /// # #[cfg(feature = "portable_simd")]
 /// # {
 /// use core::simd::i32x4;
-/// use gnum::simd::TransposeRows;
+/// use gnum::simd::{SimdLike, TransposeRows};
 ///
 /// let rows = [
 ///     i32x4::from_array([0, 1, 2, 3]),
@@ -21,8 +21,8 @@ use super::Swizzle;
 ///     i32x4::from_array([8, 9, 10, 11]),
 ///     i32x4::from_array([12, 13, 14, 15]),
 /// ];
-/// let columns = i32x4::transpose_rows(rows);
-/// assert_eq!(columns[0].to_array(), [0, 4, 8, 12]);
+/// let columns = TransposeRows::transpose_rows(rows);
+/// assert_eq!(SimdLike::to_array(columns[0]), [0, 4, 8, 12]);
 /// # }
 /// ```
 pub trait TransposeRows<const N: usize>: Sized {
@@ -43,7 +43,7 @@ pub trait TransposeRows<const N: usize>: Sized {
 /// # #[cfg(feature = "portable_simd")]
 /// # {
 /// use core::simd::i32x4;
-/// use gnum::simd::Transpose;
+/// use gnum::simd::{SimdLike, Transpose};
 ///
 /// let rows = [
 ///     i32x4::from_array([0, 1, 2, 3]),
@@ -51,8 +51,8 @@ pub trait TransposeRows<const N: usize>: Sized {
 ///     i32x4::from_array([8, 9, 10, 11]),
 ///     i32x4::from_array([12, 13, 14, 15]),
 /// ];
-/// let columns = rows.transpose();
-/// assert_eq!(columns[0].to_array(), [0, 4, 8, 12]);
+/// let columns = Transpose::transpose(rows);
+/// assert_eq!(SimdLike::to_array(columns[0]), [0, 4, 8, 12]);
 /// # }
 /// ```
 pub trait Transpose: Sized {
@@ -65,7 +65,7 @@ pub trait Transpose: Sized {
     /// # #[cfg(feature = "portable_simd")]
     /// # {
     /// use core::simd::i32x4;
-    /// use gnum::simd::Transpose;
+    /// use gnum::simd::{SimdLike, Transpose};
     ///
     /// let rows = [
     ///     i32x4::from_array([0, 1, 2, 3]),
@@ -73,8 +73,8 @@ pub trait Transpose: Sized {
     ///     i32x4::from_array([8, 9, 10, 11]),
     ///     i32x4::from_array([12, 13, 14, 15]),
     /// ];
-    /// let columns = rows.transpose();
-    /// assert_eq!(columns[0].to_array(), [0, 4, 8, 12]);
+    /// let columns = Transpose::transpose(rows);
+    /// assert_eq!(SimdLike::to_array(columns[0]), [0, 4, 8, 12]);
     /// # }
     /// ```
     #[must_use = "transpose returns a new matrix and does not mutate the input"]

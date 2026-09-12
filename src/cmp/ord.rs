@@ -162,16 +162,16 @@ pub trait NumOrd: NumEq {
     /// use gnum::cmp::NumOrd;
     ///
     /// // NaN input is not propagated, instead the bounds are applied in order.
-    /// assert_eq!(NAN.clamp_fast(0.0, 1.0), 0.0);
+    /// assert_eq!(NumOrd::clamp_fast(NAN, 0.0, 1.0), 0.0);
     ///
     /// // NaN as a lower bound forces the result to be the upper bound.
-    /// assert_eq!(0.5.clamp_fast(NAN, 1.0), 1.0);
+    /// assert_eq!(NumOrd::clamp_fast(0.5, NAN, 1.0), 1.0);
     ///
     /// // NaN as an upper bound leaks through as NaN.
-    /// assert!(0.5.clamp_fast(0.0, NAN).is_nan());
+    /// assert!(NumOrd::clamp_fast(0.5, 0.0, NAN).is_nan());
     ///
     /// // Signed zero is not preserved, instead the bounds are applied in order.
-    /// assert_eq!((-0.0f32).clamp_fast(0.0, 1.0), 0.0);
+    /// assert_eq!(NumOrd::clamp_fast(-0.0f32, 0.0, 1.0), 0.0);
     /// ```
     ///
     /// The method is equivalent to simply using [`max_fast`](Self::max_fast) and [`min_fast`](Self::min_fast)

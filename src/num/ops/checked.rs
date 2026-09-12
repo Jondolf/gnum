@@ -9,8 +9,9 @@ pub trait CheckedAdd<Rhs = Self>: Add<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.checked_add(1), Some(13));
-    /// assert_eq!(i32::MAX.checked_add(1), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedAdd::checked_add(12, 1), Some(13));
+    /// assert_eq!(CheckedAdd::checked_add(i32::MAX, 1), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_add(self, rhs: Rhs) -> Option<Self::Output>;
@@ -24,13 +25,15 @@ pub trait CheckedAdd<Rhs = Self>: Add<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.strict_add(1), 13);
-    /// ``````
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedAdd::strict_add(12, 1), 13);
+    /// ```
     ///
     /// The following panics because of overflow:
     ///
     /// ```should_panic
-    /// let _ = i32::MAX.strict_add(1);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedAdd::strict_add(i32::MAX, 1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_add(self, rhs: Rhs) -> Self::Output;
@@ -56,8 +59,9 @@ pub trait CheckedSub<Rhs = Self>: Sub<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.checked_sub(1), Some(11));
-    /// assert_eq!(i32::MIN.checked_sub(1), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedSub::checked_sub(12, 1), Some(11));
+    /// assert_eq!(CheckedSub::checked_sub(i32::MIN, 1), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_sub(self, rhs: Rhs) -> Option<Self::Output>;
@@ -71,13 +75,15 @@ pub trait CheckedSub<Rhs = Self>: Sub<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.strict_sub(1), 11);
-    /// ``````
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedSub::strict_sub(12, 1), 11);
+    /// ```
     ///
     /// The following panics because of overflow:
     ///
     /// ```should_panic
-    /// let _ = i32::MIN.strict_sub(1);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedSub::strict_sub(i32::MIN, 1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_sub(self, rhs: Rhs) -> Self::Output;
@@ -103,8 +109,9 @@ pub trait CheckedMul<Rhs = Self>: Mul<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.checked_mul(2), Some(24));
-    /// assert_eq!(i32::MAX.checked_mul(2), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedMul::checked_mul(12, 2), Some(24));
+    /// assert_eq!(CheckedMul::checked_mul(i32::MAX, 2), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_mul(self, rhs: Rhs) -> Option<Self::Output>;
@@ -118,13 +125,15 @@ pub trait CheckedMul<Rhs = Self>: Mul<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.strict_mul(2), 24);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedMul::strict_mul(12, 2), 24);
     /// ```
     ///
     /// The following panics because of overflow:
     ///
     /// ```should_panic
-    /// let _ = i32::MAX.strict_mul(2);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedMul::strict_mul(i32::MAX, 2);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_mul(self, rhs: Rhs) -> Self::Output;
@@ -150,9 +159,10 @@ pub trait CheckedDiv<Rhs = Self>: Div<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.checked_div(2), Some(6));
-    /// assert_eq!(12.checked_div(0), None);
-    /// assert_eq!(i32::MIN.checked_div(-1), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedDiv::checked_div(12, 2), Some(6));
+    /// assert_eq!(CheckedDiv::checked_div(12, 0), None);
+    /// assert_eq!(CheckedDiv::checked_div(i32::MIN, -1), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_div(self, rhs: Rhs) -> Option<Self::Output>;
@@ -166,19 +176,22 @@ pub trait CheckedDiv<Rhs = Self>: Div<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.strict_div(2), 6);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedDiv::strict_div(12, 2), 6);
     /// ```
     ///
     /// The following panics because of division by zero:
     ///
     /// ```should_panic
-    /// let _ = 12.strict_div(0);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedDiv::strict_div(12, 0);
     /// ```
     ///
     /// The following panics because of overflow:
     ///
     /// ```should_panic
-    /// let _ = i32::MIN.strict_div(-1);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedDiv::strict_div(i32::MIN, -1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_div(self, rhs: Rhs) -> Self::Output;
@@ -193,9 +206,10 @@ pub trait CheckedRem<Rhs = Self>: Rem<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.checked_rem(5), Some(2));
-    /// assert_eq!(12.checked_rem(0), None);
-    /// assert_eq!(i32::MIN.checked_rem(-1), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedRem::checked_rem(12, 5), Some(2));
+    /// assert_eq!(CheckedRem::checked_rem(12, 0), None);
+    /// assert_eq!(CheckedRem::checked_rem(i32::MIN, -1), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_rem(self, rhs: Rhs) -> Option<Self::Output>;
@@ -209,12 +223,23 @@ pub trait CheckedRem<Rhs = Self>: Rem<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.strict_rem(5), 2);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedRem::strict_rem(12, 5), 2);
     /// ```
     ///
     /// The following panics because of division by zero:
     ///
     /// ```should_panic
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedRem::strict_rem(12, 0);
+    /// ```
+    ///
+    /// The following panics because of overflow:
+    ///
+    /// ```should_panic
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedRem::strict_rem(i32::MIN, -1);
+    /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_rem(self, rhs: Rhs) -> Self::Output;
 }
@@ -226,9 +251,10 @@ pub trait CheckedDivEuclid<Rhs = Self>: Div<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.checked_div_euclid(5), Some(2));
-    /// assert_eq!(12.checked_div_euclid(0), None);
-    /// assert_eq!(i32::MIN.checked_div_euclid(-1), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedDivEuclid::checked_div_euclid(12, 5), Some(2));
+    /// assert_eq!(CheckedDivEuclid::checked_div_euclid(12, 0), None);
+    /// assert_eq!(CheckedDivEuclid::checked_div_euclid(i32::MIN, -1), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_div_euclid(self, rhs: Rhs) -> Option<Self::Output>;
@@ -242,19 +268,22 @@ pub trait CheckedDivEuclid<Rhs = Self>: Div<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.strict_div_euclid(5), 2);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedDivEuclid::strict_div_euclid(12, 5), 2);
     /// ```
     ///
     /// The following panics because of division by zero:
     ///
     /// ```should_panic
-    /// let _ = 12.strict_div_euclid(0);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedDivEuclid::strict_div_euclid(12, 0);
     /// ```
     ///
     /// The following panics because of overflow:
     ///
     /// ```should_panic
-    /// let _ = i32::MIN.strict_div_euclid(-1);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedDivEuclid::strict_div_euclid(i32::MIN, -1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_div_euclid(self, rhs: Rhs) -> Self::Output;
@@ -267,9 +296,10 @@ pub trait CheckedRemEuclid<Rhs = Self>: Rem<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.checked_rem_euclid(5), Some(2));
-    /// assert_eq!(12.checked_rem_euclid(0), None);
-    /// assert_eq!(i32::MIN.checked_rem_euclid(-1), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedRemEuclid::checked_rem_euclid(12, 5), Some(2));
+    /// assert_eq!(CheckedRemEuclid::checked_rem_euclid(12, 0), None);
+    /// assert_eq!(CheckedRemEuclid::checked_rem_euclid(i32::MIN, -1), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_rem_euclid(self, rhs: Rhs) -> Option<Self::Output>;
@@ -283,19 +313,22 @@ pub trait CheckedRemEuclid<Rhs = Self>: Rem<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.strict_rem_euclid(5), 2);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedRemEuclid::strict_rem_euclid(12, 5), 2);
     /// ```
     ///
     /// The following panics because of division by zero:
     ///
     /// ```should_panic
-    /// let _ = 12.strict_rem_euclid(0);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedRemEuclid::strict_rem_euclid(12, 0);
     /// ```
     ///
     /// The following panics because of overflow:
     ///
     /// ```should_panic
-    /// let _ = i32::MIN.strict_rem_euclid(-1);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedRemEuclid::strict_rem_euclid(i32::MIN, -1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_rem_euclid(self, rhs: Rhs) -> Self::Output;
@@ -310,8 +343,9 @@ pub trait CheckedNeg: Neg<Output = Self> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.checked_neg(), Some(-12));
-    /// assert_eq!(i32::MIN.checked_neg(), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedNeg::checked_neg(12), Some(-12));
+    /// assert_eq!(CheckedNeg::checked_neg(i32::MIN), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_neg(self) -> Option<Self::Output>;
@@ -325,13 +359,15 @@ pub trait CheckedNeg: Neg<Output = Self> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.strict_neg(), -12);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedNeg::strict_neg(12), -12);
     /// ```
     ///
     /// The following panics because of overflow:
     ///
     /// ```should_panic
-    /// let _ = i32::MIN.strict_neg();
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedNeg::strict_neg(i32::MIN);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_neg(self) -> Self::Output;
@@ -359,8 +395,9 @@ pub trait CheckedShl<Rhs = Self>: Shl<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(1u32.checked_shl(2), Some(4));
-    /// assert_eq!(1u32.checked_shl(32), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedShl::checked_shl(1u32, 2), Some(4));
+    /// assert_eq!(CheckedShl::checked_shl(1u32, 32), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_shl(self, rhs: Rhs) -> Option<Self::Output>;
@@ -375,13 +412,15 @@ pub trait CheckedShl<Rhs = Self>: Shl<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(1u32.strict_shl(2), 4);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedShl::strict_shl(1u32, 2), 4);
     /// ```
     ///
     /// The following panics because the shift amount is greater than or equal to the number of bits in the type:
     ///
     /// ```should_panic
-    /// let _ = 1u32.strict_shl(32);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedShl::strict_shl(1u32, 32);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_shl(self, rhs: Rhs) -> Self::Output;
@@ -410,8 +449,9 @@ pub trait CheckedShr<Rhs = Self>: Shr<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(4u32.checked_shr(2), Some(1));
-    /// assert_eq!(4u32.checked_shr(32), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedShr::checked_shr(4u32, 2), Some(1));
+    /// assert_eq!(CheckedShr::checked_shr(4u32, 32), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_shr(self, rhs: Rhs) -> Option<Self::Output>;
@@ -426,13 +466,15 @@ pub trait CheckedShr<Rhs = Self>: Shr<Rhs> + Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(4u32.strict_shr(2), 1);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedShr::strict_shr(4u32, 2), 1);
     /// ```
     ///
     /// The following panics because the shift amount is greater than or equal to the number of bits in the type:
     ///
     /// ```should_panic
-    /// let _ = 4u32.strict_shr(32);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedShr::strict_shr(4u32, 32);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_shr(self, rhs: Rhs) -> Self::Output;
@@ -460,9 +502,10 @@ pub trait CheckedAbs: Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.checked_abs(), Some(12));
-    /// assert_eq!((-12).checked_abs(), Some(12));
-    /// assert_eq!(i32::MIN.checked_abs(), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedAbs::checked_abs(12), Some(12));
+    /// assert_eq!(CheckedAbs::checked_abs(-12), Some(12));
+    /// assert_eq!(CheckedAbs::checked_abs(i32::MIN), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_abs(self) -> Option<Self::Output>;
@@ -476,14 +519,16 @@ pub trait CheckedAbs: Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.strict_abs(), 12);
-    /// assert_eq!((-12).strict_abs(), 12);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedAbs::strict_abs(12), 12);
+    /// assert_eq!(CheckedAbs::strict_abs(-12), 12);
     /// ```
     ///
     /// The following panics because of overflow:
     ///
     /// ```should_panic
-    /// let _ = i32::MIN.strict_abs();
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedAbs::strict_abs(i32::MIN);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_abs(self) -> Self::Output;
@@ -499,8 +544,9 @@ pub trait CheckedPow<Exp = Self>: Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(2.checked_pow(3), Some(8));
-    /// assert_eq!(i32::MAX.checked_pow(2), None);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedPow::checked_pow(2i32, 3u32), Some(8));
+    /// assert_eq!(CheckedPow::checked_pow(i32::MAX, 2u32), None);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn checked_pow(self, exp: Exp) -> Option<Self::Output>;
@@ -514,13 +560,15 @@ pub trait CheckedPow<Exp = Self>: Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(2.strict_pow(3), 8);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(CheckedPow::strict_pow(2i32, 3u32), 8);
     /// ```
     ///
     /// The following panics because of overflow:
     ///
     /// ```should_panic
-    /// let _ = i32::MAX.strict_pow(2);
+    /// # use gnum::num::ops::*;
+    /// let _ = CheckedPow::strict_pow(i32::MAX, 2u32);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn strict_pow(self, exp: Exp) -> Self::Output;

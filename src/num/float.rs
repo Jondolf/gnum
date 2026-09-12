@@ -71,9 +71,7 @@ pub trait Float: Real {
 
     /// Maximum <i>x</i> for which 10<sup><i>x</i></sup> is normal.
     ///
-    /// Equal to floor(log<sub>10</sub>&nbsp;[`MAX`]).
-    ///
-    /// [`MAX`]: Self::MAX
+    /// Equal to floor(log<sub>10</sub>&nbsp;[`Num::MAX`](crate::num::Num::MAX)).
     const MAX_10_EXP: i32;
 
     /// Not a Number (NaN).
@@ -111,12 +109,14 @@ pub trait Float: Real {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// let x: f64 = 10.0;
     /// let a: f64 = 4.0;
     /// let b: f64 = 60.0;
     ///
-    /// assert_eq!(x.mul_add(a, b), 100.0);
+    /// assert_eq!(Float::mul_add(x, a, b), 100.0);
     /// assert_eq!(x * a + b, 100.0);
+    /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[doc(alias = "fmaf", alias = "fusedMultiplyAdd")]
     fn mul_add(self, a: Self, b: Self) -> Self;
@@ -131,6 +131,7 @@ pub trait Float: Real {
     /// # Examples
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// let x: f32 = 2.0;
     /// let abs_difference = (x.powi(2) - (x * x)).abs();
     /// assert!(abs_difference <= 1e-5);
@@ -157,8 +158,9 @@ pub trait Float: Real {
     /// # Examples
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// let x: f32 = 2.0;
-    /// let abs_difference = (x.powf(2.0) - (x * x)).abs();
+    /// let abs_difference = (Float::powf(x, 2.0) - (x * x)).abs();
     /// assert!(abs_difference <= 1e-5);
     ///
     /// assert_eq!(f32::powf(1.0, f32::NAN), 1.0);
@@ -182,14 +184,13 @@ pub trait Float: Real {
     ///
     /// ```
     /// # use gnum::num::Float;
-    /// #
     /// let x: f32 = 2.0;
-    /// let abs_difference = (x.powf_stable(2.0) - (x * x)).abs();
+    /// let abs_difference = (Float::powf_stable(x, 2.0) - (x * x)).abs();
     /// assert!(abs_difference <= 1e-5);
     ///
-    /// assert_eq!(f32::powf_stable(1.0, f32::NAN), 1.0);
-    /// assert_eq!(f32::powf_stable(f32::NAN, 0.0), 1.0);
-    /// assert_eq!(f32::powf_stable(0.0, 0.0), 1.0);
+    /// assert_eq!(Float::powf_stable(1.0, f32::NAN), 1.0);
+    /// assert_eq!(Float::powf_stable(f32::NAN, 0.0), 1.0);
+    /// assert_eq!(Float::powf_stable(0.0, 0.0), 1.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn powf_stable(self, n: Self) -> Self;
@@ -199,11 +200,12 @@ pub trait Float: Real {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// let nan: f32 = f32::NAN;
     /// let x: f32 = 1.0;
     ///
-    /// assert!(nan.is_nan());
-    /// assert!(!x.is_nan());
+    /// assert!(Float::is_nan(nan));
+    /// assert!(!Float::is_nan(x));
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn is_nan(self) -> Self::Bool;
@@ -213,13 +215,14 @@ pub trait Float: Real {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// let inf: f32 = f32::INFINITY;
     /// let neg_inf: f32 = f32::NEG_INFINITY;
     /// let x: f32 = 1.0;
     ///
-    /// assert!(inf.is_infinite());
-    /// assert!(neg_inf.is_infinite());
-    /// assert!(!x.is_infinite());
+    /// assert!(Float::is_infinite(inf));
+    /// assert!(Float::is_infinite(neg_inf));
+    /// assert!(!Float::is_infinite(x));
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn is_infinite(self) -> Self::Bool;
@@ -229,15 +232,16 @@ pub trait Float: Real {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// let x: f32 = 1.0;
     /// let inf: f32 = f32::INFINITY;
     /// let neg_inf: f32 = f32::NEG_INFINITY;
     /// let nan: f32 = f32::NAN;
     ///
-    /// assert!(x.is_finite());
-    /// assert!(!inf.is_finite());
-    /// assert!(!neg_inf.is_finite());
-    /// assert!(!nan.is_finite());
+    /// assert!(Float::is_finite(x));
+    /// assert!(!Float::is_finite(inf));
+    /// assert!(!Float::is_finite(neg_inf));
+    /// assert!(!Float::is_finite(nan));
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn is_finite(self) -> Self::Bool;
@@ -249,18 +253,20 @@ pub trait Float: Real {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// let min: f32 = f32::MIN_POSITIVE;
     /// let max: f32 = f32::MAX;
     /// let lower_than_min: f32 = 1e-40;
     /// let zero: f32 = 0.0;
     ///
-    /// assert!(!min.is_subnormal());
-    /// assert!(!max.is_subnormal());
+    /// assert!(!Float::is_subnormal(min));
+    /// assert!(!Float::is_subnormal(max));
     ///
-    /// assert!(!zero.is_subnormal());
-    /// assert!(!f32::NAN.is_subnormal());
-    /// assert!(!f32::INFINITY.is_subnormal());
-    /// assert!(lower_than_min.is_subnormal());
+    /// assert!(!Float::is_subnormal(zero));
+    /// assert!(!Float::is_subnormal(f32::NAN));
+    /// assert!(!Float::is_subnormal(f32::INFINITY));
+    /// assert!(Float::is_subnormal(lower_than_min));
+    /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn is_subnormal(self) -> Self::Bool;
 
@@ -271,18 +277,19 @@ pub trait Float: Real {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// let min: f32 = f32::MIN_POSITIVE;
     /// let max: f32 = f32::MAX;
     /// let lower_than_min: f32 = 1e-40;
     /// let zero: f32 = 0.0;
     ///
-    /// assert!(min.is_normal());
-    /// assert!(max.is_normal());
+    /// assert!(Float::is_normal(min));
+    /// assert!(Float::is_normal(max));
     ///
-    /// assert!(!zero.is_normal());
-    /// assert!(!f32::NAN.is_normal());
-    /// assert!(!f32::INFINITY.is_normal());
-    /// assert!(!lower_than_min.is_normal());
+    /// assert!(!Float::is_normal(zero));
+    /// assert!(!Float::is_normal(f32::NAN));
+    /// assert!(!Float::is_normal(f32::INFINITY));
+    /// assert!(!Float::is_normal(lower_than_min));
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn is_normal(self) -> Self::Bool;
@@ -293,11 +300,12 @@ pub trait Float: Real {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// let x: f32 = 7.0;
     /// let y: f32 = -7.0;
     ///
-    /// assert!(x.is_sign_positive());
-    /// assert!(!y.is_sign_positive());
+    /// assert!(Float::is_sign_positive(x));
+    /// assert!(!Float::is_sign_positive(y));
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn is_sign_positive(self) -> Self::Bool;
@@ -308,11 +316,12 @@ pub trait Float: Real {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// let x: f32 = 7.0;
     /// let y: f32 = -7.0;
     ///
-    /// assert!(!x.is_sign_negative());
-    /// assert!(y.is_sign_negative());
+    /// assert!(!Float::is_sign_negative(x));
+    /// assert!(Float::is_sign_negative(y));
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn is_sign_negative(self) -> Self::Bool;
@@ -324,11 +333,12 @@ pub trait Float: Real {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// // f32::EPSILON is the difference between 1.0 and the next number up.
-    /// assert_eq!(1.0.next_up(), 1.0 + f32::EPSILON);
+    /// assert_eq!(Float::next_up(1.0f32), 1.0 + f32::EPSILON);
     /// // But not for most numbers.
-    /// assert!(0.1.next_up() < 0.1 + f32::EPSILON);
-    /// assert_eq!(16777216.0.next_up(), 16777218.0);
+    /// assert!(Float::next_up(0.1f32) < 0.1 + f32::EPSILON);
+    /// assert_eq!(Float::next_up(16777216.0f32), 16777218.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn next_up(self) -> Self;
@@ -340,11 +350,12 @@ pub trait Float: Real {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Float;
     /// let x: f32 = 1.0;
     /// // Clamp value into range [0, 1).
-    /// let clamped = x.clamp(0.0, 1.0.next_down());
+    /// let clamped = x.clamp(0.0, Float::next_down(1.0));
     /// assert!(clamped < 1.0);
-    /// assert_eq!(clamped.next_up(), 1.0);
+    /// assert_eq!(Float::next_up(clamped), 1.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn next_down(self) -> Self;

@@ -13,21 +13,26 @@ use super::SimdLike;
 /// # Examples
 ///
 /// ```
-/// use gnum::{f32x4, simd::{Shuffle4, SimdLike, Swizzle}};
+/// #![feature(portable_simd)]
+/// # #[cfg(feature = "portable_simd")]
+/// # {
+/// use core::simd::f32x4;
+/// use gnum::simd::{Shuffle4, SimdLike, Swizzle};
 ///
-/// let v = f32x4([1.0, 2.0, 3.0, 4.0]);
+/// let v = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
 ///
 /// // Broadcast lane 0 into every lane.
-/// let broadcast = v.shuffle::<0, 0, 0, 0>();
-/// assert_eq!(broadcast.to_array(), [1.0, 1.0, 1.0, 1.0]);
+/// let broadcast = Shuffle4::shuffle::<0, 0, 0, 0>(v);
+/// assert_eq!(SimdLike::to_array(broadcast), [1.0, 1.0, 1.0, 1.0]);
 ///
 /// // Rotate lanes: `[x, y, z, w]` -> `[y, z, w, x]`.
-/// let rotated = v.shuffle::<1, 2, 3, 0>();
-/// assert_eq!(rotated.to_array(), [2.0, 3.0, 4.0, 1.0]);
+/// let rotated = Shuffle4::shuffle::<1, 2, 3, 0>(v);
+/// assert_eq!(SimdLike::to_array(rotated), [2.0, 3.0, 4.0, 1.0]);
 ///
 /// // Equivalently, we can use the `rotate_elements_left` method from `Swizzle`.
-/// let rotated2 = v.rotate_elements_left::<1>();
-/// assert_eq!(rotated2.to_array(), [2.0, 3.0, 4.0, 1.0]);
+/// let rotated2 = Swizzle::rotate_elements_left::<1>(v);
+/// assert_eq!(SimdLike::to_array(rotated2), [2.0, 3.0, 4.0, 1.0]);
+/// # }
 /// ```
 pub trait Shuffle4: SimdLike {
     /// Returns a vector whose lanes are `[self[A], self[B], self[C], self[D]]`.
@@ -50,21 +55,26 @@ pub trait Shuffle4: SimdLike {
 /// # Examples
 ///
 /// ```
-/// use gnum::{f32x8, simd::{Shuffle8, SimdLike, Swizzle}};
+/// #![feature(portable_simd)]
+/// # #[cfg(feature = "portable_simd")]
+/// # {
+/// use core::simd::f32x8;
+/// use gnum::simd::{Shuffle8, SimdLike, Swizzle};
 ///
-/// let v = f32x8([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+/// let v = f32x8::from_array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
 ///
 /// // Broadcast lane 0 into every lane.
-/// let broadcast = v.shuffle::<0, 0, 0, 0, 0, 0, 0, 0>();
-/// assert_eq!(broadcast.to_array(), [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
+/// let broadcast = Shuffle8::shuffle::<0, 0, 0, 0, 0, 0, 0, 0>(v);
+/// assert_eq!(SimdLike::to_array(broadcast), [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
 ///
 /// // Rotate lanes: `[x, y, z, w, a, b, c, d]` -> `[y, z, w, a, b, c, d, x]`.
-/// let rotated = v.shuffle::<1, 2, 3, 4, 5, 6, 7, 0>();
-/// assert_eq!(rotated.to_array(), [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 1.0]);
+/// let rotated = Shuffle8::shuffle::<1, 2, 3, 4, 5, 6, 7, 0>(v);
+/// assert_eq!(SimdLike::to_array(rotated), [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 1.0]);
 ///
 /// // Equivalently, we can use the `rotate_elements_left` method from `Swizzle`.
-/// let rotated2 = v.rotate_elements_left::<1>();
-/// assert_eq!(rotated2.to_array(), [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 1.0]);
+/// let rotated2 = Swizzle::rotate_elements_left::<1>(v);
+/// assert_eq!(SimdLike::to_array(rotated2), [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 1.0]);
+/// # }
 /// ```
 pub trait Shuffle8: SimdLike {
     /// Returns a vector whose lanes are `[self[A], self[B], ..., self[H]]`.

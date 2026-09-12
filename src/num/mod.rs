@@ -28,8 +28,8 @@ use core::ops::*;
 ///
 /// See [`Int`] and [`Float`] for more specific traits for integer and floating-point types, respectively.
 ///
-/// [`Int`]: crate::traits::Int
-/// [`Float`]: crate::traits::Float
+/// [`Int`]: crate::num::Int
+/// [`Float`]: crate::num::Float
 pub trait Num: Copy + Zero + One + NumOps + SimdLike {
     /// The smallest finite value that can be represented by this type.
     const MIN: Self;

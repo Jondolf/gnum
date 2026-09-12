@@ -10,11 +10,16 @@ use super::SimdLike;
 /// # Example
 ///
 /// ```
-/// use gnum::{f32x4, simd::Reduce};
+/// #![feature(portable_simd)]
+/// # #[cfg(feature = "portable_simd")]
+/// # {
+/// use core::simd::f32x4;
+/// use gnum::simd::Reduce;
 ///
-/// let v = f32x4([1.0, 2.0, 3.0, 4.0]);
-/// assert_eq!(v.reduce_sum(), 10.0);
-/// assert_eq!(v.reduce_max(), 4.0);
+/// let v = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
+/// assert_eq!(Reduce::reduce_sum(v), 10.0);
+/// assert_eq!(Reduce::reduce_max(v), 4.0);
+/// # }
 /// ```
 pub trait Reduce: SimdLike {
     /// Returns the sum of the lanes of the vector.
@@ -34,10 +39,15 @@ pub trait Reduce: SimdLike {
     /// # Example
     ///
     /// ```
-    /// use gnum::{f32x4, simd::Reduce};
+    /// #![feature(portable_simd)]
+    /// # #[cfg(feature = "portable_simd")]
+    /// # {
+    /// use core::simd::f32x4;
+    /// use gnum::simd::{Reduce, SimdLike};
     ///
-    /// let v = f32x4([1.0, 2.0, 3.0, 4.0]);
-    /// assert_eq!(v.reduce_sum(), 10.0);
+    /// let v = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
+    /// assert_eq!(Reduce::reduce_sum(v), 10.0);
+    /// # }
     /// ```
     #[must_use = "method returns a new element and does not mutate the original value"]
     fn reduce_sum(self) -> Self::Element;
@@ -60,14 +70,20 @@ pub trait Reduce: SimdLike {
     /// # Example
     ///
     /// ```
-    /// use gnum::{f32x4, simd::Reduce};
+    /// #![feature(portable_simd)]
+    /// # #[cfg(feature = "portable_simd")]
+    /// # {
+    /// use core::simd::f32x4;
+    /// use gnum::simd::{Reduce, SimdLike};
     ///
-    /// let v = f32x4([1.0, 2.0, 3.0, 4.0]);
-    /// assert_eq!(v.reduce_sum_stable(), 10.0);
+    /// let v = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
+    /// assert_eq!(Reduce::reduce_sum_stable(v), 10.0);
     ///
     /// // The above is bit-identical to the following
-    /// let sum = (v[0] + v[2]) + (v[1] + v[3]);
-    /// assert_eq!(v.reduce_sum_stable(), sum);
+    /// let lanes = SimdLike::to_array(v);
+    /// let sum = (lanes[0] + lanes[2]) + (lanes[1] + lanes[3]);
+    /// assert_eq!(Reduce::reduce_sum_stable(v), sum);
+    /// # }
     /// ```
     #[must_use = "method returns a new element and does not mutate the original value"]
     fn reduce_sum_stable(self) -> Self::Element;
@@ -89,10 +105,15 @@ pub trait Reduce: SimdLike {
     /// # Example
     ///
     /// ```
-    /// use gnum::{f32x4, simd::Reduce};
+    /// #![feature(portable_simd)]
+    /// # #[cfg(feature = "portable_simd")]
+    /// # {
+    /// use core::simd::f32x4;
+    /// use gnum::simd::{Reduce, SimdLike};
     ///
-    /// let v = f32x4([1.0, 2.0, 3.0, 4.0]);
-    /// assert_eq!(v.reduce_product(), 24.0);
+    /// let v = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
+    /// assert_eq!(Reduce::reduce_product(v), 24.0);
+    /// # }
     /// ```
     #[must_use = "method returns a new element and does not mutate the original value"]
     fn reduce_product(self) -> Self::Element;
@@ -115,14 +136,20 @@ pub trait Reduce: SimdLike {
     /// # Example
     ///
     /// ```
-    /// use gnum::{f32x4, simd::Reduce};
+    /// #![feature(portable_simd)]
+    /// # #[cfg(feature = "portable_simd")]
+    /// # {
+    /// use core::simd::f32x4;
+    /// use gnum::simd::{Reduce, SimdLike};
     ///
-    /// let v = f32x4([1.0, 2.0, 3.0, 4.0]);
-    /// assert_eq!(v.reduce_product_stable(), 24.0);
+    /// let v = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
+    /// assert_eq!(Reduce::reduce_product_stable(v), 24.0);
     ///
     /// // The above is bit-identical to the following
-    /// let product = (v[0] * v[2]) * (v[1] * v[3]);
-    /// assert_eq!(v.reduce_product_stable(), product);
+    /// let lanes = SimdLike::to_array(v);
+    /// let product = (lanes[0] * lanes[2]) * (lanes[1] * lanes[3]);
+    /// assert_eq!(Reduce::reduce_product_stable(v), product);
+    /// # }
     /// ```
     #[must_use = "method returns a new element and does not mutate the original value"]
     fn reduce_product_stable(self) -> Self::Element;
@@ -140,16 +167,21 @@ pub trait Reduce: SimdLike {
     /// # Example
     ///
     /// ```
-    /// use gnum::{f32x4, simd::Reduce};
+    /// #![feature(portable_simd)]
+    /// # #[cfg(feature = "portable_simd")]
+    /// # {
+    /// use core::simd::f32x4;
+    /// use gnum::simd::Reduce;
     ///
-    /// let v = f32x4([1.0, 2.0, 3.0, 4.0]);
-    /// assert_eq!(v.reduce_min(), 1.0);
+    /// let v = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
+    /// assert_eq!(Reduce::reduce_min(v), 1.0);
     ///
-    /// let v_with_nan = f32x4([1.0, f32::NAN, 3.0, 4.0]);
-    /// assert_eq!(v_with_nan.reduce_min(), 1.0);
+    /// let v_with_nan = f32x4::from_array([1.0, f32::NAN, 3.0, 4.0]);
+    /// assert_eq!(Reduce::reduce_min(v_with_nan), 1.0);
     ///
-    /// let v_with_all_nan = f32x4([f32::NAN, f32::NAN, f32::NAN, f32::NAN]);
-    /// assert!(v_with_all_nan.reduce_min().is_nan());
+    /// let v_with_all_nan = f32x4::from_array([f32::NAN, f32::NAN, f32::NAN, f32::NAN]);
+    /// assert!(Reduce::reduce_min(v_with_all_nan).is_nan());
+    /// # }
     /// ```
     #[must_use = "method returns a new element and does not mutate the original value"]
     fn reduce_min(self) -> Self::Element;
@@ -167,16 +199,21 @@ pub trait Reduce: SimdLike {
     /// # Example
     ///
     /// ```
-    /// use gnum::{f32x4, simd::Reduce};
+    /// #![feature(portable_simd)]
+    /// # #[cfg(feature = "portable_simd")]
+    /// # {
+    /// use core::simd::f32x4;
+    /// use gnum::simd::Reduce;
     ///
-    /// let v = f32x4([1.0, 2.0, 3.0, 4.0]);
-    /// assert_eq!(v.reduce_max(), 4.0);
+    /// let v = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
+    /// assert_eq!(Reduce::reduce_max(v), 4.0);
     ///
-    /// let v_with_nan = f32x4([1.0, f32::NAN, 3.0, 4.0]);
-    /// assert_eq!(v_with_nan.reduce_max(), 4.0);
+    /// let v_with_nan = f32x4::from_array([1.0, f32::NAN, 3.0, 4.0]);
+    /// assert_eq!(Reduce::reduce_max(v_with_nan), 4.0);
     ///
-    /// let v_with_all_nan = f32x4([f32::NAN, f32::NAN, f32::NAN, f32::NAN]);
-    /// assert!(v_with_all_nan.reduce_max().is_nan());
+    /// let v_with_all_nan = f32x4::from_array([f32::NAN, f32::NAN, f32::NAN, f32::NAN]);
+    /// assert!(Reduce::reduce_max(v_with_all_nan).is_nan());
+    /// # }
     /// ```
     #[must_use = "method returns a new element and does not mutate the original value"]
     fn reduce_max(self) -> Self::Element;
@@ -189,11 +226,16 @@ pub trait Reduce: SimdLike {
 /// # Example
 ///
 /// ```
-/// use gnum::{u32x4, simd::ReduceBitwise};
+/// #![feature(portable_simd)]
+/// # #[cfg(feature = "portable_simd")]
+/// # {
+/// use core::simd::u32x4;
+/// use gnum::simd::ReduceBitwise;
 ///
-/// let v = u32x4([0b0110, 0b0111, 0b1110, 0b0100]);
-/// assert_eq!(v.reduce_and(), 0b0100);
-/// assert_eq!(v.reduce_or(), 0b1111);
+/// let v = u32x4::from_array([0b0110, 0b0111, 0b1110, 0b0100]);
+/// assert_eq!(ReduceBitwise::reduce_and(v), 0b0100);
+/// assert_eq!(ReduceBitwise::reduce_or(v), 0b1111);
+/// # }
 /// ```
 pub trait ReduceBitwise: SimdLike {
     /// Returns the cumulative bitwise "and" across the lanes of the vector.
@@ -201,10 +243,15 @@ pub trait ReduceBitwise: SimdLike {
     /// # Example
     ///
     /// ```
-    /// use gnum::{u32x4, simd::ReduceBitwise};
+    /// #![feature(portable_simd)]
+    /// # #[cfg(feature = "portable_simd")]
+    /// # {
+    /// use core::simd::u32x4;
+    /// use gnum::simd::ReduceBitwise;
     ///
-    /// let v = u32x4([0b0110, 0b0111, 0b1110, 0b0100]);
-    /// assert_eq!(v.reduce_and(), 0b0100);
+    /// let v = u32x4::from_array([0b0110, 0b0111, 0b1110, 0b0100]);
+    /// assert_eq!(ReduceBitwise::reduce_and(v), 0b0100);
+    /// # }
     /// ```
     #[must_use = "method returns a new element and does not mutate the original value"]
     fn reduce_and(self) -> Self::Element;
@@ -214,10 +261,15 @@ pub trait ReduceBitwise: SimdLike {
     /// # Example
     ///
     /// ```
-    /// use gnum::{u32x4, simd::ReduceBitwise};
+    /// #![feature(portable_simd)]
+    /// # #[cfg(feature = "portable_simd")]
+    /// # {
+    /// use core::simd::u32x4;
+    /// use gnum::simd::ReduceBitwise;
     ///
-    /// let v = u32x4([0b0110, 0b0111, 0b1110, 0b0100]);
-    /// assert_eq!(v.reduce_or(), 0b1111);
+    /// let v = u32x4::from_array([0b0110, 0b0111, 0b1110, 0b0100]);
+    /// assert_eq!(ReduceBitwise::reduce_or(v), 0b1111);
+    /// # }
     /// ```
     #[must_use = "method returns a new element and does not mutate the original value"]
     fn reduce_or(self) -> Self::Element;
@@ -227,10 +279,15 @@ pub trait ReduceBitwise: SimdLike {
     /// # Example
     ///
     /// ```
-    /// use gnum::{u32x4, simd::ReduceBitwise};
+    /// #![feature(portable_simd)]
+    /// # #[cfg(feature = "portable_simd")]
+    /// # {
+    /// use core::simd::u32x4;
+    /// use gnum::simd::ReduceBitwise;
     ///
-    /// let v = u32x4([0b0110, 0b0111, 0b1110, 0b0100]);
-    /// assert_eq!(v.reduce_xor(), 0b1011);
+    /// let v = u32x4::from_array([0b0110, 0b0111, 0b1110, 0b0100]);
+    /// assert_eq!(ReduceBitwise::reduce_xor(v), 0b1011);
+    /// # }
     /// ```
     #[must_use = "method returns a new element and does not mutate the original value"]
     fn reduce_xor(self) -> Self::Element;

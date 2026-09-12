@@ -26,7 +26,7 @@ use crate::num::Num;
 /// use gnum::num::NumCast;
 ///
 /// let x: f32 = 3.7;
-/// let y: i32 = x.cast();
+/// let y: i32 = NumCast::cast(x);
 /// assert_eq!(y, 3);
 ///
 /// // Out-of-range floats saturate, just like `as`.
@@ -46,7 +46,7 @@ pub trait NumCast<T>: Num {
     /// use gnum::num::NumCast;
     ///
     /// let x: u32 = 7;
-    /// let y: f64 = x.cast();
+    /// let y: f64 = NumCast::cast(x);
     /// assert_eq!(y, 7.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]

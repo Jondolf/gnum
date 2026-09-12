@@ -88,7 +88,7 @@ impl_real_constants!(f32, f64);
 
 /// A trait for [real number] types such as [`f32`] and [`f64`].
 ///
-/// [real numbers]: https://en.wikipedia.org/wiki/Real_number
+/// [real number]: https://en.wikipedia.org/wiki/Real_number
 pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// The integer type associated with this real number type.
     type I32: Int;
@@ -106,11 +106,12 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 3.7;
     /// let y: f32 = -3.7;
     ///
-    /// assert_eq!(x.floor(), 3.0);
-    /// assert_eq!(y.floor(), -4.0);
+    /// assert_eq!(Real::floor(x), 3.0);
+    /// assert_eq!(Real::floor(y), -4.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn floor(self) -> Self;
@@ -120,11 +121,12 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 3.7;
     /// let y: f32 = -3.7;
     ///
-    /// assert_eq!(x.ceil(), 4.0);
-    /// assert_eq!(y.ceil(), -3.0);
+    /// assert_eq!(Real::ceil(x), 4.0);
+    /// assert_eq!(Real::ceil(y), -3.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[doc(alias = "ceiling")]
@@ -136,13 +138,14 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 3.7;
     /// let y: f32 = 4.5;
     /// let z: f32 = -5.5;
     ///
-    /// assert_eq!(x.round(), 4.0);
-    /// assert_eq!(y.round(), 5.0);
-    /// assert_eq!(z.round(), -6.0);
+    /// assert_eq!(Real::round(x), 4.0);
+    /// assert_eq!(Real::round(y), 5.0);
+    /// assert_eq!(Real::round(z), -6.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn round(self) -> Self;
@@ -154,27 +157,30 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 3.7;
     /// let y: f32 = 4.5;
     /// let z: f32 = -5.5;
     ///
-    /// assert_eq!(x.round_ties_even(), 4.0);
-    /// assert_eq!(y.round_ties_even(), 4.0);
-    /// assert_eq!(z.round_ties_even(), -6.0);
+    /// assert_eq!(Real::round_ties_even(x), 4.0);
+    /// assert_eq!(Real::round_ties_even(y), 4.0);
+    /// assert_eq!(Real::round_ties_even(z), -6.0);
+    /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn round_ties_even(self) -> Self;
 
-    /// Returns the integer part of `self`. This means that noh-integer numbers
+    /// Returns the integer part of `self`. This means that non-integer numbers
     /// are always truncated towards zero.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 3.7;
     /// let y: f32 = -3.7;
     ///
-    /// assert_eq!(x.trunc(), 3.0);
-    /// assert_eq!(y.trunc(), -3.0);
+    /// assert_eq!(Real::trunc(x), 3.0);
+    /// assert_eq!(Real::trunc(y), -3.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[doc(alias = "truncate")]
@@ -187,11 +193,12 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 3.7;
     /// let y: f32 = -3.7;
     ///
-    /// assert_eq!(x.fract(), 0.7);
-    /// assert_eq!(y.fract(), -0.7);
+    /// assert!((Real::fract(x) - 0.7).abs() <= f32::EPSILON);
+    /// assert!((Real::fract(y) + 0.7).abs() <= f32::EPSILON);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn fract(self) -> Self;
@@ -203,11 +210,12 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 4.0;
     /// let y: f32 = 2.0;
     ///
-    /// assert_eq!(x.sqrt(), 2.0);
-    /// assert_eq!(y.sqrt(), 1.4142135);
+    /// assert_eq!(Real::sqrt(x), 2.0);
+    /// assert_eq!(Real::sqrt(y), 1.4142135);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[doc(alias = "squareRoot")]
@@ -223,16 +231,18 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`exp_stable`](Self::exp_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 1.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert_eq!(x.exp(), f32::E);
-    /// assert_eq!(y.exp(), 1.0);
+    /// assert_eq!(Real::exp(x), core::f32::consts::E);
+    /// assert_eq!(Real::exp(y), 1.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn exp(self) -> Self;
@@ -242,21 +252,21 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`exp`](Self::exp) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`exp`](Self::exp) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 1.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert!((x.exp_stable() - core::f32::consts::E).abs() <= 1e-5);
-    /// assert_eq!(y.exp_stable(), 1.0);
+    /// assert!((Real::exp_stable(x) - core::f32::consts::E).abs() <= 1e-5);
+    /// assert_eq!(Real::exp_stable(y), 1.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn exp_stable(self) -> Self;
@@ -271,16 +281,18 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`exp2_stable`](Self::exp2_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 2.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert_eq!(x.exp2(), 4.0);
-    /// assert_eq!(y.exp2(), 1.0);
+    /// assert_eq!(Real::exp2(x), 4.0);
+    /// assert_eq!(Real::exp2(y), 1.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn exp2(self) -> Self;
@@ -290,21 +302,21 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`exp2`](Self::exp2) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`exp2`](Self::exp2) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 2.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert!((x.exp2_stable() - 4.0).abs() <= 1e-5);
-    /// assert_eq!(y.exp2_stable(), 1.0);
+    /// assert!((Real::exp2_stable(x) - 4.0).abs() <= 1e-5);
+    /// assert_eq!(Real::exp2_stable(y), 1.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn exp2_stable(self) -> Self;
@@ -321,17 +333,19 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`log_stable`](Self::log_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let base: f32 = 2.0;
     /// let x: f32 = 16.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert_eq!(x.log(base), 4.0);
-    /// assert_eq!(y.log(base), f32::NEG_INFINITY);
+    /// assert_eq!(Real::log(x, base), 4.0);
+    /// assert_eq!(Real::log(y, base), f32::NEG_INFINITY);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn log(self, base: Self) -> Self;
@@ -343,22 +357,22 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`log`](Self::log) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`log`](Self::log) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let base: f32 = 2.0;
     /// let x: f32 = 16.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert!((x.log_stable(base) - 4.0).abs() <= 1e-5);
-    /// assert_eq!(y.log_stable(base), f32::NEG_INFINITY);
+    /// assert!((Real::log_stable(x, base) - 4.0).abs() <= 1e-5);
+    /// assert_eq!(Real::log_stable(y, base), f32::NEG_INFINITY);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn log_stable(self, base: Self) -> Self;
@@ -375,16 +389,18 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`ln_stable`](Self::ln_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
-    /// let x: f32 = f32::E;
+    /// # use gnum::num::Real;
+    /// let x: f32 = core::f32::consts::E;
     /// let y: f32 = 0.0;
     ///
-    /// assert_eq!(x.ln(), 1.0);
-    /// assert_eq!(y.ln(), f32::NEG_INFINITY);
+    /// assert!((Real::ln(x) - 1.0).abs() <= f32::EPSILON);
+    /// assert_eq!(Real::ln(y), f32::NEG_INFINITY);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn ln(self) -> Self;
@@ -396,21 +412,21 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`ln`](Self::ln) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`ln`](Self::ln) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = core::f32::consts::E;
     /// let y: f32 = 0.0;
     ///
-    /// assert!((x.ln_stable() - 1.0).abs() <= 1e-5);
-    /// assert_eq!(y.ln_stable(), f32::NEG_INFINITY);
+    /// assert!((Real::ln_stable(x) - 1.0).abs() <= 1e-5);
+    /// assert_eq!(Real::ln_stable(y), f32::NEG_INFINITY);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn ln_stable(self) -> Self;
@@ -427,16 +443,18 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`log2_stable`](Self::log2_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 16.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert_eq!(x.log2(), 4.0);
-    /// assert_eq!(y.log2(), f32::NEG_INFINITY);
+    /// assert_eq!(Real::log2(x), 4.0);
+    /// assert_eq!(Real::log2(y), f32::NEG_INFINITY);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn log2(self) -> Self;
@@ -448,21 +466,21 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`log2`](Self::log2) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`log2`](Self::log2) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 16.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert!((x.log2_stable() - 4.0).abs() <= 1e-5);
-    /// assert_eq!(y.log2_stable(), f32::NEG_INFINITY);
+    /// assert!((Real::log2_stable(x) - 4.0).abs() <= 1e-5);
+    /// assert_eq!(Real::log2_stable(y), f32::NEG_INFINITY);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn log2_stable(self) -> Self;
@@ -479,16 +497,18 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`log10_stable`](Self::log10_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 100.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert_eq!(x.log10(), 2.0);
-    /// assert_eq!(y.log10(), f32::NEG_INFINITY);
+    /// assert_eq!(Real::log10(x), 2.0);
+    /// assert_eq!(Real::log10(y), f32::NEG_INFINITY);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn log10(self) -> Self;
@@ -500,21 +520,21 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`log10`](Self::log10) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`log10`](Self::log10) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 100.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert!((x.log10_stable() - 2.0).abs() <= 1e-5);
-    /// assert_eq!(y.log10_stable(), f32::NEG_INFINITY);
+    /// assert!((Real::log10_stable(x) - 2.0).abs() <= 1e-5);
+    /// assert_eq!(Real::log10_stable(y), f32::NEG_INFINITY);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn log10_stable(self) -> Self;
@@ -529,16 +549,18 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`cbrt_stable`](Self::cbrt_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 27.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert_eq!(x.cbrt(), 3.0);
-    /// assert_eq!(y.cbrt(), 0.0);
+    /// assert_eq!(Real::cbrt(x), 3.0);
+    /// assert_eq!(Real::cbrt(y), 0.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[doc(alias = "cubeRoot")]
@@ -549,21 +571,21 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`cbrt`](Self::cbrt) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`cbrt`](Self::cbrt) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 27.0;
     /// let y: f32 = 0.0;
     ///
-    /// assert!((x.cbrt_stable() - 3.0).abs() <= 1e-4);
-    /// assert_eq!(y.cbrt_stable(), 0.0);
+    /// assert!((Real::cbrt_stable(x) - 3.0).abs() <= 1e-4);
+    /// assert_eq!(Real::cbrt_stable(y), 0.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[doc(alias = "cubeRootStable")]
@@ -581,16 +603,18 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`hypot_stable`](Self::hypot_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 3.0;
     /// let y: f32 = 4.0;
     ///
     /// // sqrt(3^2 + 4^2) = sqrt(25) = 5
-    /// assert_eq!(x.hypot(y), 5.0);
+    /// assert_eq!(Real::hypot(x, y), 5.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn hypot(self, other: Self) -> Self;
@@ -603,21 +627,21 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`hypot`](Self::hypot) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`hypot`](Self::hypot) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 3.0;
     /// let y: f32 = 4.0;
     ///
     /// // sqrt(3^2 + 4^2) = sqrt(25) = 5
-    /// assert_eq!(x.hypot_stable(y), 5.0);
+    /// assert_eq!(Real::hypot_stable(x, y), 5.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn hypot_stable(self, other: Self) -> Self;
@@ -632,14 +656,16 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`sin_stable`](Self::sin_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = core::f32::consts::FRAC_PI_2;
     ///     
-    /// assert_eq!(x.sin(), 1.0);
+    /// assert_eq!(Real::sin(x), 1.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn sin(self) -> Self;
@@ -649,19 +675,19 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`sin`](Self::sin) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`sin`](Self::sin) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = core::f32::consts::FRAC_PI_2;
     ///
-    /// assert!((x.sin_stable() - 1.0).abs() <= 1e-6);
+    /// assert!((Real::sin_stable(x) - 1.0).abs() <= 1e-6);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn sin_stable(self) -> Self;
@@ -676,14 +702,16 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`cos_stable`](Self::cos_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = core::f32::consts::PI;
     ///
-    /// assert_eq!(x.cos(), -1.0);
+    /// assert_eq!(Real::cos(x), -1.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn cos(self) -> Self;
@@ -693,19 +721,19 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`cos`](Self::cos) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`cos`](Self::cos) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = core::f32::consts::PI;
     ///
-    /// assert!((x.cos_stable() - (-1.0)).abs() <= 1e-6);
+    /// assert!((Real::cos_stable(x) - (-1.0)).abs() <= 1e-6);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn cos_stable(self) -> Self;
@@ -720,14 +748,16 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`tan_stable`](Self::tan_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = core::f32::consts::FRAC_PI_4;
     ///
-    /// assert_eq!(x.tan(), 1.0);
+    /// assert_eq!(Real::tan(x), 1.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn tan(self) -> Self;
@@ -737,19 +767,19 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`tan`](Self::tan) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`tan`](Self::tan) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = core::f32::consts::FRAC_PI_4;
     ///
-    /// assert!((x.tan_stable() - 1.0).abs() <= 1e-6);
+    /// assert!((Real::tan_stable(x) - 1.0).abs() <= 1e-6);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn tan_stable(self) -> Self;
@@ -767,14 +797,16 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`asin_stable`](Self::asin_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 1.0;
     ///
-    /// assert_eq!(x.asin(), core::f32::consts::FRAC_PI_2);
+    /// assert_eq!(Real::asin(x), core::f32::consts::FRAC_PI_2);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn asin(self) -> Self;
@@ -787,19 +819,19 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`asin`](Self::asin) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`asin`](Self::asin) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 1.0;
     ///
-    /// assert_eq!(x.asin_stable(), core::f32::consts::FRAC_PI_2);
+    /// assert_eq!(Real::asin_stable(x), core::f32::consts::FRAC_PI_2);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn asin_stable(self) -> Self;
@@ -817,14 +849,16 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`acos_stable`](Self::acos_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 0.0;
     ///
-    /// assert_eq!(x.acos(), core::f32::consts::FRAC_PI_2);
+    /// assert_eq!(Real::acos(x), core::f32::consts::FRAC_PI_2);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn acos(self) -> Self;
@@ -837,19 +871,19 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`acos`](Self::acos) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`acos`](Self::acos) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 0.0;
     ///
-    /// assert!((x.acos_stable() - core::f32::consts::FRAC_PI_2).abs() <= 1e-6);
+    /// assert!((Real::acos_stable(x) - core::f32::consts::FRAC_PI_2).abs() <= 1e-6);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn acos_stable(self) -> Self;
@@ -866,14 +900,16 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`atan_stable`](Self::atan_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 1.0;
     ///
-    /// assert_eq!(x.atan(), core::f32::consts::FRAC_PI_4);
+    /// assert_eq!(Real::atan(x), core::f32::consts::FRAC_PI_4);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn atan(self) -> Self;
@@ -885,19 +921,19 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`atan`](Self::atan) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`atan`](Self::atan) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 1.0;
     ///
-    /// assert!((x.atan_stable() - core::f32::consts::FRAC_PI_4).abs() <= 1e-5);
+    /// assert!((Real::atan_stable(x) - core::f32::consts::FRAC_PI_4).abs() <= 1e-5);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn atan_stable(self) -> Self;
@@ -919,11 +955,13 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`atan2_stable`](Self::atan2_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// // Positive angles measured counterclockwise from the positive x axis
     ///
     /// // -pi/4 radians (45 deg clockwise)
@@ -934,8 +972,8 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// let x2: f32 = -3.0;
     /// let y2: f32 = 3.0;
     ///
-    /// let abs_difference_1 = (y1.atan2(x1) - (-core::f32::consts::FRAC_PI_4)).abs();
-    /// let abs_difference_2 = (y2.atan2(x2) - (3.0 * core::f32::consts::FRAC_PI_4)).abs();
+    /// let abs_difference_1 = (Real::atan2(y1, x1) - (-core::f32::consts::FRAC_PI_4)).abs();
+    /// let abs_difference_2 = (Real::atan2(y2, x2) - (3.0 * core::f32::consts::FRAC_PI_4)).abs();
     ///
     /// assert!(abs_difference_1 <= 1e-5);
     /// assert!(abs_difference_2 <= 1e-5);
@@ -956,16 +994,16 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`atan2`](Self::atan2) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`atan2`](Self::atan2) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// // Positive angles measured counterclockwise from the positive x axis
     ///
     /// // -pi/4 radians (45 deg clockwise)
@@ -976,8 +1014,8 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// let x2: f32 = -3.0;
     /// let y2: f32 = 3.0;
     ///
-    /// let abs_difference_1 = (y1.atan2_stable(x1) - (-core::f32::consts::FRAC_PI_4)).abs();
-    /// let abs_difference_2 = (y2.atan2_stable(x2) - (3.0 * core::f32::consts::FRAC_PI_4)).abs();
+    /// let abs_difference_1 = (Real::atan2_stable(y1, x1) - (-core::f32::consts::FRAC_PI_4)).abs();
+    /// let abs_difference_2 = (Real::atan2_stable(y2, x2) - (3.0 * core::f32::consts::FRAC_PI_4)).abs();
     ///
     /// assert!(abs_difference_1 <= 1e-5);
     /// assert!(abs_difference_2 <= 1e-5);
@@ -996,16 +1034,18 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`sin_cos_stable`](Self::sin_cos_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = core::f32::consts::FRAC_PI_4;
-    /// let (s, c) = x.sin_cos();
+    /// let (s, c) = Real::sin_cos(x);
     ///
-    /// let abs_difference_s = (s - core::f32::consts::FRAC_PI_4.sin()).abs();
-    /// let abs_difference_c = (c - core::f32::consts::FRAC_PI_4.cos()).abs();
+    /// let abs_difference_s = (s - Real::sin(core::f32::consts::FRAC_PI_4)).abs();
+    /// let abs_difference_c = (c - Real::cos(core::f32::consts::FRAC_PI_4)).abs();
     ///
     /// assert!(abs_difference_s <= 1e-5);
     /// assert!(abs_difference_c <= 1e-5);
@@ -1019,21 +1059,21 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`sin_cos`](Self::sin_cos) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`sin_cos`](Self::sin_cos) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = core::f32::consts::FRAC_PI_4;
-    /// let (s, c) = x.sin_cos_stable();
+    /// let (s, c) = Real::sin_cos_stable(x);
     ///
-    /// let abs_difference_s = (s - core::f32::consts::FRAC_PI_4.sin()).abs();
-    /// let abs_difference_c = (c - core::f32::consts::FRAC_PI_4.cos()).abs();
+    /// let abs_difference_s = (s - Real::sin(core::f32::consts::FRAC_PI_4)).abs();
+    /// let abs_difference_c = (c - Real::cos(core::f32::consts::FRAC_PI_4)).abs();
     ///
     /// assert!(abs_difference_s <= 1e-5);
     /// assert!(abs_difference_c <= 1e-5);
@@ -1051,14 +1091,16 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`sinh_stable`](Self::sinh_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let e = core::f32::consts::E;
     /// let x: f32 = 1.0;
-    /// let f = x.sinh();
+    /// let f = Real::sinh(x);
     ///
     /// // Solving sinh() at 1 gives `(e^2-1)/(2e)`
     /// let g = ((e * e) - 1.0) / (2.0 * e);
@@ -1074,19 +1116,19 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`sinh`](Self::sinh) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`sinh`](Self::sinh) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let e = core::f32::consts::E;
     /// let x: f32 = 1.0;
-    /// let f = x.sinh_stable();
+    /// let f = Real::sinh_stable(x);
     ///
     /// // Solving sinh() at 1 gives `(e^2-1)/(2e)`
     /// let g = ((e * e) - 1.0) / (2.0 * e);
@@ -1107,14 +1149,16 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`cosh_stable`](Self::cosh_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let e = core::f32::consts::E;
     /// let x: f32 = 1.0;
-    /// let f = x.cosh();
+    /// let f = Real::cosh(x);
     ///
     /// // Solving cosh() at 1 gives this result
     /// let g = ((e * e) + 1.0) / (2.0 * e);
@@ -1131,19 +1175,19 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`cosh`](Self::cosh) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`cosh`](Self::cosh) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let e = core::f32::consts::E;
     /// let x: f32 = 1.0;
-    /// let f = x.cosh_stable();
+    /// let f = Real::cosh_stable(x);
     ///
     /// // Solving cosh() at 1 gives this result
     /// let g = ((e * e) + 1.0) / (2.0 * e);
@@ -1164,14 +1208,16 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`tanh_stable`](Self::tanh_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let e = core::f32::consts::E;
     /// let x: f32 = 1.0;
-    /// let f = x.tanh();
+    /// let f = Real::tanh(x);
     ///
     /// // Solving tanh() at 1 gives `(1 - e^(-2))/(1 + e^(-2))`
     /// let g = (1.0 - e.powi(-2)) / (1.0 + e.powi(-2));
@@ -1187,19 +1233,19 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`tanh`](Self::tanh) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`tanh`](Self::tanh) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let e = core::f32::consts::E;
     /// let x: f32 = 1.0;
-    /// let f = x.tanh_stable();
+    /// let f = Real::tanh_stable(x);
     ///
     /// // Solving tanh() at 1 gives `(1 - e^(-2))/(1 + e^(-2))`
     /// let g = (1.0 - e.powi(-2)) / (1.0 + e.powi(-2));
@@ -1220,13 +1266,15 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`asinh_stable`](Self::asinh_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 1.0;
-    /// let f = x.sinh().asinh();
+    /// let f = Real::asinh(Real::sinh(x));
     ///
     /// let abs_difference = (f - x).abs();
     ///
@@ -1241,18 +1289,18 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`asinh`](Self::asinh) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`asinh`](Self::asinh) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 1.0;
-    /// let f = x.sinh_stable().asinh_stable();
+    /// let f = Real::asinh_stable(Real::sinh_stable(x));
     ///
     /// let abs_difference = (f - x).abs();
     ///
@@ -1273,13 +1321,15 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`acosh_stable`](Self::acosh_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 1.0;
-    /// let f = x.cosh().acosh();
+    /// let f = Real::acosh(Real::cosh(x));
     ///
     /// let abs_difference = (f - x).abs();
     ///
@@ -1296,18 +1346,18 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`acosh`](Self::acosh) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`acosh`](Self::acosh) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 1.0;
-    /// let f = x.cosh_stable().acosh_stable();
+    /// let f = Real::acosh_stable(Real::cosh_stable(x));
     ///
     /// let abs_difference = (f - x).abs();
     ///
@@ -1328,13 +1378,15 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     ///
     /// See [`atanh_stable`](Self::atanh_stable) for a version of this function
     /// that is guaranteed to be deterministic and returns identical results
-    /// across both scalar and vectorized types at the cost of some performance.
+    /// across both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 0.5;
-    /// let f = x.tanh().atanh();
+    /// let f = Real::atanh(Real::tanh(x));
     ///
     /// let abs_difference = (f - x).abs();
     ///
@@ -1350,18 +1402,18 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Precision
     ///
     /// This function is deterministic and returns identical results across
-    /// both scalar and vectorized types at the cost of some performance.
+    /// both scalar and vectorized types at the cost of some precision
+    /// and/or performance.
     ///
-    /// See [`atanh`](Self::atanh) for a version of this function that may be faster
-    /// but can be non-deterministic.
+    /// See [`atanh`](Self::atanh) for a version of this function that may be
+    /// more precise but can be non-deterministic.
     ///
     /// # Example
     ///
     /// ```
     /// # use gnum::num::Real;
-    /// #
     /// let x: f32 = 0.5;
-    /// let f = x.tanh_stable().atanh_stable();
+    /// let f = Real::atanh_stable(Real::tanh_stable(x));
     ///
     /// let abs_difference = (f - x).abs();
     ///
@@ -1375,11 +1427,12 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 4.0;
     /// let y: f32 = 0.5;
     ///
-    /// assert_eq!(x.recip(), 0.25);
-    /// assert_eq!(y.recip(), 2.0);
+    /// assert_eq!(Real::recip(x), 0.25);
+    /// assert_eq!(Real::recip(y), 2.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn recip(self) -> Self;
@@ -1389,9 +1442,10 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = core::f32::consts::PI;
     ///
-    /// assert_eq!(x.to_degrees(), 180.0);
+    /// assert_eq!(Real::to_degrees(x), 180.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn to_degrees(self) -> Self;
@@ -1401,9 +1455,10 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 180.0;
     ///
-    /// assert_eq!(x.to_radians(), core::f32::consts::PI);
+    /// assert_eq!(Real::to_radians(x), core::f32::consts::PI);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn to_radians(self) -> Self;
@@ -1418,11 +1473,12 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 3.0;
     /// let y: f32 = 5.0;
     ///
-    /// assert_eq!(x.midpoint(y), 4.0);
-    /// assert_eq!(y.midpoint(x), 4.0);
+    /// assert_eq!(Real::midpoint(x, y), 4.0);
+    /// assert_eq!(Real::midpoint(y, x), 4.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn midpoint(self, other: Self) -> Self;
@@ -1436,12 +1492,11 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
-    /// use gnum::num::Real;
-    ///
+    /// # use gnum::num::Real;
     /// assert_eq!(Real::midpoint_fast(3.0f32, 5.0), 4.0);
     ///
     /// // `midpoint_fast` can overflow, while `midpoint` does not
-    /// assert!(Real::midpoint_fast(f32::MAX, f32::MAX).is_infinite());
+    /// assert_eq!(Real::midpoint_fast(f32::MAX, f32::MAX), f32::INFINITY);
     /// assert_eq!(Real::midpoint(f32::MAX, f32::MAX), f32::MAX);
     /// ```
     #[inline]
@@ -1455,11 +1510,12 @@ pub trait Real: Num + Signed + RealConstants + NumOrd {
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Real;
     /// let x: f32 = 3.0;
     /// let y: f32 = -2.0;
     ///
-    /// assert_eq!(x.copysign(y), -3.0);
-    /// assert_eq!(y.copysign(x), 2.0);
+    /// assert_eq!(Real::copysign(x, y), -3.0);
+    /// assert_eq!(Real::copysign(y, x), 2.0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn copysign(self, sign: Self) -> Self;

@@ -31,8 +31,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
-    /// assert_eq!(i32::BITS, 32);
-    /// assert_eq!(u64::BITS, 64);
+    /// # use gnum::num::Int;
+    /// assert_eq!(<i32 as Int>::BITS, 32);
+    /// assert_eq!(<u64 as Int>::BITS, 64);
     /// ```
     const BITS: u32;
 
@@ -41,8 +42,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u8 = 0b00110001;
-    /// assert_eq!(n.count_ones(), 3);
+    /// assert_eq!(Int::count_ones(n), 3);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn count_ones(self) -> Self::Unsigned;
@@ -52,8 +54,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u8 = 0b00110001;
-    /// assert_eq!(n.count_zeros(), 5);
+    /// assert_eq!(Int::count_zeros(n), 5);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn count_zeros(self) -> Self::Unsigned;
@@ -63,8 +66,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u8 = 0b00110001;
-    /// assert_eq!(n.leading_zeros(), 2);
+    /// assert_eq!(Int::leading_zeros(n), 2);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn leading_zeros(self) -> Self::Unsigned;
@@ -74,8 +78,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u8 = 0b00110001;
-    /// assert_eq!(n.trailing_zeros(), 0);
+    /// assert_eq!(Int::trailing_zeros(n), 0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn trailing_zeros(self) -> Self::Unsigned;
@@ -85,8 +90,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u8 = 0b11010000;
-    /// assert_eq!(n.leading_ones(), 2);
+    /// assert_eq!(Int::leading_ones(n), 2);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn leading_ones(self) -> Self::Unsigned;
@@ -96,8 +102,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u8 = 0b00110001;
-    /// assert_eq!(n.trailing_ones(), 1);
+    /// assert_eq!(Int::trailing_ones(n), 1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn trailing_ones(self) -> Self::Unsigned;
@@ -113,9 +120,10 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u8 = 0b00110001;
-    /// assert_eq!(n.rotate_left(2), 0b11000010);
-    /// assert_eq!(n.rotate_left(8), n);
+    /// assert_eq!(Int::rotate_left(n, 2), 0b11000100);
+    /// assert_eq!(Int::rotate_left(n, 8), n);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn rotate_left(self, n: Self::Unsigned) -> Self;
@@ -131,9 +139,10 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u8 = 0b00110001;
-    /// assert_eq!(n.rotate_right(2), 0b01001100);
-    /// assert_eq!(n.rotate_right(8), n);
+    /// assert_eq!(Int::rotate_right(n, 2), 0b01001100);
+    /// assert_eq!(Int::rotate_right(n, 8), n);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn rotate_right(self, n: Self::Unsigned) -> Self;
@@ -143,8 +152,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u32 = 0x12345678;
-    /// assert_eq!(n.swap_bytes(), 0x78563412);
+    /// assert_eq!(Int::swap_bytes(n), 0x78563412);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn swap_bytes(self) -> Self;
@@ -154,8 +164,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u8 = 0b00010010;
-    /// assert_eq!(n.reverse_bits(), 0b01001000);
+    /// assert_eq!(Int::reverse_bits(n), 0b01001000);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn reverse_bits(self) -> Self;
@@ -166,12 +177,13 @@ pub trait Int:
     ///
     /// # Example
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u32 = 0x12345678;
     ///
     /// if cfg!(target_endian = "big") {
-    ///     assert_eq!(n.from_be(), n);
+    ///     assert_eq!(Int::from_be(n), n);
     /// } else {
-    ///     assert_eq!(n.from_be(), n.swap_bytes());
+    ///     assert_eq!(Int::from_be(n), Int::swap_bytes(n));
     /// }
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -184,12 +196,13 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u32 = 0x12345678;
     ///
     /// if cfg!(target_endian = "little") {
-    ///     assert_eq!(n.from_le(), n);
+    ///     assert_eq!(Int::from_le(n), n);
     /// } else {
-    ///     assert_eq!(n.from_le(), n.swap_bytes());
+    ///     assert_eq!(Int::from_le(n), Int::swap_bytes(n));
     /// }
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -202,12 +215,13 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u32 = 0x12345678;
     ///
     /// if cfg!(target_endian = "big") {
-    ///     assert_eq!(n.to_be(), n);
+    ///     assert_eq!(Int::to_be(n), n);
     /// } else {
-    ///     assert_eq!(n.to_be(), n.swap_bytes());
+    ///     assert_eq!(Int::to_be(n), Int::swap_bytes(n));
     /// }
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -220,12 +234,13 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n: u32 = 0x12345678;
     ///
     /// if cfg!(target_endian = "little") {
-    ///     assert_eq!(n.to_le(), n);
+    ///     assert_eq!(Int::to_le(n), n);
     /// } else {
-    ///     assert_eq!(n.to_le(), n.swap_bytes());
+    ///     assert_eq!(Int::to_le(n), Int::swap_bytes(n));
     /// }
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
@@ -237,8 +252,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
-    /// let n: u32 = -1;
-    /// assert_eq!(n.cast_unsigned(), u32::MAX);
+    /// # use gnum::num::Int;
+    /// let n: i32 = -1;
+    /// assert_eq!(Int::cast_unsigned(n), u32::MAX);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn cast_unsigned(self) -> Self::Unsigned;
@@ -249,8 +265,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
+    /// # use gnum::num::Int;
     /// let n = u32::MAX;
-    /// assert_eq!(n.cast_signed(), -1i32);
+    /// assert_eq!(Int::cast_signed(n), -1i32);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn cast_signed(self) -> Self::Signed;
@@ -264,20 +281,23 @@ pub trait Int:
     /// # Example
     ///
     /// ```
-    /// assert_eq!(16.ilog(2), 4);
-    /// assert_eq!(15.ilog(2), 3);
+    /// # use gnum::num::Int;
+    /// assert_eq!(Int::ilog(16i32, 2), 4u32);
+    /// assert_eq!(Int::ilog(15i32, 2), 3u32);
     /// ```
     ///
     /// The following panics because `self` is not greater than zero:
     ///
     /// ```should_panic
-    /// let _ = 0.ilog(2);
+    /// # use gnum::num::Int;
+    /// let _ = Int::ilog(0i32, 2);
     /// ```
     ///
     /// The following panics because `base` is less than 2:
     ///
     /// ```should_panic
-    /// let _ = 16.ilog(1);
+    /// # use gnum::num::Int;
+    /// let _ = Int::ilog(16i32, 1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn ilog(self, base: Self) -> Self::Unsigned;
@@ -291,14 +311,16 @@ pub trait Int:
     /// # Example
     ///
     /// ```
-    /// assert_eq!(16.ilog2(), 4);
-    /// assert_eq!(15.ilog2(), 3);
+    /// # use gnum::num::Int;
+    /// assert_eq!(Int::ilog2(16i32), 4u32);
+    /// assert_eq!(Int::ilog2(15i32), 3u32);
     /// ```
     ///
     /// The following panics because `self` is not greater than zero:
     ///
     /// ```should_panic
-    /// let _ = 0.ilog2();
+    /// # use gnum::num::Int;
+    /// let _ = Int::ilog2(0i32);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn ilog2(self) -> Self::Unsigned;
@@ -312,14 +334,16 @@ pub trait Int:
     /// # Example
     ///
     /// ```
-    /// assert_eq!(100.ilog10(), 2);
-    /// assert_eq!(99.ilog10(), 1);
+    /// # use gnum::num::Int;
+    /// assert_eq!(Int::ilog10(100i32), 2u32);
+    /// assert_eq!(Int::ilog10(99i32), 1u32);
     /// ```
     ///
     /// The following panics because `self` is not greater than zero:
     ///
     /// ```should_panic
-    /// let _ = 0.ilog10();
+    /// # use gnum::num::Int;
+    /// let _ = Int::ilog10(0i32);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn ilog10(self) -> Self::Unsigned;
@@ -329,8 +353,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
-    /// assert_eq!(2.pow(3), 8);
-    /// assert_eq!(5.pow(0), 1);
+    /// # use gnum::num::Int;
+    /// assert_eq!(Int::pow(2i32, 3u32), 8);
+    /// assert_eq!(Int::pow(5i32, 0u32), 1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn pow(self, exp: Self::Unsigned) -> Self;
@@ -344,8 +369,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
-    /// assert_eq!(16.isqrt(), 4);
-    /// assert_eq!(15.isqrt(), 3);
+    /// # use gnum::num::Int;
+    /// assert_eq!(Int::isqrt(16), 4);
+    /// assert_eq!(Int::isqrt(15), 3);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn isqrt(self) -> Self;
@@ -359,8 +385,9 @@ pub trait Int:
     /// # Example
     ///
     /// ```
-    /// assert_eq!(10u16.midpoint(20u16), 15);
-    /// assert_eq!(i32::MIN.midpoint(i32::MAX), -1);
+    /// # use gnum::num::Int;
+    /// assert_eq!(Int::midpoint(10u16, 20u16), 15);
+    /// assert_eq!(Int::midpoint(i32::MIN, i32::MAX), -1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[doc(alias = "average_floor")]

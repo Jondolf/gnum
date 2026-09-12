@@ -11,10 +11,11 @@ pub trait DivEuclid<Rhs = Self> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.div_euclid(5), 2);
-    /// assert_eq!((-12).div_euclid(5), -3);
-    /// assert_eq!(12.div_euclid(-5), -3);
-    /// assert_eq!((-12).div_euclid(-5), 2);
+    /// # use gnum::num::ops::DivEuclid;
+    /// assert_eq!(DivEuclid::div_euclid(12, 5), 2);
+    /// assert_eq!(DivEuclid::div_euclid(-12, 5), -3);
+    /// assert_eq!(DivEuclid::div_euclid(12, -5), -2);
+    /// assert_eq!(DivEuclid::div_euclid(-12, -5), 3);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn div_euclid(self, rhs: Rhs) -> Self::Output;
@@ -33,10 +34,11 @@ pub trait RemEuclid<Rhs = Self> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.rem_euclid(5), 2);
-    /// assert_eq!((-12).rem_euclid(5), 3);
-    /// assert_eq!(12.rem_euclid(-5), -3);
-    /// assert_eq!((-12).rem_euclid(-5), -2);
+    /// # use gnum::num::ops::RemEuclid;
+    /// assert_eq!(RemEuclid::rem_euclid(12, 5), 2);
+    /// assert_eq!(RemEuclid::rem_euclid(-12, 5), 3);
+    /// assert_eq!(RemEuclid::rem_euclid(12, -5), 2);
+    /// assert_eq!(RemEuclid::rem_euclid(-12, -5), 3);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     #[doc(alias = "modulo", alias = "mod")]
@@ -69,13 +71,14 @@ macro_rules! impl_div_rem_euclid_int {
                 /// # Example
                 ///
                 /// ```
+                /// # use gnum::num::ops::DivEuclid;
                 /// let a = 7;
                 /// let b = 4;
                 ///
-                /// assert_eq!(a.div_euclid(b), 1); // 7 >= 4 * 1
-                /// assert_eq!(a.div_euclid(-b), -1); // 7 >= -4 * -1
-                /// assert_eq!((-a).div_euclid(b), -2); // -7 >= 4 * -2
-                /// assert_eq!((-a).div_euclid(-b), 2); // -7 >= -4 * 2
+                /// assert_eq!(DivEuclid::div_euclid(a, b), 1); // 7 >= 4 * 1
+                /// assert_eq!(DivEuclid::div_euclid(a, -b), -1); // 7 >= -4 * -1
+                /// assert_eq!(DivEuclid::div_euclid(-a, b), -2); // -7 >= 4 * -2
+                /// assert_eq!(DivEuclid::div_euclid(-a, -b), 2); // -7 >= -4 * 2
                 /// ```
                 #[inline]
                 fn div_euclid(self, rhs: Self) -> Self::Output {
@@ -99,19 +102,21 @@ macro_rules! impl_div_rem_euclid_int {
                 /// # Example
                 ///
                 /// ```
+                /// # use gnum::num::ops::RemEuclid;
                 /// let a = 7;
                 /// let b = 4;
                 ///
-                /// assert_eq!(a.rem_euclid(b), 3);
-                /// assert_eq!((-a).rem_euclid(b), 1);
-                /// assert_eq!(a.rem_euclid(-b), 3);
-                /// assert_eq!((-a).rem_euclid(-b), 1);
+                /// assert_eq!(RemEuclid::rem_euclid(a, b), 3);
+                /// assert_eq!(RemEuclid::rem_euclid(-a, b), 1);
+                /// assert_eq!(RemEuclid::rem_euclid(a, -b), 3);
+                /// assert_eq!(RemEuclid::rem_euclid(-a, -b), 1);
                 /// ```
                 ///
                 /// This will panic:
                 ///
                 /// ```should_panic
-                /// let _ = i16::MIN.rem_euclid(-1);
+                /// # use gnum::num::ops::RemEuclid;
+                /// let _ = RemEuclid::rem_euclid(i16::MIN, -1);
                 /// ```
                 #[inline]
                 fn rem_euclid(self, rhs: Self) -> Self::Output {
@@ -139,13 +144,14 @@ macro_rules! impl_div_rem_euclid_float {
                 /// # Example
                 ///
                 /// ```
+                /// # use gnum::num::ops::DivEuclid;
                 /// let a = 7.0;
                 /// let b = 4.0;
                 ///
-                /// assert_eq!(a.div_euclid(b), 1.0); // 7 >= 4 * 1.0
-                /// assert_eq!(a.div_euclid(-b), -1.0); // 7 >= -4 * -1.0
-                /// assert_eq!((-a).div_euclid(b), -2.0); // -7 >= 4 * -2.0
-                /// assert_eq!((-a).div_euclid(-b), 2.0); // -7 >= -4 * 2.0
+                /// assert_eq!(DivEuclid::div_euclid(a, b), 1.0); // 7 >= 4 * 1.0
+                /// assert_eq!(DivEuclid::div_euclid(a, -b), -1.0); // 7 >= -4 * -1.0
+                /// assert_eq!(DivEuclid::div_euclid(-a, b), -2.0); // -7 >= 4 * -2.0
+                /// assert_eq!(DivEuclid::div_euclid(-a, -b), 2.0); // -7 >= -4 * 2.0
                 /// ```
                 #[inline]
                 fn div_euclid(self, rhs: Self) -> Self::Output {
@@ -163,13 +169,14 @@ macro_rules! impl_div_rem_euclid_float {
                 /// # Example
                 ///
                 /// ```
+                /// # use gnum::num::ops::RemEuclid;
                 /// let a = 7.0;
                 /// let b = 4.0;
                 ///
-                /// assert_eq!(a.rem_euclid(b), 3.0);
-                /// assert_eq!((-a).rem_euclid(b), 1.0);
-                /// assert_eq!(a.rem_euclid(-b), 3.0);
-                /// assert_eq!((-a).rem_euclid(-b), 1.0);
+                /// assert_eq!(RemEuclid::rem_euclid(a, b), 3.0);
+                /// assert_eq!(RemEuclid::rem_euclid(-a, b), 1.0);
+                /// assert_eq!(RemEuclid::rem_euclid(a, -b), 3.0);
+                /// assert_eq!(RemEuclid::rem_euclid(-a, -b), 1.0);
                 /// ```
                 #[inline]
                 fn rem_euclid(self, rhs: Self) -> Self::Output {

@@ -1,4 +1,4 @@
-//! Generic numerics for Rust.
+//! Generic numerics with [determinism](#determinism) and [SIMD](#simd) in Rust.
 //!
 //! # Getting Started
 //!
@@ -89,6 +89,7 @@
 //! allowing code to be generic across both.
 //!
 //! [SIMD]: https://en.wikipedia.org/wiki/Single_instruction,_multiple_data
+//! [`wide`]: https://docs.rs/wide
 //!
 //! # Determinism
 //!
@@ -96,15 +97,15 @@
 //! deterministic and bit-identical across both scalar and SIMD implementations
 //! for the same element type, except where otherwise noted. For example,
 //! calling [`Real::sqrt`] on four scalar `f32` values is guaranteed to produce
-//! the same results as calling [`Real::sqrt`] on a `f32x4` SIMD value.
+//! the same results as calling [`Real::sqrt`] on an `f32x4` SIMD value.
 //!
 //! Some operations such as transcendental functions (`sin`, `cos`, `atan2`)
 //! are non-deterministic in both the standard library and in `gnum`, and are
 //! documented as such. For these methods, `gnum` provides "stable" alternatives
 //! such as [`Real::sin_stable`], which are deterministic and guaranteed to produce
 //! the same results across both scalar and SIMD implementations for the same element type.
-//! These stable alternatives may be slightly slower than the standard versions for scalar types,
-//! but are often competitive or even _faster_ for SIMD types.
+//! Some of these stable alternatives may have lower precision or be slightly slower than
+//! the standard versions for scalar types, but are often competitive or even _faster_ for SIMD types.
 //!
 //! Note that these determinism guarantees only apply to a given version of `gnum`
 //! and the Rust compiler. Do not expect bit-identical results across different versions.

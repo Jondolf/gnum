@@ -11,8 +11,8 @@
 //! determinism) should use the non-`*_stable` methods, which map to the platform's
 //! native routines. Accurate double-precision implementations may be added in the future.
 //!
-//! The `*_stable` methods are typically slower than the non-`*_stable` methods
-//! for scalar `f32` and `f64`, but competitive or even faster for SIMD types.
+//! The `*_stable` methods are typically less precise and/or slower than the non-`*_stable`
+//! methods for scalar `f32` and `f64`, but competitive or even faster for SIMD types.
 //! This can vary by operation and by platform.
 //!
 //! [SLEEF]: https://sleef.org/

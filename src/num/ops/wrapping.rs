@@ -11,8 +11,9 @@ pub trait WrappingAdd<Rhs = Self>: Add<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.wrapping_add(1), 13);
-    /// assert_eq!(i32::MAX.wrapping_add(1), i32::MIN);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingAdd::wrapping_add(12, 1), 13);
+    /// assert_eq!(WrappingAdd::wrapping_add(i32::MAX, 1), i32::MIN);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_add(self, rhs: Rhs) -> Self::Output;
@@ -27,8 +28,9 @@ pub trait WrappingSub<Rhs = Self>: Sub<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.wrapping_sub(1), 11);
-    /// assert_eq!(i32::MIN.wrapping_sub(1), i32::MAX);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingSub::wrapping_sub(12, 1), 11);
+    /// assert_eq!(WrappingSub::wrapping_sub(i32::MIN, 1), i32::MAX);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_sub(self, rhs: Rhs) -> Self::Output;
@@ -43,8 +45,9 @@ pub trait WrappingMul<Rhs = Self>: Mul<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.wrapping_mul(2), 24);
-    /// assert_eq!(i32::MAX.wrapping_mul(2), -2);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingMul::wrapping_mul(12, 2), 24);
+    /// assert_eq!(WrappingMul::wrapping_mul(i32::MAX, 2), -2);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_mul(self, rhs: Rhs) -> Self::Output;
@@ -63,8 +66,9 @@ pub trait WrappingDiv<Rhs = Self>: Div<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.wrapping_div(2), 6);
-    /// assert_eq!(i32::MIN.wrapping_div(-1), i32::MIN);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingDiv::wrapping_div(12, 2), 6);
+    /// assert_eq!(WrappingDiv::wrapping_div(i32::MIN, -1), i32::MIN);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_div(self, rhs: Rhs) -> Self::Output;
@@ -83,8 +87,9 @@ pub trait WrappingRem<Rhs = Self>: Rem<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.wrapping_rem(5), 2);
-    /// assert_eq!(i32::MIN.wrapping_rem(-1), 0);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingRem::wrapping_rem(12, 5), 2);
+    /// assert_eq!(WrappingRem::wrapping_rem(i32::MIN, -1), 0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_rem(self, rhs: Rhs) -> Self::Output;
@@ -101,8 +106,9 @@ pub trait WrappingDivEuclid<Rhs = Self>: Div<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.wrapping_div_euclid(5), 2);
-    /// assert_eq!(i32::MIN.wrapping_div_euclid(-1), i32::MIN);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingDivEuclid::wrapping_div_euclid(12, 5), 2);
+    /// assert_eq!(WrappingDivEuclid::wrapping_div_euclid(i32::MIN, -1), i32::MIN);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_div_euclid(self, rhs: Rhs) -> Self::Output;
@@ -119,8 +125,9 @@ pub trait WrappingRemEuclid<Rhs = Self>: Rem<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.wrapping_rem_euclid(5), 2);
-    /// assert_eq!(i32::MIN.wrapping_rem_euclid(-1), 0);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingRemEuclid::wrapping_rem_euclid(12, 5), 2);
+    /// assert_eq!(WrappingRemEuclid::wrapping_rem_euclid(i32::MIN, -1), 0);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_rem_euclid(self, rhs: Rhs) -> Self::Output;
@@ -135,8 +142,9 @@ pub trait WrappingNeg: Neg {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.wrapping_neg(), -12);
-    /// assert_eq!(i32::MIN.wrapping_neg(), i32::MIN);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingNeg::wrapping_neg(12), -12);
+    /// assert_eq!(WrappingNeg::wrapping_neg(i32::MIN), i32::MIN);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_neg(self) -> Self::Output;
@@ -151,8 +159,9 @@ pub trait WrappingShl<Rhs = Self>: Shl<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(1u32.wrapping_shl(2), 4);
-    /// assert_eq!(1u32.wrapping_shl(32), 1);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingShl::wrapping_shl(1u32, 2), 4);
+    /// assert_eq!(WrappingShl::wrapping_shl(1u32, 32), 1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_shl(self, rhs: Rhs) -> Self::Output;
@@ -167,8 +176,9 @@ pub trait WrappingShr<Rhs = Self>: Shr<Rhs> {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(4u32.wrapping_shr(2), 1);
-    /// assert_eq!(4u32.wrapping_shr(32), 4);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingShr::wrapping_shr(4u32, 2), 1);
+    /// assert_eq!(WrappingShr::wrapping_shr(4u32, 32), 4);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_shr(self, rhs: Rhs) -> Self::Output;
@@ -184,9 +194,10 @@ pub trait WrappingAbs: Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(12.wrapping_abs(), 12);
-    /// assert_eq!((-12).wrapping_abs(), 12);
-    /// assert_eq!(i32::MIN.wrapping_abs(), i32::MIN);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingAbs::wrapping_abs(12), 12);
+    /// assert_eq!(WrappingAbs::wrapping_abs(-12), 12);
+    /// assert_eq!(WrappingAbs::wrapping_abs(i32::MIN), i32::MIN);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_abs(self) -> Self::Output;
@@ -202,8 +213,9 @@ pub trait WrappingPow<Exp = Self>: Sized {
     /// # Example
     ///
     /// ```
-    /// assert_eq!(2.wrapping_pow(3), 8);
-    /// assert_eq!(i32::MAX.wrapping_pow(2), 1);
+    /// # use gnum::num::ops::*;
+    /// assert_eq!(WrappingPow::wrapping_pow(2i32, 3u32), 8);
+    /// assert_eq!(WrappingPow::wrapping_pow(i32::MAX, 2u32), 1);
     /// ```
     #[must_use = "this returns the result of the operation, without modifying the original"]
     fn wrapping_pow(self, exp: Exp) -> Self::Output;
@@ -329,6 +341,30 @@ impl_binary_op!(
 );
 
 impl_unary_op!(WrappingNeg, wrapping_neg, i8, i16, i32, i64, i128, isize);
+
+macro_rules! impl_wrapping_shift {
+    ($($t:ty),+) => {
+        $(
+            impl WrappingShl<u32> for $t {
+                #[inline]
+                fn wrapping_shl(self, rhs: u32) -> Self::Output {
+                    <$t>::wrapping_shl(self, rhs)
+                }
+            }
+
+            impl WrappingShr<u32> for $t {
+                #[inline]
+                fn wrapping_shr(self, rhs: u32) -> Self::Output {
+                    <$t>::wrapping_shr(self, rhs)
+                }
+            }
+        )+
+    };
+}
+
+impl_wrapping_shift!(
+    u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize
+);
 
 macro_rules! impl_wrapping_abs {
     ($($t:ty),+) => {
