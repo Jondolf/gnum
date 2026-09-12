@@ -1,0 +1,29 @@
+[package]
+name = "gimd"
+version = "0.1.0"
+edition = "2024"
+description = "Generic SIMD for stable and nightly Rust"
+repository = "https://github.com/Jondolf/gnum"
+readme = "README.md"
+
+[features]
+default = ["wide", "portable_simd"]
+
+# SIMD backends
+wide = ["dep:wide", "gnum/wide"]
+portable_simd = ["gnum/portable_simd", "bytemuck?/nightly_portable_simd"]
+
+# Optional support for external crates
+bytemuck = ["dep:bytemuck"]
+zerocopy = ["dep:zerocopy"]
+
+[dependencies]
+gnum = { path = "..", default-features = false }
+wide = { version = "1.7", optional = true }
+bytemuck = { version = "1", optional = true, default-features = false, features = [
+    "aarch64_simd",
+    "wasm_simd",
+] }
+zerocopy = { version = "0.8", optional = true, default-features = false, features = [
+    "simd",
+] }

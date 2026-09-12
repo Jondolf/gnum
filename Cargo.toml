@@ -2,10 +2,11 @@
 name = "gnum"
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/Jondolf/gnum"
 readme = "README.md"
 
 [workspace]
-members = ["ssimd"]
+members = ["gimd"]
 resolver = "2"
 
 [features]
