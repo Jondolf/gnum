@@ -1,4 +1,4 @@
-use crate::simd::{Swizzle, Transpose, blocked_transpose};
+use crate::simd::{Swizzle, TransposeRows, blocked_transpose};
 use wide::*;
 
 #[inline(always)]
@@ -8,10 +8,10 @@ fn generic<T: Swizzle + Copy, const N: usize>(rows: [T; N]) -> [T; N] {
 
 macro_rules! impl_generic {
     ($($simd:ident, $lanes:literal);+ $(;)?) => {$(
-        impl Transpose for [$simd; $lanes] {
+        impl TransposeRows<$lanes> for $simd {
             #[inline]
-            fn transpose(self) -> Self {
-                generic(self)
+            fn transpose_rows(rows: [Self; $lanes]) -> [Self; $lanes] {
+                generic(rows)
             }
         }
     )+};
@@ -19,10 +19,10 @@ macro_rules! impl_generic {
 
 macro_rules! impl_inherent {
     ($($simd:ident, $lanes:literal);+ $(;)?) => {$(
-        impl Transpose for [$simd; $lanes] {
+        impl TransposeRows<$lanes> for $simd {
             #[inline]
-            fn transpose(self) -> Self {
-                <$simd>::transpose(self)
+            fn transpose_rows(rows: [Self; $lanes]) -> [Self; $lanes] {
+                <$simd>::transpose(rows)
             }
         }
     )+};
@@ -30,13 +30,13 @@ macro_rules! impl_inherent {
 
 macro_rules! impl_inherent_on {
     ($($simd:ident, $lanes:literal, $feature:literal);+ $(;)?) => {$(
-        impl Transpose for [$simd; $lanes] {
+        impl TransposeRows<$lanes> for $simd {
             #[inline]
-            fn transpose(self) -> Self {
+            fn transpose_rows(rows: [Self; $lanes]) -> [Self; $lanes] {
                 #[cfg(target_feature = $feature)]
-                return <$simd>::transpose(self);
+                return <$simd>::transpose(rows);
                 #[cfg(not(target_feature = $feature))]
-                return generic(self);
+                return generic(rows);
             }
         }
     )+};
@@ -164,10 +164,10 @@ blocked_fn!(transpose_i64x8, i64x8, 8, i64x4, 4, 2, best_i64x4);
 
 macro_rules! impl_blocked {
     ($($simd:ident, $lanes:literal, $function:ident);+ $(;)?) => {$(
-        impl Transpose for [$simd; $lanes] {
+        impl TransposeRows<$lanes> for $simd {
             #[inline]
-            fn transpose(self) -> Self {
-                $function(self)
+            fn transpose_rows(rows: [Self; $lanes]) -> [Self; $lanes] {
+                $function(rows)
             }
         }
     )+};
@@ -182,25 +182,25 @@ impl_blocked!(
     u64x8, 8, transpose_u64x8; i64x8, 8, transpose_i64x8
 );
 
-impl Transpose for [f32x16; 16] {
+impl TransposeRows<16> for f32x16 {
     #[inline]
-    fn transpose(self) -> Self {
+    fn transpose_rows(rows: [Self; 16]) -> [Self; 16] {
         #[cfg(target_feature = "avx")]
-        return transpose_f32x16_by_8(self);
+        return transpose_f32x16_by_8(rows);
         #[cfg(not(target_feature = "avx"))]
-        return f32x16::transpose(self);
+        return f32x16::transpose(rows);
     }
 }
 
 macro_rules! impl_32x16 {
     ($simd:ident, $by_4:ident, $by_8:ident) => {
-        impl Transpose for [$simd; 16] {
+        impl TransposeRows<16> for $simd {
             #[inline]
-            fn transpose(self) -> Self {
+            fn transpose_rows(rows: [Self; 16]) -> [Self; 16] {
                 #[cfg(target_feature = "avx2")]
-                return $by_8(self);
+                return $by_8(rows);
                 #[cfg(not(target_feature = "avx2"))]
-                return $by_4(self);
+                return $by_4(rows);
             }
         }
     };

@@ -1,7 +1,40 @@
 #[cfg(any(feature = "portable_simd", feature = "wide"))]
 use super::Swizzle;
 
+/// Transpose a square matrix represented by an array of SIMD vectors.
+///
+/// See [`TransposeRows`] for a blanket implementation of this trait
+/// for every `[T; N]` whose element type implements [`TransposeRows<N>`].
+///
+/// # Examples
+///
+/// ```
+/// #![feature(portable_simd)]
+/// # #[cfg(feature = "portable_simd")]
+/// # {
+/// use core::simd::i32x4;
+/// use gnum::simd::TransposeRows;
+///
+/// let rows = [
+///     i32x4::from_array([0, 1, 2, 3]),
+///     i32x4::from_array([4, 5, 6, 7]),
+///     i32x4::from_array([8, 9, 10, 11]),
+///     i32x4::from_array([12, 13, 14, 15]),
+/// ];
+/// let columns = i32x4::transpose_rows(rows);
+/// assert_eq!(columns[0].to_array(), [0, 4, 8, 12]);
+/// # }
+/// ```
+pub trait TransposeRows<const N: usize>: Sized {
+    /// Returns the transpose of the `N`x`N` matrix whose rows are `rows`.
+    #[must_use = "transpose returns a new matrix and does not mutate the input"]
+    fn transpose_rows(rows: [Self; N]) -> [Self; N];
+}
+
 /// Transposes a square matrix represented by an array of SIMD vectors.
+///
+/// This is blanket-implemented for every `[T; N]` whose element type
+/// implements [`TransposeRows<N>`].
 ///
 /// # Examples
 ///
@@ -46,6 +79,13 @@ pub trait Transpose: Sized {
     /// ```
     #[must_use = "transpose returns a new matrix and does not mutate the input"]
     fn transpose(self) -> Self;
+}
+
+impl<T: TransposeRows<N>, const N: usize> Transpose for [T; N] {
+    #[inline]
+    fn transpose(self) -> Self {
+        T::transpose_rows(self)
+    }
 }
 
 /// Transposes an `N`x`N` matrix by splitting each row into `K` blocks of `BN` lanes,

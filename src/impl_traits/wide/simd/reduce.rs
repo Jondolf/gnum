@@ -10,24 +10,24 @@ macro_rules! impl_reduce_float {
                     self.reduce_add()
                 }
                 #[inline]
-                fn reduce_product(self) -> Self::Element {
-                    self.reduce_mul()
-                }
-                #[inline]
                 fn reduce_sum_stable(self) -> Self::Element {
                     generic_reduce_stable(self.to_array(), |a: $elem, b| a + b)
+                }
+                #[inline]
+                fn reduce_product(self) -> Self::Element {
+                    self.reduce_mul()
                 }
                 #[inline]
                 fn reduce_product_stable(self) -> Self::Element {
                     generic_reduce_stable(self.to_array(), |a: $elem, b| a * b)
                 }
                 #[inline]
-                fn reduce_max(self) -> Self::Element {
-                    self.to_array().into_iter().reduce(|a, b| a.max(b)).unwrap()
-                }
-                #[inline]
                 fn reduce_min(self) -> Self::Element {
                     self.to_array().into_iter().reduce(|a, b| a.min(b)).unwrap()
+                }
+                #[inline]
+                fn reduce_max(self) -> Self::Element {
+                    self.to_array().into_iter().reduce(|a, b| a.max(b)).unwrap()
                 }
             }
         )*
@@ -43,24 +43,24 @@ macro_rules! impl_reduce_int {
                     self.reduce_add()
                 }
                 #[inline]
-                fn reduce_product(self) -> Self::Element {
-                    self.reduce_mul()
-                }
-                #[inline]
                 fn reduce_sum_stable(self) -> Self::Element {
                     self.reduce_add()
+                }
+                #[inline]
+                fn reduce_product(self) -> Self::Element {
+                    self.reduce_mul()
                 }
                 #[inline]
                 fn reduce_product_stable(self) -> Self::Element {
                     self.reduce_mul()
                 }
                 #[inline]
-                fn reduce_max(self) -> Self::Element {
-                    self.reduce_max()
-                }
-                #[inline]
                 fn reduce_min(self) -> Self::Element {
                     self.reduce_min()
+                }
+                #[inline]
+                fn reduce_max(self) -> Self::Element {
+                    self.reduce_max()
                 }
             }
 

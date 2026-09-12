@@ -1,6 +1,6 @@
 use core::simd::{Simd, SimdElement, simd_swizzle};
 
-use crate::simd::{Swizzle, Transpose, blocked_transpose, generic_transpose};
+use crate::simd::{Swizzle, TransposeRows, blocked_transpose, generic_transpose};
 
 #[inline]
 fn transpose4<T: SimdElement>(rows: [Simd<T, 4>; 4]) -> [Simd<T, 4>; 4] {
@@ -74,13 +74,13 @@ fn blocked<T: SimdElement, const N: usize, const BN: usize, const K: usize>(
 macro_rules! impl_generic {
     ($($lanes:literal),+ $(,)?) => {
         $(
-            impl<T: SimdElement> Transpose for [Simd<T, $lanes>; $lanes]
+            impl<T: SimdElement> TransposeRows<$lanes> for Simd<T, $lanes>
             where
                 Simd<T, $lanes>: Swizzle,
             {
                 #[inline]
-                fn transpose(self) -> Self {
-                    generic_transpose(self)
+                fn transpose_rows(rows: [Self; $lanes]) -> [Self; $lanes] {
+                    generic_transpose(rows)
                 }
             }
         )+
@@ -89,42 +89,42 @@ macro_rules! impl_generic {
 
 impl_generic!(1, 2, 32, 64);
 
-impl<T: SimdElement> Transpose for [Simd<T, 4>; 4]
+impl<T: SimdElement> TransposeRows<4> for Simd<T, 4>
 where
     Simd<T, 4>: Swizzle,
 {
     #[inline]
-    fn transpose(self) -> Self {
-        transpose4(self)
+    fn transpose_rows(rows: [Self; 4]) -> [Self; 4] {
+        transpose4(rows)
     }
 }
 
-impl<T: SimdElement> Transpose for [Simd<T, 8>; 8]
+impl<T: SimdElement> TransposeRows<8> for Simd<T, 8>
 where
     Simd<T, 8>: Swizzle,
 {
     #[inline]
-    fn transpose(self) -> Self {
+    fn transpose_rows(rows: [Self; 8]) -> [Self; 8] {
         if size_of::<T>() == 1 {
-            return generic_transpose(self);
+            return generic_transpose(rows);
         }
         #[cfg(not(target_feature = "avx"))]
         if size_of::<T>() == 2 {
-            return generic_transpose(self);
+            return generic_transpose(rows);
         }
-        transpose8(self)
+        transpose8(rows)
     }
 }
 
-impl<T: SimdElement> Transpose for [Simd<T, 16>; 16]
+impl<T: SimdElement> TransposeRows<16> for Simd<T, 16>
 where
     Simd<T, 16>: Swizzle,
 {
     #[inline]
-    fn transpose(self) -> Self {
+    fn transpose_rows(rows: [Self; 16]) -> [Self; 16] {
         if size_of::<T>() <= 2 {
-            return generic_transpose(self);
+            return generic_transpose(rows);
         }
-        blocked::<T, 16, 8, 2>(self, transpose8)
+        blocked::<T, 16, 8, 2>(rows, transpose8)
     }
 }

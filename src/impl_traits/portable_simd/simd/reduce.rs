@@ -28,12 +28,12 @@ macro_rules! impl_reduce_float {
                     generic_reduce_stable(Simd::to_array(self), |a: $t, b| a * b)
                 }
                 #[inline]
-                fn reduce_max(self) -> Self::Element {
-                    SimdFloat::reduce_max(self)
-                }
-                #[inline]
                 fn reduce_min(self) -> Self::Element {
                     SimdFloat::reduce_min(self)
+                }
+                #[inline]
+                fn reduce_max(self) -> Self::Element {
+                    SimdFloat::reduce_max(self)
                 }
             }
         )*
@@ -64,12 +64,12 @@ macro_rules! impl_reduce_int {
                     $trait::reduce_product(self)
                 }
                 #[inline]
-                fn reduce_max(self) -> Self::Element {
-                    $trait::reduce_max(self)
-                }
-                #[inline]
                 fn reduce_min(self) -> Self::Element {
                     $trait::reduce_min(self)
+                }
+                #[inline]
+                fn reduce_max(self) -> Self::Element {
+                    $trait::reduce_max(self)
                 }
             }
 

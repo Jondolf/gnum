@@ -20,6 +20,6 @@ pub use select::Select;
 pub use shuffle::{Shuffle4, Shuffle8};
 pub use simd_like::SimdLike;
 pub use swizzle::Swizzle;
-pub use transpose::Transpose;
+pub use transpose::{Transpose, TransposeRows};
 #[cfg(any(feature = "portable_simd", feature = "wide"))]
 pub(crate) use transpose::{blocked_transpose, generic_transpose};
