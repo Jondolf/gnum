@@ -7,7 +7,7 @@ repository = "https://github.com/Jondolf/gnum"
 readme = "README.md"
 
 [features]
-default = ["wide", "portable_simd"]
+default = ["wide"]
 
 # SIMD backends
 wide = ["dep:wide", "gnum/wide"]

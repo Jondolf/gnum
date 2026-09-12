@@ -10,15 +10,15 @@ members = ["gimd"]
 resolver = "2"
 
 [features]
-# Support for `core::simd`
-portable_simd = []
+default = []
 
-# Support for `wide`
+# SIMD backends
 wide = ["dep:wide"]
+portable_simd = []
 
 [dependencies]
 wide = { version = "1.7", optional = true }
 
 [dev-dependencies]
-gnum = { path = "./", features = ["portable_simd", "wide"] }
+gnum = { path = "./", features = ["wide", "portable_simd"] }
 wide = { version = "1.7" }
