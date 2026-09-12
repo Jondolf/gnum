@@ -415,7 +415,7 @@ pub trait Float: Real {
 }
 
 macro_rules! impl_float {
-    ($($float:ty => $uint:ty, $int:ty),*) => {
+    ($($float:ty => $uint:ty, $int:ty, $fma:path),*) => {
         $(
             impl Float for $float {
                 type Bits = $uint;
@@ -435,11 +435,25 @@ macro_rules! impl_float {
 
                 #[inline]
                 fn mul_add(self, a: Self, b: Self) -> Self {
-                    self.mul_add(a, b)
+                    #[cfg(feature = "std")]
+                    {
+                        self.mul_add(a, b)
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        $fma(self, a, b)
+                    }
                 }
                 #[inline]
                 fn powf(self, n: Self) -> Self {
-                    self.powf(n)
+                    #[cfg(feature = "std")]
+                    {
+                        self.powf(n)
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::powf(self, n)
+                    }
                 }
                 #[inline]
                 fn powf_stable(self, n: Self) -> Self {
@@ -502,4 +516,7 @@ macro_rules! impl_float {
     };
 }
 
-impl_float!(f32 => u32, i32, f64 => u64, i64);
+impl_float!(
+    f32 => u32, i32, crate::num::fma::fmaf,
+    f64 => u64, i64, crate::num::fma::fma
+);

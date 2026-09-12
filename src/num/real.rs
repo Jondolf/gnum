@@ -1537,35 +1537,84 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn floor(self) -> Self {
-                    self.floor()
+                    #[cfg(feature = "std")]
+                    {
+                        self.floor()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::round::RoundOps::floor_internal(self)
+                    }
                 }
                 #[inline]
                 fn ceil(self) -> Self {
-                    self.ceil()
+                    #[cfg(feature = "std")]
+                    {
+                        self.ceil()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::round::RoundOps::ceil_internal(self)
+                    }
                 }
                 #[inline]
                 fn round(self) -> Self {
-                    self.round()
+                    #[cfg(feature = "std")]
+                    {
+                        self.round()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::round::RoundOps::round_internal(self)
+                    }
                 }
                 #[inline]
                 fn round_ties_even(self) -> Self {
-                    self.round_ties_even()
+                    #[cfg(feature = "std")]
+                    {
+                        self.round_ties_even()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::round::RoundOps::round_ties_even_internal(self)
+                    }
                 }
                 #[inline]
                 fn trunc(self) -> Self {
-                    self.trunc()
+                    #[cfg(feature = "std")]
+                    {
+                        self.trunc()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::round::RoundOps::trunc_internal(self)
+                    }
                 }
                 #[inline]
                 fn fract(self) -> Self {
-                    self.fract()
+                    self - Real::trunc(self)
                 }
                 #[inline]
                 fn sqrt(self) -> Self {
-                    self.sqrt()
+                    #[cfg(feature = "std")]
+                    {
+                        self.sqrt()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::sqrt(self)
+                    }
                 }
                 #[inline]
                 fn exp(self) -> Self {
-                    self.exp()
+                    #[cfg(feature = "std")]
+                    {
+                        self.exp()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::exp(self)
+                    }
                 }
                 #[inline]
                 fn exp_stable(self) -> Self {
@@ -1573,7 +1622,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn exp2(self) -> Self {
-                    self.exp2()
+                    #[cfg(feature = "std")]
+                    {
+                        self.exp2()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::exp2(self)
+                    }
                 }
                 #[inline]
                 fn exp2_stable(self) -> Self {
@@ -1581,7 +1637,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn log(self, base: Self) -> Self {
-                    self.log(base)
+                    #[cfg(feature = "std")]
+                    {
+                        self.log(base)
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::log(self, base)
+                    }
                 }
                 #[inline]
                 fn log_stable(self, base: Self) -> Self {
@@ -1589,7 +1652,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn ln(self) -> Self {
-                    self.ln()
+                    #[cfg(feature = "std")]
+                    {
+                        self.ln()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::ln(self)
+                    }
                 }
                 #[inline]
                 fn ln_stable(self) -> Self {
@@ -1597,7 +1667,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn log2(self) -> Self {
-                    self.log2()
+                    #[cfg(feature = "std")]
+                    {
+                        self.log2()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::log2(self)
+                    }
                 }
                 #[inline]
                 fn log2_stable(self) -> Self {
@@ -1605,7 +1682,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn log10(self) -> Self {
-                    self.log10()
+                    #[cfg(feature = "std")]
+                    {
+                        self.log10()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::log10(self)
+                    }
                 }
                 #[inline]
                 fn log10_stable(self) -> Self {
@@ -1613,7 +1697,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn cbrt(self) -> Self {
-                    self.cbrt()
+                    #[cfg(feature = "std")]
+                    {
+                        self.cbrt()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::cbrt(self)
+                    }
                 }
                 #[inline]
                 fn cbrt_stable(self) -> Self {
@@ -1621,7 +1712,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn hypot(self, other: Self) -> Self {
-                    self.hypot(other)
+                    #[cfg(feature = "std")]
+                    {
+                        self.hypot(other)
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::hypot(self, other)
+                    }
                 }
                 #[inline]
                 fn hypot_stable(self, other: Self) -> Self {
@@ -1629,7 +1727,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn sin(self) -> Self {
-                    self.sin()
+                    #[cfg(feature = "std")]
+                    {
+                        self.sin()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::sin(self)
+                    }
                 }
                 #[inline]
                 fn sin_stable(self) -> Self {
@@ -1637,7 +1742,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn cos(self) -> Self {
-                    self.cos()
+                    #[cfg(feature = "std")]
+                    {
+                        self.cos()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::cos(self)
+                    }
                 }
                 #[inline]
                 fn cos_stable(self) -> Self {
@@ -1645,7 +1757,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn tan(self) -> Self {
-                    self.tan()
+                    #[cfg(feature = "std")]
+                    {
+                        self.tan()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::tan(self)
+                    }
                 }
                 #[inline]
                 fn tan_stable(self) -> Self {
@@ -1653,7 +1772,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn asin(self) -> Self {
-                    self.asin()
+                    #[cfg(feature = "std")]
+                    {
+                        self.asin()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::asin(self)
+                    }
                 }
                 #[inline]
                 fn asin_stable(self) -> Self {
@@ -1661,7 +1787,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn acos(self) -> Self {
-                    self.acos()
+                    #[cfg(feature = "std")]
+                    {
+                        self.acos()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::acos(self)
+                    }
                 }
                 #[inline]
                 fn acos_stable(self) -> Self {
@@ -1669,7 +1802,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn atan(self) -> Self {
-                    self.atan()
+                    #[cfg(feature = "std")]
+                    {
+                        self.atan()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::atan(self)
+                    }
                 }
                 #[inline]
                 fn atan_stable(self) -> Self {
@@ -1677,7 +1817,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn atan2(self, other: Self) -> Self {
-                    self.atan2(other)
+                    #[cfg(feature = "std")]
+                    {
+                        self.atan2(other)
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::atan2(self, other)
+                    }
                 }
                 #[inline]
                 fn atan2_stable(self, other: Self) -> Self {
@@ -1685,7 +1832,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn sin_cos(self) -> (Self, Self) {
-                    self.sin_cos()
+                    #[cfg(feature = "std")]
+                    {
+                        self.sin_cos()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::sin_cos(self)
+                    }
                 }
                 #[inline]
                 fn sin_cos_stable(self) -> (Self, Self) {
@@ -1693,7 +1847,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn sinh(self) -> Self {
-                    self.sinh()
+                    #[cfg(feature = "std")]
+                    {
+                        self.sinh()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::sinh(self)
+                    }
                 }
                 #[inline]
                 fn sinh_stable(self) -> Self {
@@ -1701,7 +1862,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn cosh(self) -> Self {
-                    self.cosh()
+                    #[cfg(feature = "std")]
+                    {
+                        self.cosh()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::cosh(self)
+                    }
                 }
                 #[inline]
                 fn cosh_stable(self) -> Self {
@@ -1709,7 +1877,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn tanh(self) -> Self {
-                    self.tanh()
+                    #[cfg(feature = "std")]
+                    {
+                        self.tanh()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::tanh(self)
+                    }
                 }
                 #[inline]
                 fn tanh_stable(self) -> Self {
@@ -1717,7 +1892,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn asinh(self) -> Self {
-                    self.asinh()
+                    #[cfg(feature = "std")]
+                    {
+                        self.asinh()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::asinh(self)
+                    }
                 }
                 #[inline]
                 fn asinh_stable(self) -> Self {
@@ -1725,7 +1907,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn acosh(self) -> Self {
-                    self.acosh()
+                    #[cfg(feature = "std")]
+                    {
+                        self.acosh()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::acosh(self)
+                    }
                 }
                 #[inline]
                 fn acosh_stable(self) -> Self {
@@ -1733,7 +1922,14 @@ macro_rules! impl_real {
                 }
                 #[inline]
                 fn atanh(self) -> Self {
-                    self.atanh()
+                    #[cfg(feature = "std")]
+                    {
+                        self.atanh()
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        crate::num::stable::atanh(self)
+                    }
                 }
                 #[inline]
                 fn atanh_stable(self) -> Self {

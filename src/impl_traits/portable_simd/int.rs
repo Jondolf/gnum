@@ -4,7 +4,7 @@ use crate::{
     num::{Int, Zero},
     simd::Select,
 };
-use std::simd::{
+use core::simd::{
     Simd,
     cmp::{SimdPartialEq, SimdPartialOrd},
     num::{SimdInt, SimdUint},

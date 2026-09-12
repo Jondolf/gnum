@@ -4,9 +4,11 @@ pub mod ops;
 
 mod cast;
 mod float;
+pub(crate) mod fma;
 mod int;
 mod markers;
 mod real;
+pub(crate) mod round;
 mod signed;
 pub(crate) mod stable;
 

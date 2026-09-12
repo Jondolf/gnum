@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![cfg_attr(feature = "portable_simd", feature(portable_simd))]
+#![cfg_attr(not(feature = "std"), no_std)]
 #![warn(missing_docs)]
 
 #[cfg(not(any(feature = "wide", feature = "portable_simd")))]

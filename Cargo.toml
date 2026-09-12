@@ -15,15 +15,21 @@ members = ["gimd"]
 resolver = "2"
 
 [features]
-default = []
+default = ["std"]
+
+# Use the standard library's math routines instead of portable approximations
+std = ["wide?/std"]
 
 # SIMD backends
 wide = ["dep:wide"]
 portable_simd = []
 
 [dependencies]
-wide = { version = "1.7", optional = true }
+wide = { version = "1.7", optional = true, default-features = false }
 
 [dev-dependencies]
-gnum = { path = "./", features = ["wide", "portable_simd"] }
+gnum = { path = "./", default-features = false, features = [
+    "wide",
+    "portable_simd",
+] }
 wide = { version = "1.7" }

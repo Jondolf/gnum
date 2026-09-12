@@ -642,6 +642,83 @@ pub(crate) fn atanh<T: Float>(x: T) -> T {
 
 // == roots and powers ==
 
+/// Computes the square root of `x`.
+#[cfg(any(not(feature = "std"), test))]
+#[inline]
+pub(crate) fn sqrt<T: Float>(x: T) -> T {
+    // Generic adaptation of SLEEF's `xsqrtf_u05` and `xsqrt_u05` software fallbacks
+
+    let invalid = x.num_lt(T::ZERO) | x.is_nan();
+    let mut d = invalid.select(T::ZERO, x);
+
+    // Scale small inputs before the reciprocal-square-root seed, then undo the scaling at the end.
+    let small_limit = if <T::Bits as Int>::BITS == 32 {
+        k::<T>(5.293955920339377e-23)
+    } else {
+        k::<T>(8.636168555094445e-78)
+    };
+    let scale = if <T::Bits as Int>::BITS == 32 {
+        k::<T>(1.888946593147858e22)
+    } else {
+        k::<T>(1.157920892373162e77)
+    };
+    let unscale = if <T::Bits as Int>::BITS == 32 {
+        k::<T>(7.275957614183426e-12)
+    } else {
+        k::<T>(2.9387358770557188e-39)
+    };
+    let small = d.num_lt(small_limit);
+    d = small.select(d * scale, d);
+    let q = small.select(unscale, T::ONE);
+
+    let magic = if <T::Bits as Int>::BITS == 32 {
+        T::from_f32(f32::from_bits(0x5f37_59df)).to_bits()
+    } else {
+        T::from_f64(f64::from_bits(0x5fe6_ec85_e7de_30da)).to_bits()
+    };
+    let one_bit = ibits::<T>(1).cast_unsigned();
+    let mut y = T::from_bits(magic - (d.to_bits() >> one_bit));
+
+    // Coupled Newton refinements of sqrt(d) and 1 / (2 * sqrt(d)).
+    let mut root = d * y;
+    let mut half_recip = T::HALF * y;
+
+    y = (-root).mul_add(half_recip, T::HALF);
+    root = root.mul_add(y, root);
+    half_recip = half_recip.mul_add(y, half_recip);
+    y = (-root).mul_add(half_recip, T::HALF);
+    root = root.mul_add(y, root);
+    half_recip = half_recip.mul_add(y, half_recip);
+
+    // Double-precision needs one additional refinement before the final correction.
+    if <T::Bits as Int>::BITS == 64 {
+        y = (-root).mul_add(half_recip, T::HALF);
+        root = root.mul_add(y, root);
+        half_recip = half_recip.mul_add(y, half_recip);
+    }
+
+    y = (-root).mul_add(half_recip, k::<T>(1.5));
+    half_recip += half_recip;
+    half_recip *= y;
+    root = half_recip * d;
+
+    // Recover the low product error and apply SLEEF's final root correction.
+    y = half_recip.mul_add(d, -root);
+    let mut correction = (-half_recip).mul_add(root, T::ONE);
+    correction = (-half_recip).mul_add(y, correction);
+    half_recip = (T::HALF * root).mul_add(correction, y);
+    let mut result = (root + half_recip) * q;
+
+    // Restore the special cases masked above.
+    let quiet_bit = ibits::<T>(1) << (mantissa_bits::<T>() - ibits::<T>(1));
+    let quiet_nan = T::from_bits(x.to_bits() | quiet_bit.cast_unsigned());
+
+    result = x.num_eq(T::ZERO).select(x, result);
+    result = x.num_eq(T::INFINITY).select(x, result);
+    result = x.num_lt(T::ZERO).select(T::NAN, result);
+    x.is_nan().select(quiet_nan, result)
+}
+
 /// Computes the cube root of `x`.
 #[inline]
 pub(crate) fn cbrt<T: Float>(x: T) -> T {
@@ -903,6 +980,40 @@ mod tests {
             };
             assert!(err <= 4e-6, "expm1 rel err {err:e} at x={x}");
         }
+    }
+
+    #[test]
+    fn sqrt_correctly_rounded() {
+        // Test a large number of pseudo-random bit patterns.
+        let mut state = 0x243f_6a88_85a3_08d3_u64;
+        for _ in 0..200_000 {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+
+            let num_f32 = f32::from_bits(state as u32 & 0x7fff_ffff);
+            if num_f32.is_finite() {
+                assert_eq!(
+                    sqrt(num_f32).to_bits(),
+                    num_f32.sqrt().to_bits(),
+                    "x={num_f32:e}"
+                );
+            }
+
+            let num_f64 = f64::from_bits(state & 0x7fff_ffff_ffff_ffff);
+            if num_f64.is_finite() {
+                assert_eq!(
+                    sqrt(num_f64).to_bits(),
+                    num_f64.sqrt().to_bits(),
+                    "x={num_f64:e}"
+                );
+            }
+        }
+
+        assert_eq!(sqrt(0.0f64).to_bits(), 0.0f64.to_bits());
+        assert_eq!(sqrt(-0.0f64).to_bits(), (-0.0f64).to_bits());
+        assert_eq!(sqrt(f64::INFINITY), f64::INFINITY);
+        assert!(sqrt(-1.0f64).is_nan());
     }
 
     /// A NaN with a distinctive payload.

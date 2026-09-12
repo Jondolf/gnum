@@ -1,6 +1,13 @@
-use super::round::RoundOps;
+#![cfg_attr(
+    not(feature = "std"),
+    allow(
+        unreachable_code,
+        reason = "native branches are retained for std builds"
+    )
+)]
+
 use crate::cmp::NumOrd;
-use crate::num::{Float, Real, RealConstants, Signed};
+use crate::num::{Float, Real, RealConstants, Signed, round::RoundOps};
 use wide::bytemuck;
 use wide::*;
 
@@ -357,7 +364,7 @@ impl_real!(
 );
 
 macro_rules! impl_float {
-    ($($simd:ident => $elem:ty, $uint:ident, $int:ident, $sielem:ty, $true:expr, $false:expr);* $(;)?) => {
+    ($($simd:ident => $elem:ty, $uint:ident, $int:ident, $sielem:ty, $fma:path, $true:expr, $false:expr);* $(;)?) => {
         $(
             impl Float for $simd {
                 type Bits = $uint;
@@ -395,7 +402,7 @@ macro_rules! impl_float {
                         let bb = b.to_array();
                         let mut i = 0usize;
                         let r = self.to_array().map(|x: $elem| {
-                            let v = x.mul_add(aa[i], bb[i]);
+                            let v = $fma(x, aa[i], bb[i]);
                             i += 1;
                             v
                         });
@@ -404,6 +411,9 @@ macro_rules! impl_float {
                 }
                 #[inline]
                 fn powf(self, n: Self) -> Self {
+                    #[cfg(not(feature = "std"))]
+                    return crate::num::stable::powf(self, n);
+
                     let result = self.powf_simd(n);
 
                     // Handle subnormals and NaN properly
@@ -527,10 +537,10 @@ macro_rules! impl_float {
 }
 
 impl_float!(
-    f32x4 => f32, u32x4, i32x4, i32, f32::from_bits(u32::MAX), 0.0;
-    f32x8 => f32, u32x8, i32x8, i32, f32::from_bits(u32::MAX), 0.0;
-    f32x16 => f32, u32x16, i32x16, i32, f32::from_bits(u32::MAX), 0.0;
-    f64x2 => f64, u64x2, i64x2, i64, f64::from_bits(u64::MAX), 0.0;
-    f64x4 => f64, u64x4, i64x4, i64, f64::from_bits(u64::MAX), 0.0;
-    f64x8 => f64, u64x8, i64x8, i64, f64::from_bits(u64::MAX), 0.0;
+    f32x4 => f32, u32x4, i32x4, i32, crate::num::fma::fmaf, f32::from_bits(u32::MAX), 0.0;
+    f32x8 => f32, u32x8, i32x8, i32, crate::num::fma::fmaf, f32::from_bits(u32::MAX), 0.0;
+    f32x16 => f32, u32x16, i32x16, i32, crate::num::fma::fmaf, f32::from_bits(u32::MAX), 0.0;
+    f64x2 => f64, u64x2, i64x2, i64, crate::num::fma::fma, f64::from_bits(u64::MAX), 0.0;
+    f64x4 => f64, u64x4, i64x4, i64, crate::num::fma::fma, f64::from_bits(u64::MAX), 0.0;
+    f64x8 => f64, u64x8, i64x8, i64, crate::num::fma::fma, f64::from_bits(u64::MAX), 0.0;
 );

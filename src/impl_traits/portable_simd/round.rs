@@ -8,6 +8,7 @@
 //! is derived from an int round-trip that is bit-identical to the scalar result
 //! but was measured to be 2-7x as fast.
 
+use crate::num::round::RoundOps;
 #[allow(unused_imports, reason = "used on targets without hardware rounding")]
 use crate::{cmp::NumEq, simd::Select};
 #[allow(unused_imports, reason = "used on targets without hardware rounding")]
@@ -16,22 +17,18 @@ use core::simd::{
     cmp::SimdPartialOrd,
     num::{SimdFloat, SimdInt},
 };
+#[cfg(feature = "std")]
 #[allow(unused_imports, reason = "used on targets with hardware rounding")]
 use std::simd::StdFloat;
 
-pub(crate) trait RoundOps: Copy {
-    fn floor_internal(self) -> Self;
-    fn ceil_internal(self) -> Self;
-    fn round_internal(self) -> Self;
-    fn round_ties_even_internal(self) -> Self;
-    fn trunc_internal(self) -> Self;
-}
-
 /// We just use core::simd for targets with hardware rounding instructions.
-#[cfg(any(
-    target_feature = "sse4.1",
-    target_feature = "simd128",
-    all(target_arch = "aarch64", target_feature = "neon")
+#[cfg(all(
+    feature = "std",
+    any(
+        target_feature = "sse4.1",
+        target_feature = "simd128",
+        all(target_arch = "aarch64", target_feature = "neon")
+    )
 ))]
 macro_rules! impl_round {
     ($($real:ty => $int:ty, $uint:ty, $magic:expr, $sign:expr);* $(;)?) => {
@@ -67,10 +64,13 @@ macro_rules! impl_round {
 }
 
 // For targets without hardware rounding, emulate everything using an int round-trip.
-#[cfg(not(any(
-    target_feature = "sse4.1",
-    target_feature = "simd128",
-    all(target_arch = "aarch64", target_feature = "neon")
+#[cfg(not(all(
+    feature = "std",
+    any(
+        target_feature = "sse4.1",
+        target_feature = "simd128",
+        all(target_arch = "aarch64", target_feature = "neon")
+    )
 )))]
 macro_rules! impl_round {
     ($($real:ty => $int:ty, $uint:ty, $magic:expr, $sign:expr);* $(;)?) => {

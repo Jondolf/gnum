@@ -155,7 +155,24 @@ macro_rules! impl_div_rem_euclid_float {
                 /// ```
                 #[inline]
                 fn div_euclid(self, rhs: Self) -> Self::Output {
-                    self.div_euclid(rhs)
+                    #[cfg(feature = "std")]
+                    {
+                        self.div_euclid(rhs)
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        let quotient = crate::num::Real::trunc(self / rhs);
+                        let remainder = self % rhs;
+                        if remainder < 0.0 {
+                            if rhs > 0.0 {
+                                quotient - 1.0
+                            } else {
+                                quotient + 1.0
+                            }
+                        } else {
+                            quotient
+                        }
+                    }
                 }
             }
 
@@ -180,7 +197,19 @@ macro_rules! impl_div_rem_euclid_float {
                 /// ```
                 #[inline]
                 fn rem_euclid(self, rhs: Self) -> Self::Output {
-                    self.rem_euclid(rhs)
+                    #[cfg(feature = "std")]
+                    {
+                        self.rem_euclid(rhs)
+                    }
+                    #[cfg(not(feature = "std"))]
+                    {
+                        let remainder = self % rhs;
+                        if remainder < 0.0 {
+                            remainder + rhs.abs()
+                        } else {
+                            remainder
+                        }
+                    }
                 }
             }
         )*

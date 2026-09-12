@@ -130,6 +130,15 @@
 //! [NaN bit patterns]: https://doc.rust-lang.org/std/primitive.f32.html#nan-bit-patterns
 
 #![cfg_attr(feature = "portable_simd", feature(portable_simd))]
+#![cfg_attr(
+    all(feature = "portable_simd", not(feature = "std")),
+    feature(core_intrinsics)
+)]
+#![cfg_attr(
+    all(feature = "portable_simd", not(feature = "std")),
+    expect(internal_features)
+)]
+#![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::wrong_self_convention)]
 #![warn(missing_docs)]
 

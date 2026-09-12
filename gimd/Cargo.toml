@@ -18,7 +18,10 @@ keywords = [
 categories = ["data-structures", "mathematics", "no-std"]
 
 [features]
-default = ["wide"]
+default = ["std", "wide"]
+
+# Use the standard library's math routines instead of portable approximations
+std = ["gnum/std", "wide?/std"]
 
 # SIMD backends
 wide = ["dep:wide", "gnum/wide"]
@@ -30,7 +33,7 @@ zerocopy = ["dep:zerocopy"]
 
 [dependencies]
 gnum = { path = "..", default-features = false }
-wide = { version = "1.7", optional = true }
+wide = { version = "1.7", optional = true, default-features = false }
 bytemuck = { version = "1", optional = true, default-features = false, features = [
     "aarch64_simd",
     "wasm_simd",

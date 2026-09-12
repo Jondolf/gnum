@@ -1,7 +1,7 @@
 //! The backing implementation of the rounding operations for [`wide`] types.
 
 use crate::cmp::NumEq;
-use crate::num::Num;
+use crate::num::{Num, round::RoundOps};
 use crate::simd::Select;
 use wide::*;
 
@@ -11,14 +11,6 @@ use crate::cmp::NumOrd;
 use crate::num::{RealConstants, Signed};
 #[allow(unused_imports, reason = "used on targets without hardware rounding")]
 use crate::simd::MaskCast;
-
-pub(crate) trait RoundOps: Copy {
-    fn floor_internal(self) -> Self;
-    fn ceil_internal(self) -> Self;
-    fn round_internal(self) -> Self;
-    fn round_ties_even_internal(self) -> Self;
-    fn trunc_internal(self) -> Self;
-}
 
 /// Quiets a signaling NaN in `rounded`, wherever `original` was NaN.
 #[inline(always)]

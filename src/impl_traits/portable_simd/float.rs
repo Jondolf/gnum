@@ -1,12 +1,12 @@
-use super::round::RoundOps;
 use crate::cmp::NumOrd;
-use crate::num::{Float, Real, RealConstants, Signed};
+use crate::num::{Float, Real, RealConstants, Signed, round::RoundOps};
 use crate::simd::Select;
 use core::simd::{
     Simd, SimdElement,
     cmp::{SimdPartialEq, SimdPartialOrd},
     num::{SimdFloat, SimdInt, SimdUint},
 };
+#[cfg(feature = "std")]
 use std::simd::StdFloat;
 
 impl<T: SimdElement + RealConstants, const N: usize> RealConstants for Simd<T, N> {
@@ -76,11 +76,25 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn sqrt(self) -> Self {
-                StdFloat::sqrt(self)
+                #[cfg(feature = "std")]
+                {
+                    StdFloat::sqrt(self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    unsafe { core::intrinsics::simd::simd_fsqrt(self) }
+                }
             }
             #[inline]
             fn exp(self) -> Self {
-                StdFloat::exp(self)
+                #[cfg(feature = "std")]
+                {
+                    StdFloat::exp(self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::exp(self)
+                }
             }
             #[inline]
             fn exp_stable(self) -> Self {
@@ -88,7 +102,14 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn exp2(self) -> Self {
-                StdFloat::exp2(self)
+                #[cfg(feature = "std")]
+                {
+                    StdFloat::exp2(self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::exp2(self)
+                }
             }
             #[inline]
             fn exp2_stable(self) -> Self {
@@ -96,7 +117,14 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn log(self, base: Self) -> Self {
-                StdFloat::log(self, base)
+                #[cfg(feature = "std")]
+                {
+                    StdFloat::log(self, base)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::log(self, base)
+                }
             }
             #[inline]
             fn log_stable(self, base: Self) -> Self {
@@ -104,7 +132,14 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn ln(self) -> Self {
-                StdFloat::ln(self)
+                #[cfg(feature = "std")]
+                {
+                    StdFloat::ln(self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::ln(self)
+                }
             }
             #[inline]
             fn ln_stable(self) -> Self {
@@ -112,7 +147,14 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn log2(self) -> Self {
-                StdFloat::log2(self)
+                #[cfg(feature = "std")]
+                {
+                    StdFloat::log2(self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::log2(self)
+                }
             }
             #[inline]
             fn log2_stable(self) -> Self {
@@ -120,7 +162,14 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn log10(self) -> Self {
-                StdFloat::log10(self)
+                #[cfg(feature = "std")]
+                {
+                    StdFloat::log10(self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::log10(self)
+                }
             }
             #[inline]
             fn log10_stable(self) -> Self {
@@ -128,7 +177,14 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn cbrt(self) -> Self {
-                self.as_array().map(|x| x.cbrt()).into()
+                #[cfg(feature = "std")]
+                {
+                    self.as_array().map(|x| x.cbrt()).into()
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::cbrt(self)
+                }
             }
             #[inline]
             fn cbrt_stable(self) -> Self {
@@ -136,20 +192,27 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn hypot(self, other: Self) -> Self {
-                // Scale by the larger magnitude so neither square can overflow or underflow.
-                let x = SimdFloat::abs(self);
-                let y = SimdFloat::abs(other);
-                let hi = SimdFloat::simd_max(x, y);
-                let lo = SimdFloat::simd_min(x, y);
-                let ratio = lo / hi;
-                let result = hi * StdFloat::sqrt(Simd::splat(1.0) + ratio * ratio);
+                #[cfg(feature = "std")]
+                {
+                    // Scale by the larger magnitude so neither square can overflow or underflow.
+                    let x = SimdFloat::abs(self);
+                    let y = SimdFloat::abs(other);
+                    let hi = SimdFloat::simd_max(x, y);
+                    let lo = SimdFloat::simd_min(x, y);
+                    let ratio = lo / hi;
+                    let result = hi * StdFloat::sqrt(Simd::splat(1.0) + ratio * ratio);
 
-                // Restore `hypot` special cases.
-                let result = hi.simd_eq(Simd::splat(0.0)).select(Simd::splat(0.0), result);
-                let result =
-                    (SimdFloat::is_nan(self) | SimdFloat::is_nan(other)).select(Self::NAN, result);
-                (SimdFloat::is_infinite(self) | SimdFloat::is_infinite(other))
-                    .select(Self::INFINITY, result)
+                    // Restore `hypot` special cases.
+                    let result = hi.simd_eq(Simd::splat(0.0)).select(Simd::splat(0.0), result);
+                    let result = (SimdFloat::is_nan(self) | SimdFloat::is_nan(other))
+                        .select(Self::NAN, result);
+                    (SimdFloat::is_infinite(self) | SimdFloat::is_infinite(other))
+                        .select(Self::INFINITY, result)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::hypot(self, other)
+                }
             }
             #[inline]
             fn hypot_stable(self, other: Self) -> Self {
@@ -157,7 +220,14 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn sin(self) -> Self {
-                StdFloat::sin(self)
+                #[cfg(feature = "std")]
+                {
+                    StdFloat::sin(self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::sin(self)
+                }
             }
             #[inline]
             fn sin_stable(self) -> Self {
@@ -165,7 +235,14 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn cos(self) -> Self {
-                StdFloat::cos(self)
+                #[cfg(feature = "std")]
+                {
+                    StdFloat::cos(self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::cos(self)
+                }
             }
             #[inline]
             fn cos_stable(self) -> Self {
@@ -173,12 +250,17 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn tan(self) -> Self {
-                if <$real>::MANTISSA_DIGITS == f32::MANTISSA_DIGITS {
-                    // LLVM combines these into the vector sin/cos lowering for f32,
-                    // but for f64 this is slower.
-                    StdFloat::sin(self) / StdFloat::cos(self)
-                } else {
-                    self.as_array().map(|x| x.tan()).into()
+                #[cfg(feature = "std")]
+                {
+                    if <$real>::MANTISSA_DIGITS == f32::MANTISSA_DIGITS {
+                        StdFloat::sin(self) / StdFloat::cos(self)
+                    } else {
+                        self.as_array().map(|x| x.tan()).into()
+                    }
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::tan(self)
                 }
             }
             #[inline]
@@ -187,7 +269,14 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn asin(self) -> Self {
-                self.as_array().map(|x| x.asin()).into()
+                #[cfg(feature = "std")]
+                {
+                    self.as_array().map(|x| x.asin()).into()
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::asin(self)
+                }
             }
             #[inline]
             fn asin_stable(self) -> Self {
@@ -195,7 +284,14 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn acos(self) -> Self {
-                self.as_array().map(|x| x.acos()).into()
+                #[cfg(feature = "std")]
+                {
+                    self.as_array().map(|x| x.acos()).into()
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::acos(self)
+                }
             }
             #[inline]
             fn acos_stable(self) -> Self {
@@ -203,7 +299,14 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn atan(self) -> Self {
-                self.as_array().map(|x| x.atan()).into()
+                #[cfg(feature = "std")]
+                {
+                    self.as_array().map(|x| x.atan()).into()
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::atan(self)
+                }
             }
             #[inline]
             fn atan_stable(self) -> Self {
@@ -211,11 +314,18 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn atan2(self, other: Self) -> Self {
-                let mut result = self;
-                for i in 0..Self::LEN {
-                    result[i] = self[i].atan2(other[i]);
+                #[cfg(feature = "std")]
+                {
+                    let mut result = self;
+                    for i in 0..Self::LEN {
+                        result[i] = self[i].atan2(other[i]);
+                    }
+                    result
                 }
-                result
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::atan2(self, other)
+                }
             }
             #[inline]
             fn atan2_stable(self, other: Self) -> Self {
@@ -223,12 +333,19 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn sin_cos(self) -> (Self, Self) {
-                let mut sin = self;
-                let mut cos = self;
-                for i in 0..Self::LEN {
-                    (sin[i], cos[i]) = self[i].sin_cos();
+                #[cfg(feature = "std")]
+                {
+                    let mut sin = self;
+                    let mut cos = self;
+                    for i in 0..Self::LEN {
+                        (sin[i], cos[i]) = self[i].sin_cos();
+                    }
+                    (sin, cos)
                 }
-                (sin, cos)
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::sin_cos(self)
+                }
             }
             #[inline]
             fn sin_cos_stable(self) -> (Self, Self) {
@@ -236,13 +353,20 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn sinh(self) -> Self {
-                let x = SimdFloat::abs(self);
-                let root_e = StdFloat::exp(x * Simd::splat(0.5));
-                let half_e = root_e * (root_e * Simd::splat(0.5));
-                let result = half_e - Simd::splat(0.25) / half_e;
-                let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
-                let result = x.simd_lt(small).select(x, result);
-                SimdFloat::copysign(result, self)
+                #[cfg(feature = "std")]
+                {
+                    let x = SimdFloat::abs(self);
+                    let root_e = StdFloat::exp(x * Simd::splat(0.5));
+                    let half_e = root_e * (root_e * Simd::splat(0.5));
+                    let result = half_e - Simd::splat(0.25) / half_e;
+                    let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
+                    let result = x.simd_lt(small).select(x, result);
+                    SimdFloat::copysign(result, self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::sinh(self)
+                }
             }
             #[inline]
             fn sinh_stable(self) -> Self {
@@ -250,9 +374,16 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn cosh(self) -> Self {
-                let root_e = StdFloat::exp(SimdFloat::abs(self) * Simd::splat(0.5));
-                let half_e = root_e * (root_e * Simd::splat(0.5));
-                half_e + Simd::splat(0.25) / half_e
+                #[cfg(feature = "std")]
+                {
+                    let root_e = StdFloat::exp(SimdFloat::abs(self) * Simd::splat(0.5));
+                    let half_e = root_e * (root_e * Simd::splat(0.5));
+                    half_e + Simd::splat(0.25) / half_e
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::cosh(self)
+                }
             }
             #[inline]
             fn cosh_stable(self) -> Self {
@@ -260,13 +391,20 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn tanh(self) -> Self {
-                let x = SimdFloat::abs(self);
-                let e2 = StdFloat::exp(x + x);
-                let result = (e2 - Simd::splat(1.0)) / (e2 + Simd::splat(1.0));
-                let result = SimdFloat::is_infinite(e2).select(Simd::splat(1.0), result);
-                let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
-                let result = x.simd_lt(small).select(x, result);
-                SimdFloat::copysign(result, self)
+                #[cfg(feature = "std")]
+                {
+                    let x = SimdFloat::abs(self);
+                    let e2 = StdFloat::exp(x + x);
+                    let result = (e2 - Simd::splat(1.0)) / (e2 + Simd::splat(1.0));
+                    let result = SimdFloat::is_infinite(e2).select(Simd::splat(1.0), result);
+                    let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
+                    let result = x.simd_lt(small).select(x, result);
+                    SimdFloat::copysign(result, self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::tanh(self)
+                }
             }
             #[inline]
             fn tanh_stable(self) -> Self {
@@ -274,20 +412,26 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn asinh(self) -> Self {
-                if <$real>::MANTISSA_DIGITS == f32::MANTISSA_DIGITS {
-                    return self.as_array().map(|x| x.asinh()).into();
-                }
+                #[cfg(feature = "std")]
+                {
+                    if <$real>::MANTISSA_DIGITS == f32::MANTISSA_DIGITS {
+                        return self.as_array().map(|x| x.asinh()).into();
+                    }
 
-                let x = SimdFloat::abs(self);
-                let square_limit = StdFloat::sqrt(Simd::splat(<$real>::MAX));
-                let regular = StdFloat::ln(
-                    x + StdFloat::sqrt(x * x + Simd::splat(1.0)),
-                );
-                let large = StdFloat::ln(x) + Simd::splat(<$real as RealConstants>::LN_2);
-                let result = x.simd_gt(square_limit).select(large, regular);
-                let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
-                let result = x.simd_lt(small).select(x, result);
-                SimdFloat::copysign(result, self)
+                    let x = SimdFloat::abs(self);
+                    let square_limit = StdFloat::sqrt(Simd::splat(<$real>::MAX));
+                    let regular =
+                        StdFloat::ln(x + StdFloat::sqrt(x * x + Simd::splat(1.0)));
+                    let large = StdFloat::ln(x) + Simd::splat(<$real as RealConstants>::LN_2);
+                    let result = x.simd_gt(square_limit).select(large, regular);
+                    let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
+                    let result = x.simd_lt(small).select(x, result);
+                    SimdFloat::copysign(result, self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::asinh(self)
+                }
             }
             #[inline]
             fn asinh_stable(self) -> Self {
@@ -295,19 +439,26 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn acosh(self) -> Self {
-                if <$real>::MANTISSA_DIGITS == f32::MANTISSA_DIGITS {
-                    return self.as_array().map(|x| x.acosh()).into();
-                }
+                #[cfg(feature = "std")]
+                {
+                    if <$real>::MANTISSA_DIGITS == f32::MANTISSA_DIGITS {
+                        return self.as_array().map(|x| x.acosh()).into();
+                    }
 
-                let square_limit = StdFloat::sqrt(Simd::splat(<$real>::MAX));
-                let regular = StdFloat::ln(
-                    self
-                        + StdFloat::sqrt(
-                            (self - Simd::splat(1.0)) * (self + Simd::splat(1.0)),
-                        ),
-                );
-                let large = StdFloat::ln(self) + Simd::splat(<$real as RealConstants>::LN_2);
-                self.simd_gt(square_limit).select(large, regular)
+                    let square_limit = StdFloat::sqrt(Simd::splat(<$real>::MAX));
+                    let regular = StdFloat::ln(
+                        self
+                            + StdFloat::sqrt(
+                                (self - Simd::splat(1.0)) * (self + Simd::splat(1.0)),
+                            ),
+                    );
+                    let large = StdFloat::ln(self) + Simd::splat(<$real as RealConstants>::LN_2);
+                    self.simd_gt(square_limit).select(large, regular)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::acosh(self)
+                }
             }
             #[inline]
             fn acosh_stable(self) -> Self {
@@ -315,13 +466,20 @@ macro_rules! impl_real_simd {
             }
             #[inline]
             fn atanh(self) -> Self {
-                let abs = SimdFloat::abs(self);
-                let result = StdFloat::ln(
-                    (Simd::splat(1.0) + abs) / (Simd::splat(1.0) - abs),
-                ) * Simd::splat(0.5);
-                let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
-                let result = abs.simd_lt(small).select(abs, result);
-                SimdFloat::copysign(result, self)
+                #[cfg(feature = "std")]
+                {
+                    let abs = SimdFloat::abs(self);
+                    let result = StdFloat::ln(
+                        (Simd::splat(1.0) + abs) / (Simd::splat(1.0) - abs),
+                    ) * Simd::splat(0.5);
+                    let small = StdFloat::sqrt(Simd::splat(<$real>::EPSILON));
+                    let result = abs.simd_lt(small).select(abs, result);
+                    SimdFloat::copysign(result, self)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::atanh(self)
+                }
             }
             #[inline]
             fn atanh_stable(self) -> Self {
@@ -391,15 +549,29 @@ macro_rules! impl_float_simd {
 
             #[inline]
             fn mul_add(self, a: Self, b: Self) -> Self {
-                StdFloat::mul_add(self, a, b)
+                #[cfg(feature = "std")]
+                {
+                    StdFloat::mul_add(self, a, b)
+                }
+                #[cfg(not(feature = "std"))]
+                {
+                    unsafe { core::intrinsics::simd::simd_fma(self, a, b) }
+                }
             }
             #[inline]
             fn powf(self, n: Self) -> Self {
-                let mut result = self;
-                for i in 0..Self::LEN {
-                    result[i] = self[i].powf(n[i]);
+                #[cfg(feature = "std")]
+                {
+                    let mut result = self;
+                    for i in 0..Self::LEN {
+                        result[i] = self[i].powf(n[i]);
+                    }
+                    result
                 }
-                result
+                #[cfg(not(feature = "std"))]
+                {
+                    crate::num::stable::powf(self, n)
+                }
             }
             #[inline]
             fn powf_stable(self, n: Self) -> Self {
