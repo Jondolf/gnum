@@ -1,6 +1,6 @@
 [package]
 name = "gnum"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 edition = "2024"
 authors = ["Joona Aalto <jondolf.dev@gmail.com>"]
 description = "Generic numerics with SIMD and determinism in Rust"
