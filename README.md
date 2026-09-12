@@ -93,7 +93,7 @@ impl<T: Num> Vec2<T> {
 }
 ```
 
-The `Vec2<T>` type can then be used with `f32`, `i32`, `u16`, or any other `Num` types.
+The `Vec2<T>` type can then be used with `f32`, `i32`, `u16`, or any other `Num` type.
 With `T: Real`, we also gain access to math that is only available on real numbers:
 
 ```rust
