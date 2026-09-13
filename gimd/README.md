@@ -21,7 +21,7 @@ See the [`gnum`] crate for more information.
 
 [`core::simd`]: https://doc.rust-lang.org/core/simd/index.html
 [`wide`]: https://crates.io/crates/wide
-[`gnum`]: https://crates.io/crates/gnum
+[`gnum`]: https://github.com/Jondolf/gnum
 
 ## Getting Started
 
