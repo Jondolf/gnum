@@ -1,5 +1,6 @@
 //! The shared backing interface for scalar and SIMD rounding operations.
 
+#[allow(unused, reason = "only used with some feature configurations")]
 pub(crate) trait RoundOps: Copy {
     fn floor_internal(self) -> Self;
     fn ceil_internal(self) -> Self;
