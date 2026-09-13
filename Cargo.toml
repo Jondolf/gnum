@@ -7,7 +7,7 @@ description = "Generic numerics with SIMD and determinism in Rust"
 repository = "https://github.com/Jondolf/gnum"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-keywords = ["numerics", "math", "determinism", "simd", "wide", "portable-simd"]
+keywords = ["numerics", "math", "determinism", "simd"]
 categories = ["mathematics", "science", "no-std"]
 
 [workspace]
