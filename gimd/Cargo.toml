@@ -7,14 +7,7 @@ description = "Generic SIMD for stable and nightly Rust"
 repository = "https://github.com/Jondolf/gnum"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-keywords = [
-    "simd",
-    "wide",
-    "portable-simd",
-    "math",
-    "numerics",
-    "vectorization",
-]
+keywords = ["simd", "math", "numerics", "vectorization"]
 categories = ["data-structures", "mathematics", "no-std"]
 
 [features]
